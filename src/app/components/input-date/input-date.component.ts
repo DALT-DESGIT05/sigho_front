@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, computed, effect, forwardRef, inject, input, output, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, computed, effect, forwardRef, inject, input, model, output, signal, viewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ComponentSize, DateControlType, PaletteColor } from '../../interfaces/util.interface';
 import { DateService } from '../../services/date.service';
@@ -40,7 +40,7 @@ export class InputDateComponent implements ControlValueAccessor {
   readonly size = input<ComponentSize>('md');
   readonly color = input<PaletteColor>('primary');
   readonly type = input<DateControlType>('date');
-  readonly value = input<string | Date | number | null | undefined>(null);
+  readonly value = model<string | Date | number | null | undefined>(null);
   readonly disabled = input(false, { transform: (value: boolean | string) => value === '' || value === true || value === 'true' });
   /** Muestra el label externo. */
   readonly showLabel = input(true);
@@ -51,8 +51,8 @@ export class InputDateComponent implements ControlValueAccessor {
   readonly isDisabled = signal(false);
   private readonly input_control = viewChild<ElementRef<HTMLInputElement>>('input_control');
 
-  readonly valueChange = output<string>();
   readonly change = output<Event>();
+  readonly touch = output<void>();
 
   constructor() {
     effect(() => this.inputValue.set(this.toNativeValue(this.value(), this.type())));
@@ -65,9 +65,7 @@ export class InputDateComponent implements ControlValueAccessor {
   readonly useFloatingLabel = computed(() => !!this.visibleLabel() && (this.showFloatingLabel() || (this.responsiveFloatingLabel() && this.size() === 'xs')));
   readonly showExternalLabel = computed(() => !!this.visibleLabel() && this.showLabel() && !(this.responsiveFloatingLabel() && this.size() === 'xs'));
 
-  writeValue(value: string | Date | number | null | undefined): void {
-    this.inputValue.set(this.toNativeValue(value, this.type()));
-  }
+  writeValue(value: string | Date | number | null | undefined): void { this.value.set(value); }
   registerOnChange(fn: (value: string) => void): void { this.onChange = fn; }
   registerOnTouched(fn: () => void): void { this.onTouched = fn; }
   setDisabledState(isDisabled: boolean): void { this.isDisabled.set(isDisabled); }
@@ -80,12 +78,12 @@ export class InputDateComponent implements ControlValueAccessor {
   handleInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.inputValue.set(value);
+    this.value.set(value);
     this.onChange(value);
-    this.valueChange.emit(value);
     this.change.emit(event);
   }
 
-  handleBlur(): void { this.onTouched(); }
+  handleBlur(): void { this.onTouched(); this.touch.emit(); }
 
   private toNativeValue(value: string | Date | number | null | undefined, type: DateControlType): string {
     if (value == null || value === '') return '';

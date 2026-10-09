@@ -1,15 +1,14 @@
 <app-modal #modal titulo="Actualizar teléfono" [keyboard]="false" [ignoreBackdropClick]="true" [showCloseButton]="false" [showFooter]="true">
-  <app-input-text
-    label="Teléfono"
+  <label class="form-label" for="telefono-paciente">Teléfono</label>
+  <input
+    id="telefono-paciente"
     type="tel"
+    class="form-control"
     autocomplete="tel"
-    [required]="true"
-    [disabled]="formulario.done || formulario.search"
-    [(ngModel)]="formulario.telefono">
-  </app-input-text>
+    [formField]="telefono_form.telefono">
 
   <div modal-footer class="d-flex gap-2">
-    <app-button action="save" size="sm" [loading]="formulario.search" [disabled]="formulario.done || formulario.search" (clicked)="btn_save()"></app-button>
+    <app-button action="save" size="sm" [loading]="isSaving()" [disabled]="isCompleted() || isSaving()" (clicked)="btn_save()"></app-button>
     <app-button action="close" size="sm" (clicked)="close_modal()"></app-button>
   </div>
 </app-modal>

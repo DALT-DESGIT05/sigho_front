@@ -1,4 +1,4 @@
-import { Component, computed, effect, forwardRef, input, output, signal } from '@angular/core';
+import { Component, computed, effect, forwardRef, input, model, output, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ComponentSize, PaletteColor, TableColumnAlignment } from '../../interfaces/util.interface';
 import { LabelComponent } from '../label/label.component';
@@ -31,7 +31,7 @@ export class InputGroupComponent implements ControlValueAccessor {
   readonly align = input<TableColumnAlignment>('start');
   readonly size = input<ComponentSize>('md');
   readonly color = input<PaletteColor>('primary');
-  readonly value = input<string | number | null | undefined>(undefined);
+  readonly value = model<string | number | null | undefined>(undefined);
   readonly maxlength = input<number | null>(null);
   readonly minlength = input<number | null>(null);
   readonly min = input<number | null>(null);
@@ -44,7 +44,6 @@ export class InputGroupComponent implements ControlValueAccessor {
   readonly suffix = input('');
   readonly disabled = input(false, { transform: (value: boolean | string) => value === '' || value === true || value === 'true' });
 
-  readonly valueChange = output<string>();
   readonly change = output<Event>();
   readonly inputEvent = output<Event>({ alias: 'input' });
   readonly focus = output<FocusEvent>();
@@ -52,6 +51,7 @@ export class InputGroupComponent implements ControlValueAccessor {
   readonly keydown = output<KeyboardEvent>();
   readonly keyup = output<KeyboardEvent>();
   readonly enter = output<KeyboardEvent>();
+  readonly touch = output<void>();
 
   readonly inputValue = signal('');
   readonly isDisabled = signal(false);
@@ -72,14 +72,14 @@ export class InputGroupComponent implements ControlValueAccessor {
     effect(() => this.isDisabled.set(this.disabled()));
   }
 
-  writeValue(value: string | number | null | undefined): void { this.inputValue.set(this.toText(value)); }
+  writeValue(value: string | number | null | undefined): void { this.value.set(value); }
   registerOnChange(fn: (value: string) => void): void { this.onChange = fn; }
   registerOnTouched(fn: () => void): void { this.onTouched = fn; }
   setDisabledState(disabled: boolean): void { this.isDisabled.set(disabled); }
-  handleInput(event: Event): void { const value = (event.target as HTMLInputElement).value; this.inputValue.set(value); this.onChange(value); this.valueChange.emit(value); this.inputEvent.emit(event); }
+  handleInput(event: Event): void { const value = (event.target as HTMLInputElement).value; this.inputValue.set(value); this.value.set(value); this.onChange(value); this.inputEvent.emit(event); }
   handleChange(event: Event): void { this.change.emit(event); }
   handleFocus(event: FocusEvent): void { this.focus.emit(event); }
-  handleBlur(event: FocusEvent): void { this.onTouched(); this.blur.emit(event); }
+  handleBlur(event: FocusEvent): void { this.onTouched(); this.touch.emit(); this.blur.emit(event); }
   handleKeydown(event: KeyboardEvent): void { this.keydown.emit(event); if (event.key === 'Enter') this.enter.emit(event); }
   handleKeyup(event: KeyboardEvent): void { this.keyup.emit(event); }
   private toText(value: string | number | null | undefined): string { return value == null ? '' : String(value); }

@@ -32,7 +32,7 @@ export class MailService {
     );
   }
 
-  validar_correo(usuario: string, correo: string, dominio: number, ip_usuario: string, recaptcha:string, mostrar_loading = false): Observable<boolean> {
+  validar_correo(usuario: string, correo: string, dominio: number, ip_usuario: string, recaptcha:string, mostrar_loading = true): Observable<boolean> {
     const url = this.baseUrl + 'v1/usuario/validar_correo';
     const body = { usuario, correo, dominio, ip_usuario,'g-recaptcha-response': recaptcha };
     return this.httpClient.post<ResponseInteface<any>>(url, body,{context:new HttpContext().set(MOSTRAR_LOADING, mostrar_loading)})
@@ -56,7 +56,7 @@ export class MailService {
     correo: string,
     dominio: number,
     ip_usuario: string,
-    mostrar_loading = false
+    mostrar_loading = true
   ): Observable<boolean> {
     const url = this.baseUrl + 'v1/usuario/restablecer_by_correo';
     const body = {

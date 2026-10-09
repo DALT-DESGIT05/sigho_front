@@ -73,8 +73,8 @@
                 type="button"
                 class="nav-link dropdown-toggle waves-effect waves-dark profile-pic top-profile-trigger"
                 id="topProfileMenu"
-                data-bs-toggle="dropdown"
-                aria-expanded="false">
+                [attr.aria-expanded]="isProfileMenuOpen"
+                (click)="toggleProfileMenu($event)">
                   <span class="top-profile-photo"><app-image-lazy tipo="mi-foto" alt="Foto de perfil" imageClass="rounded-circle" objectFit="contain" /></span>
                   <span class="hidden-md-down">
                     <span class="p-2 text-afiliado">
@@ -82,9 +82,9 @@
                     </span>
                   </span>
               </button>
-              <ul class="dropdown-menu dropdown-menu-end top-profile-menu" aria-labelledby="topProfileMenu">
+              <ul class="dropdown-menu dropdown-menu-end top-profile-menu" [class.show]="isProfileMenuOpen" aria-labelledby="topProfileMenu">
                 <li>
-                  <a class="dropdown-item" routerLink="/perfil/perfil-usuario">
+                  <a class="dropdown-item" routerLink="/perfil/perfil-usuario" (click)="closeProfileMenu()">
                     <i class="fa-solid fa-user" aria-hidden="true"></i>
                     <span>Mi perfil</span>
                   </a>
@@ -242,7 +242,7 @@
     </div>
     <!-- End Sidebar scroll-->
     <div class="sidebar-user">
-      <button type="button" class="sidebar-profile-trigger" data-bs-toggle="modal" data-bs-target="#profileModal">
+      <button type="button" class="sidebar-profile-trigger" (click)="openProfileModal()">
         <app-image-lazy tipo="mi-foto" alt="Foto de perfil" />
         <span class="sidebar-user-copy">
           <strong [title]="(usuario()?.nombres || 'Usuario') + ' ' + (usuario()?.apellidos || '')">{{ (usuario()?.nombres || 'Usuario') + ' ' + (usuario()?.apellidos || '') }}</strong>
@@ -372,36 +372,23 @@
 </div>
 
 
-<!-- Modal -->
-<div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header">
-              <h5 class="modal-title" id="profileModalLabel">Información del Usuario</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-              <div class="d-flex align-items-center">
-                  <app-image-lazy tipo="mi-foto" alt="Foto de perfil" imageClass="rounded-circle" objectFit="cover" class="profile-modal-image" />
-                  <div>
-                      <h6>{{ usuario()?.nombres }} {{ usuario()?.apellidos }}</h6>
-                      <div class="d-flex flex-column mt-2 mb-2">
-                        <span class="text-muted mt-1 mb-1">Correo: {{ usuario()?.email || 'No disponible' }}</span>
-                        <span class="text-muted">Celular: {{ usuario()?.telefono || 'No disponible' }}</span>
-                      </div>
-                  <a href="/perfil/perfil-usuario" class="btn dashboard-primary-button btn-sm">Ir a mi perfil <i class="fa fa-user ml-4"></i></a>
-                  </div>
-              </div>
-          </div>
-          <div class="modal-footer">
-              <button type="button" class="btn dashboard-primary-button" data-bs-dismiss="modal" (click)="salir()">Cerrar Sesión</button>
-              <button type="button" class="btn btn-danger close-button" data-bs-dismiss="modal">Cerrar</button>
-          </div>
+<app-modal #profileModal title="Información del usuario" icon="fa-solid fa-user" [showFooter]="true">
+  <div class="d-flex align-items-center">
+    <app-image-lazy tipo="mi-foto" alt="Foto de perfil" imageClass="rounded-circle" objectFit="cover" class="profile-modal-image" />
+    <div>
+      <h6>{{ usuario()?.nombres }} {{ usuario()?.apellidos }}</h6>
+      <div class="d-flex flex-column mt-2 mb-2">
+        <span class="text-muted mt-1 mb-1">Correo: {{ usuario()?.email || 'No disponible' }}</span>
+        <span class="text-muted">Celular: {{ usuario()?.telefono || 'No disponible' }}</span>
       </div>
+      <a routerLink="/perfil/perfil-usuario" class="btn dashboard-primary-button btn-sm" (click)="closeProfileModal()">Ir a mi perfil <i class="fa fa-user ml-4"></i></a>
+    </div>
   </div>
-</div>
-
-<!-- ============================================================== -->
+  <div modal-footer class="d-flex gap-2">
+    <app-button action="exit" size="sm" (clicked)="salir()" />
+    <app-button action="close" size="sm" (clicked)="closeProfileModal()" />
+  </div>
+</app-modal>
 <!-- End Wrapper -->
 <!-- ============================================================== -->
 <!-- ============================================================== -->

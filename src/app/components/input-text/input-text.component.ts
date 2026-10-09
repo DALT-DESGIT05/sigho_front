@@ -1,4 +1,4 @@
-import { Component, ElementRef, computed, effect, forwardRef, input, output, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, computed, effect, forwardRef, input, model, output, signal, viewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ComponentSize, PaletteColor, TableColumnAlignment } from '../../interfaces/util.interface';
 import { LabelComponent } from '../label/label.component';
@@ -34,7 +34,7 @@ export class InputTextComponent implements ControlValueAccessor {
   readonly color = input<PaletteColor>('primary');
   /** Color opcional del valor mostrado, usando la paleta del proyecto. */
   readonly textColor = input<PaletteColor | ''>('');
-  readonly value = input<string | number | null | undefined>(undefined);
+  readonly value = model<string | number | null | undefined>(undefined);
   readonly maxlength = input<number | null>(null);
   readonly minlength = input<number | null>(null);
   readonly ariaLabel = input('');
@@ -46,7 +46,6 @@ export class InputTextComponent implements ControlValueAccessor {
   readonly responsiveFloatingLabel = input(false);
   readonly disabled = input(false, { transform: (value: boolean | string) => value === '' || value === true || value === 'true' });
 
-  readonly valueChange = output<string>();
   readonly change = output<Event>();
   readonly inputEvent = output<Event>({ alias: 'input' });
   readonly focus = output<FocusEvent>();
@@ -54,6 +53,7 @@ export class InputTextComponent implements ControlValueAccessor {
   readonly keydown = output<KeyboardEvent>();
   readonly keyup = output<KeyboardEvent>();
   readonly enter = output<KeyboardEvent>();
+  readonly touch = output<void>();
 
   readonly inputValue = signal('');
   readonly isDisabled = signal(false);
@@ -78,7 +78,7 @@ export class InputTextComponent implements ControlValueAccessor {
   readonly showExternalLabel = computed(() => !!this.visibleLabel() && this.showLabel() && !(this.responsiveFloatingLabel() && this.size() === 'xs'));
   readonly alignmentClass = computed(() => `text-${this.align()}`);
 
-  writeValue(value: string | number | null | undefined): void { this.inputValue.set(this.toText(value)); }
+  writeValue(value: string | number | null | undefined): void { this.value.set(value); }
   registerOnChange(fn: (value: string) => void): void { this.onChange = fn; }
   registerOnTouched(fn: () => void): void { this.onTouched = fn; }
   setDisabledState(disabled: boolean): void { this.isDisabled.set(disabled); }
@@ -97,14 +97,14 @@ export class InputTextComponent implements ControlValueAccessor {
         input.value = '';
       }
     this.inputValue.set(value);
+    this.value.set(value);
     this.onChange(value);
-    this.valueChange.emit(value);
     this.inputEvent.emit(event);
   }
 
   handleChange(event: Event): void { this.change.emit(event); }
   handleFocus(event: FocusEvent): void { this.focus.emit(event); }
-  handleBlur(event: FocusEvent): void { this.onTouched(); this.blur.emit(event); }
+  handleBlur(event: FocusEvent): void { this.onTouched(); this.touch.emit(); this.blur.emit(event); }
   handleKeydown(event: KeyboardEvent): void { this.keydown.emit(event); if (event.key === 'Enter') this.enter.emit(event); }
   handleKeyup(event: KeyboardEvent): void { this.keyup.emit(event); }
 

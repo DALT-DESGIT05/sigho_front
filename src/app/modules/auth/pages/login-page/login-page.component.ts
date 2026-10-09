@@ -1,18 +1,12 @@
-import { Component, inject, ViewChild, CUSTOM_ELEMENTS_SCHEMA, signal, OnDestroy, OnInit, ViewChildren, QueryList, ElementRef } from '@angular/core';
-import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { Component, inject, ViewChild, CUSTOM_ELEMENTS_SCHEMA, signal, computed, OnDestroy, OnInit, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { FormField, email, form, minLength, required } from '@angular/forms/signals';
 import { AuthService } from '../../../../services/auth/auth.service';
 import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
 import { UtilService } from '../../../../services/util.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RecaptchaComponent } from '../../../../components/recaptcha/recaptcha.component';
-import { CommonModule } from '@angular/common';
-import { MatSelectModule } from '@angular/material/select';
 import { MailService } from '../../../../services/auth/mail.service';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import { CheckComponent } from '../../../../components/check/check.component';
 import { QRCodeComponent } from 'angularx-qrcode';
 import { MenuService } from '../../../../services/menu.service';
 import { Modal } from 'bootstrap';
@@ -22,8 +16,7 @@ import { ButtonComponent } from '../../../../components/button/button.component'
   selector: 'app-login-page',
   standalone: true,
   imports: [
-    ReactiveFormsModule, MatFormFieldModule, MatCardModule,
-    MatCheckboxModule, CommonModule, RecaptchaComponent, MatSelectModule, QRCodeComponent, CheckComponent, ButtonComponent
+    FormField, RecaptchaComponent, QRCodeComponent, ButtonComponent
   ],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss',
@@ -49,7 +42,6 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   recaptchaToken: string | null = null;
   currentAction: 'login' | 'reset' | null = null;
   isPasswordVisible: boolean = false;
-  private readonly _formBuilder = inject(FormBuilder);
   private readonly _authService = inject(AuthService);
   private readonly utilService = inject(UtilService);
   private readonly menuService = inject(MenuService);
@@ -65,29 +57,29 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   private loginRequestInFlight = false;
   private resetRequestInFlight = false;
 
-  loginForm = this._formBuilder.nonNullable.group({
-    usuario: ['', [Validators.required, Validators.minLength(5)]],
-    contrasena: ['', [Validators.required, Validators.minLength(8)]],
-    recuerdame: [false],
+  readonly login_model = signal({ usuario: '', contrasena: '', recuerdame: false });
+  readonly login_form = form(this.login_model, (schema) => {
+    required(schema.usuario); minLength(schema.usuario, 5);
+    required(schema.contrasena); minLength(schema.contrasena, 8);
   });
-
-  resetForm = this._formBuilder.nonNullable.group({
-    usuario_rest: ['', [Validators.required, Validators.pattern(/\S+/)]],
-    email_rest: ['', [Validators.required, Validators.email]],
-    dominio_rest: [''],
-    codigo_rest: [''],
-    psw_rest: [''],
-    psw2_rest: [''],
+  readonly reset_model = signal({ usuario_rest: '', email_rest: '', dominio_rest: '', codigo_rest: '', psw_rest: '', psw2_rest: '' });
+  readonly reset_form = form(this.reset_model, (schema) => {
+    required(schema.usuario_rest);
+    required(schema.email_rest);
+    email(schema.email_rest);
+    required(schema.codigo_rest);
+    required(schema.psw_rest);
+    minLength(schema.psw_rest, 8);
+    required(schema.psw2_rest);
+    minLength(schema.psw2_rest, 8);
   });
 
   constructor(private authService: AuthService, private mail_service: MailService) { }
 
   isLoading: boolean = false;
 
-  get canSendPasswordReset(): boolean {
-    const { usuario_rest, email_rest } = this.resetForm.controls;
-    return usuario_rest.valid && email_rest.valid && !this.estado && !this.resetRequestInFlight;
-  }
+  readonly canSendPasswordReset = computed(() => this.reset_form.usuario_rest().valid() && this.reset_form.email_rest().valid() && !this.estado && !this.resetRequestInFlight);
+
 
   ngOnInit(): void {
 
@@ -147,8 +139,24 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  onLoginSubmit(event: Event): void {
+    event.preventDefault();
+    this.ingresar();
+  }
+
+  onResetSubmit(event: Event): void {
+    event.preventDefault();
+    this.enviar_restablecimiento();
+  }
+
   ingresar(): void {
     if (this.loginRequestInFlight || this.captchaExecutionPending) {
+      return;
+    }
+
+    if (!this.login_form().valid()) {
+      this.login_form.usuario().markAsTouched();
+      this.login_form.contrasena().markAsTouched();
       return;
     }
 
@@ -166,9 +174,9 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this.error_usuario = null;
     this.error_contrasena = null;
 
-    const usuario = this.loginForm.controls.usuario.value;
-    const contrasena = this.loginForm.controls.contrasena.value;
-    const recuerdame = this.loginForm.controls.recuerdame.value;
+    const usuario = this.login_model().usuario;
+    const contrasena = this.login_model().contrasena;
+    const recuerdame = this.login_model().recuerdame;
 
     if (!this.recaptchaToken) {
       this.captchaExecutionPending = true;
@@ -245,18 +253,6 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  get control_usuario(): FormControl<String> {
-    return this.loginForm.controls.usuario;
-  }
-
-  get control_contrasena(): FormControl<String> {
-    return this.loginForm.controls.contrasena;
-  }
-
-  get control_recuerdame(): FormControl<Boolean> {
-    return this.loginForm.controls.recuerdame;
-  }
-
   open_reset() {
     this.reset_psw = !this.reset_psw;
     this.error_usuario_rest = null;
@@ -303,10 +299,9 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const { usuario_rest, email_rest } = this.resetForm.controls;
-    if (usuario_rest.invalid || email_rest.invalid) {
-      usuario_rest.markAsTouched();
-      email_rest.markAsTouched();
+    if (!this.reset_form.usuario_rest().valid() || !this.reset_form.email_rest().valid()) {
+      this.reset_form.usuario_rest().markAsTouched();
+      this.reset_form.email_rest().markAsTouched();
       return;
     }
 
@@ -321,7 +316,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const data = this.resetForm.value;
+    const data = this.reset_model();
     const usuario = data.usuario_rest || '';
     const correo = data.email_rest || '';
     const dominio = Number(data.dominio_rest) || 0;
@@ -396,7 +391,17 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   }
 
   restablecer_by_correo() {
-    const data = this.resetForm.value;
+    const passwordFields = [
+      this.reset_form.codigo_rest(),
+      this.reset_form.psw_rest(),
+      this.reset_form.psw2_rest(),
+    ];
+    if (passwordFields.some((field) => !field.valid())) {
+      passwordFields.forEach((field) => field.markAsTouched());
+      return;
+    }
+
+    const data = this.reset_model();
     this.estado = true;
     const nuevaclave = data.psw_rest || '';
     const repetirclave = data.psw2_rest || '';

@@ -107,7 +107,7 @@ export class AuthService {
   constructor() {
     sessionStorage.removeItem('expiracion');
     sessionStorage.removeItem('last_activity');
-    this.checkAuthStatus().subscribe();
+    this.checkAuthStatus(true).subscribe();
   }
 
   /** Cierra la sesión en el navegador sin depender de una respuesta de la API. */

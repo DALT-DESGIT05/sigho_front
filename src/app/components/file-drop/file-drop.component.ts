@@ -5,6 +5,7 @@ import {
   computed,
   forwardRef,
   input,
+  model,
   output,
   signal,
   viewChild,
@@ -38,12 +39,14 @@ export class FileDropComponent implements ControlValueAccessor {
   readonly invalid = input(false);
   readonly help_text = input('Arrastre el archivo aquí o selecciónelo desde su equipo.');
   readonly archivo_seleccionado = output<File | null>();
+  readonly touch = output<void>();
 
   private readonly input_archivo = viewChild<ElementRef<HTMLInputElement>>('input_archivo');
   private on_change: (archivo: File | null) => void = () => undefined;
   private on_touched: () => void = () => undefined;
 
-  readonly archivo = signal<File | null>(null);
+  readonly value = model<File | null>(null);
+  readonly archivo = this.value;
   readonly arrastrando = signal(false);
   readonly deshabilitado_formulario = signal(false);
   readonly mensaje_error = signal('');
@@ -51,7 +54,7 @@ export class FileDropComponent implements ControlValueAccessor {
   readonly clases = computed(() => `file-drop--${this.size()} file-drop--${this.color()}`);
 
   writeValue(archivo: File | null): void {
-    this.archivo.set(archivo);
+    this.value.set(archivo);
     this.mensaje_error.set('');
 
     if (!archivo) {
@@ -124,6 +127,7 @@ export class FileDropComponent implements ControlValueAccessor {
 
   private asignar_archivo(archivo: File | null): void {
     this.on_touched();
+    this.touch.emit();
 
     if (!archivo) {
       return;

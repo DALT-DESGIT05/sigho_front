@@ -37,11 +37,38 @@ describe('LoginPageComponent', () => {
 
   it('hides the reCAPTCHA badge after a successful login', () => {
     document.body.classList.add('recaptcha-visible');
-    component.loginForm.setValue({ usuario: 'usuario', contrasena: 'contrasena', recuerdame: false });
+    component.login_model.set({ usuario: 'usuario', contrasena: 'contrasena', recuerdame: false });
     component.recaptchaToken = 'token';
 
     component.ingresar();
 
     expect(document.body.classList.contains('recaptcha-visible')).toBe(false);
+  });
+
+  it('starts with an invalid Signal Form and synchronizes field values to its model', () => {
+    expect(component.login_form().valid()).toBe(false);
+
+    component.login_form.usuario().value.set('usuario');
+    component.login_form.contrasena().value.set('contrasena');
+
+    expect(component.login_model()).toEqual({ usuario: 'usuario', contrasena: 'contrasena', recuerdame: false });
+    expect(component.login_form().valid()).toBe(true);
+  });
+
+  it('does not submit an invalid Signal Form', () => {
+    component.ingresar();
+
+    expect(component.login_form.usuario().touched()).toBe(true);
+    expect(component.login_form.contrasena().touched()).toBe(true);
+    expect(component.recaptchaToken).toBeNull();
+  });
+
+  it('prevents the browser native submit before processing login', () => {
+    const preventDefault = vi.fn();
+
+    component.onLoginSubmit({ preventDefault } as unknown as Event);
+
+    expect(preventDefault).toHaveBeenCalledOnce();
+    expect(component.login_form.usuario().touched()).toBe(true);
   });
 });

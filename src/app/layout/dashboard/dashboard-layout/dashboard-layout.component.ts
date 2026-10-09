@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit, viewChild } from '@angular/core';
 import {
   RouterModule,
   RouterOutlet,
@@ -16,14 +16,16 @@ import { ImageLazyComponent } from '../../../components/image-lazy/image-lazy.co
 import { MenuService } from '../../../services/menu.service';
 import { MenuItem } from '../../../interfaces/menu.interface';
 import { Last_activity_component } from '../../../components/last-activity/last-activity.component';
+import { ButtonComponent } from '../../../components/button/button.component';
+import { ModalComponent } from '../../../components/modal/modal.component';
 
 @Component({
   selector: 'app-dashboard-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterModule, CommonModule, ImageLazyComponent, Last_activity_component],
+  imports: [RouterOutlet, RouterModule, CommonModule, ImageLazyComponent, Last_activity_component, ButtonComponent, ModalComponent],
   templateUrl: './dashboard-layout.component.html',
   styleUrl: './dashboard-layout.component.scss',
-  host: { '(window:resize)': 'onWindowResize()' },
+  host: { '(window:resize)': 'onWindowResize()', '(document:click)': 'onDocumentClick($event)' },
 })
 export class DashboardLayoutComponent implements OnInit {
   private authService = inject(AuthService);
@@ -34,6 +36,7 @@ export class DashboardLayoutComponent implements OnInit {
   isSidebarOpen = false;
   isSidebarCollapsed = false;
   isHeaderScrolled = false;
+  isProfileMenuOpen = false;
   openMenuGroups: Record<string, boolean> = {};
 
   pageTitle: string = '';
@@ -41,6 +44,7 @@ export class DashboardLayoutComponent implements OnInit {
 
   public usuario = computed(() => this.authService.currentUser());
   public roles_usuario = computed(() => this.authService.get_roles());
+  readonly profileModal = viewChild<ModalComponent>('profileModal');
 
   nombre_unidad = sessionStorage.getItem('nombre_unidad');
   contrasena_cambiada = sessionStorage.getItem('contrasena_cambiada');
@@ -105,6 +109,7 @@ export class DashboardLayoutComponent implements OnInit {
   }
 
   logout(): void {
+    this.closeProfileMenu();
     this.authService.logout().subscribe({
       next: () => {
         Swal.fire({
@@ -121,7 +126,33 @@ export class DashboardLayoutComponent implements OnInit {
   }
 
   salir(): void {
+    this.closeProfileModal();
     this.logout();
+  }
+
+  toggleProfileMenu(event: Event): void {
+    event.stopPropagation();
+    this.isProfileMenuOpen = !this.isProfileMenuOpen;
+  }
+
+  closeProfileMenu(): void {
+    this.isProfileMenuOpen = false;
+  }
+
+  onDocumentClick(event: Event): void {
+    const target = event.target;
+    if (target instanceof Element && !target.closest('.u-pro')) {
+      this.closeProfileMenu();
+    }
+  }
+
+  openProfileModal(): void {
+    this.closeProfileMenu();
+    this.profileModal()?.open();
+  }
+
+  closeProfileModal(): void {
+    this.profileModal()?.close();
   }
 
   get isSidebarVisible(): boolean {

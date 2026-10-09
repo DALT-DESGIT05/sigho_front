@@ -1,4 +1,3 @@
-import { NgClass } from '@angular/common';
 import { Component, computed, input, output } from '@angular/core';
 import { ButtonAction, ButtonActionDefinition, ButtonVariant, ComponentSize, OutlineHover, PaletteColor } from '../../interfaces/util.interface';
 
@@ -21,7 +20,7 @@ const BUTTON_ACTIONS: Record<ButtonAction, ButtonActionDefinition> = {
   excel: { text: 'Exportar Excel', icon: 'fa-solid fa-file-excel', color: 'purple' },
 };
 
-@Component({ selector: 'app-button', standalone: true, imports: [NgClass], templateUrl: './button.component.html', styleUrl: './button.component.scss' })
+@Component({ selector: 'app-button', templateUrl: './button.component.html', styleUrl: './button.component.scss' })
 export class ButtonComponent {
   readonly texto = input(''); readonly text = input(''); readonly icon = input(''); readonly color = input<PaletteColor>();
   readonly hoverColor = input<PaletteColor>(); readonly size = input<ComponentSize>('md'); readonly variant = input<ButtonVariant>('solid');

@@ -1,11 +1,9 @@
 import { Component, computed, input } from '@angular/core';
-import { NgClass } from '@angular/common';
 import { ComponentSize, PaletteColor } from '../../interfaces/util.interface';
 
 @Component({
   selector: 'app-progress-bars',
   standalone: true,
-  imports: [NgClass],
   templateUrl: './progress-bars.component.html',
   styleUrl: './progress-bars.component.scss',
 })

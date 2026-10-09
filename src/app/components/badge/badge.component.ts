@@ -1,11 +1,9 @@
 import { Component, computed, input } from '@angular/core';
-import { NgClass } from '@angular/common';
 import { ComponentSize } from '../../interfaces/util.interface';
 
 @Component({
   selector: 'app-badge',
   standalone: true,
-  imports: [NgClass],
   templateUrl: './badge.component.html',
   styleUrl: './badge.component.scss'
 })

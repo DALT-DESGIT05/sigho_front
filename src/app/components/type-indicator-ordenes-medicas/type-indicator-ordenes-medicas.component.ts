@@ -1,11 +1,9 @@
-import { NgClass } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
 import { ComponentSize } from '../../interfaces/util.interface';
 
 @Component({
   selector: 'app-type-indicator-ordenes-medicas',
   standalone: true,
-  imports: [NgClass],
   templateUrl: './type-indicator-ordenes-medicas.component.html',
   styleUrl: './type-indicator-ordenes-medicas.component.scss',
 })

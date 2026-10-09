@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 
 export interface PatientSummaryData {
   paciente?: string | null;
@@ -20,44 +20,30 @@ export interface PatientSummaryData {
 
 @Component({
   selector: 'app-patient-summary',
-  standalone: true,
   templateUrl: './patient-summary.component.html',
   styleUrl: './patient-summary.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PatientSummaryComponent {
-  @Input({ required: true }) patient!: PatientSummaryData;
-  @Input() showDemographics = true;
-  @Input() showPhone = false;
-  @Input() showEmail = false;
-  @Input() showDni = false;
-  @Input() showStatus = false;
-  @Input() showPaymentMethod = false;
-  @Input() allowPhoneUpdate = false;
-  @Input() allowEmailUpdate = false;
-  @Output() phoneUpdate = new EventEmitter<void>();
-  @Output() emailUpdate = new EventEmitter<void>();
+  readonly patient = input.required<PatientSummaryData>();
+  readonly showDemographics = input(true);
+  readonly showPhone = input(false);
+  readonly showEmail = input(false);
+  readonly showDni = input(false);
+  readonly showStatus = input(false);
+  readonly showPaymentMethod = input(false);
+  readonly allowPhoneUpdate = input(false);
+  readonly allowEmailUpdate = input(false);
+  readonly phoneUpdate = output<void>();
+  readonly emailUpdate = output<void>();
 
-  get patientName(): string {
-    return this.value(this.patient?.paciente || this.patient?.nombres);
-  }
-
-  get bloodGroup(): string {
-    return this.value(this.patient?.grupo_sanquineo || this.patient?.grupo_sanguineo, 'No registrado');
-  }
-
-  get age(): string {
-    const age = this.value(this.patient?.edad);
-    return age === 'No registrado' || /a(?:ñ|n)os/i.test(age) ? age : `${age} años`;
-  }
-
-  get responsibleName(): string {
-    return this.value(this.patient?.nombre_titular || this.patient?.titular, 'No registrado');
-  }
-
-  get phone(): string {
-    return this.value(this.patient?.telefono || this.patient?.celular, 'No registrado');
-  }
+  readonly patientName = computed(() => this.value(this.patient().paciente || this.patient().nombres));
+  readonly bloodGroup = computed(() => this.value(this.patient().grupo_sanquineo || this.patient().grupo_sanguineo, 'No registrado'));
+  readonly age = computed(() => {
+    const age = this.value(this.patient().edad);
+    return age === 'No registrado' || /a(?:\u00f1|n)os/i.test(age) ? age : `${age} a\u00f1os`;
+  });
+  readonly responsibleName = computed(() => this.value(this.patient().nombre_titular || this.patient().titular, 'No registrado'));
+  readonly phone = computed(() => this.value(this.patient().telefono || this.patient().celular, 'No registrado'));
 
   value(value: unknown, fallback = 'No registrado'): string {
     const normalized = String(value ?? '').trim();

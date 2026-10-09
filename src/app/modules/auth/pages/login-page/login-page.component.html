@@ -275,7 +275,7 @@
       <div class="modal-body text-center">
         <!-- QR -->
          @if(mostrarQr == false){
-           <qrcode *ngIf="qrcode_url" [qrdata]="qrcode_url" [width]="200"></qrcode>
+           @if (qrcode_url) { <qrcode [qrdata]="qrcode_url" [width]="200"></qrcode> }
          }
 
         <!-- Inputs OTP: 6 inputs MANUALES -->
@@ -330,6 +330,4 @@
     </div>
   </div>
 </div>
-
-
 

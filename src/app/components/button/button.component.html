@@ -1,4 +1,4 @@
-<button class="btn app-button" [ngClass]="buttonClasses()" [class.app-button--block]="block()" [class.app-button--icon-only]="isIconOnly()"
+<button class="btn app-button" [class]="buttonClasses()" [class.app-button--block]="block()" [class.app-button--icon-only]="isIconOnly()"
   [class.app-button--loading]="loading()" [type]="type()" [disabled]="disabled() || loading()" [name]="name()" [value]="value()"
   [attr.form]="form() || null" [attr.title]="showTitle() ? resolvedTitle() : null" [attr.aria-label]="resolvedAriaLabel()" [attr.aria-busy]="loading()" (click)="onClick($event)">
   @if (loading()) {

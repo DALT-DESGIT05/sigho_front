@@ -141,47 +141,47 @@
           } @else {
             @for(option of menuItems; track trackMenuOption($index, option)) {
               @if(option.children?.length) {
-                <li class="menu-item menu-group" [ngClass]="{'menu-item-active': isActiveMenuGroup(option)}">
+                <li class="menu-item menu-group" [class]="{'menu-item-active': isActiveMenuGroup(option)}">
                   <a
                     class="waves-effect waves-dark menu-group-toggle"
                     href="javascript:void(0)"
                     [attr.aria-expanded]="isMenuGroupOpen(option)"
                     [attr.title]="option.label"
-                    [ngClass]="{'menu-link-active': isActiveMenuGroup(option)}"
+                    [class]="{'menu-link-active': isActiveMenuGroup(option)}"
                     (click)="toggleMenuGroup(option)">
                     <i [class]="option.icon"></i>
                     <span class="hide-menu">{{ option.label }}</span>
-                    <i class="fa menu-arrow" [ngClass]="isMenuGroupOpen(option) ? 'fa-angle-down' : 'fa-angle-right'"></i>
+                    <i class="fa menu-arrow" [class]="isMenuGroupOpen(option) ? 'fa-angle-down' : 'fa-angle-right'"></i>
                   </a>
 
                   @if(isMenuGroupOpen(option)) {
                     <ul class="submenu">
                       @for(child of option.children; track trackMenuChild($index, child)) {
-                        <li class="submenu-item" [ngClass]="{'submenu-item-active': isActiveMenuOption(child)}">
+                        <li class="submenu-item" [class]="{'submenu-item-active': isActiveMenuOption(child)}">
                           @if(child.children?.length) {
                             <a
                               class="waves-effect waves-dark submenu-link submenu-group-toggle"
                               href="javascript:void(0)"
                               [attr.aria-expanded]="isMenuGroupOpen(child)"
                               [attr.title]="child.label"
-                              [ngClass]="{'menu-link-active': isActiveMenuOption(child)}"
+                              [class]="{'menu-link-active': isActiveMenuOption(child)}"
                               (click)="toggleMenuGroup(child, option)">
                               <i [class]="child.icon"></i>
                               <span class="hide-menu">{{ child.label }}</span>
-                              <i class="fa menu-arrow" [ngClass]="isMenuGroupOpen(child) ? 'fa-angle-down' : 'fa-angle-right'"></i>
+                              <i class="fa menu-arrow" [class]="isMenuGroupOpen(child) ? 'fa-angle-down' : 'fa-angle-right'"></i>
                             </a>
 
                             @if(isMenuGroupOpen(child)) {
                               <ul class="submenu submenu-level-3">
                                 @for(grandChild of child.children; track trackMenuChild($index, grandChild)) {
-                                  <li class="submenu-item" [ngClass]="{'submenu-item-active': grandChild.link && isActiveLink(grandChild.link)}">
+                                  <li class="submenu-item" [class]="{'submenu-item-active': grandChild.link && isActiveLink(grandChild.link)}">
                                     @if(grandChild.link) {
                                       <a
                                         class="waves-effect waves-dark submenu-link"
                                         [routerLink]="grandChild.link"
                                         aria-expanded="false"
                                         [attr.title]="grandChild.label"
-                                        [ngClass]="{'menu-link-active': isActiveLink(grandChild.link)}"
+                                        [class]="{'menu-link-active': isActiveLink(grandChild.link)}"
                                         (click)="closeSidebarOnMobile()">
                                         <i [class]="grandChild.icon"></i>
                                         <span class="hide-menu">{{ grandChild.label }}</span>
@@ -202,7 +202,7 @@
                               [routerLink]="child.link"
                               aria-expanded="false"
                               [attr.title]="child.label"
-                              [ngClass]="{'menu-link-active': isActiveLink(child.link)}"
+                              [class]="{'menu-link-active': isActiveLink(child.link)}"
                               (click)="closeSidebarOnMobile()">
                               <i [class]="child.icon"></i>
                               <span class="hide-menu">{{ child.label }}</span>
@@ -219,9 +219,9 @@
                   }
                 </li>
               } @else {
-                <li class="menu-item" [ngClass]="{'menu-item-active': isActiveMenuOption(option)}">
+                <li class="menu-item" [class]="{'menu-item-active': isActiveMenuOption(option)}">
                   @if(option.link) {
-                    <a class="waves-effect waves-dark menu-link" [routerLink]="option.link" aria-expanded="false" [attr.title]="option.label" [ngClass]="{'menu-link-active': isActiveMenuOption(option)}" (click)="closeSidebarOnMobile()">
+                    <a class="waves-effect waves-dark menu-link" [routerLink]="option.link" aria-expanded="false" [attr.title]="option.label" [class]="{'menu-link-active': isActiveMenuOption(option)}" (click)="closeSidebarOnMobile()">
                       <i [class]="option.icon"></i>
                       <span class="hide-menu">{{ option.label }}</span>
                     </a>

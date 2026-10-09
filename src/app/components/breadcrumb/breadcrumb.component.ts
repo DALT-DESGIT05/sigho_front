@@ -1,4 +1,3 @@
-import { NgClass } from '@angular/common';
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ComponentSize, PaletteColor } from '../../interfaces/util.interface';
@@ -20,7 +19,7 @@ export type BreadcrumbSeparator = '/' | '>' | '|' | '•' | string;
 @Component({
   selector: 'app-breadcrumb',
   standalone: true,
-  imports: [NgClass, RouterLink],
+  imports: [RouterLink],
   templateUrl: './breadcrumb.component.html',
   styleUrl: './breadcrumb.component.scss'
 })

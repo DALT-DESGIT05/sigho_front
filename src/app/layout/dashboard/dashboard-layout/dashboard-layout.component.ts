@@ -1,4 +1,4 @@
-import { Component, computed, HostListener, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import {
   RouterModule,
   RouterOutlet,
@@ -22,7 +22,8 @@ import { Last_activity_component } from '../../../components/last-activity/last-
   standalone: true,
   imports: [RouterOutlet, RouterModule, CommonModule, ImageLazyComponent, Last_activity_component],
   templateUrl: './dashboard-layout.component.html',
-  styleUrls: ['./dashboard-layout.component.scss']
+  styleUrl: './dashboard-layout.component.scss',
+  host: { '(window:resize)': 'onWindowResize()' },
 })
 export class DashboardLayoutComponent implements OnInit {
   private authService = inject(AuthService);
@@ -144,7 +145,6 @@ export class DashboardLayoutComponent implements OnInit {
     }
   }
 
-  @HostListener('window:resize')
   onWindowResize(): void {
     if (!this.isMobileViewport()) {
       this.isSidebarOpen = false;

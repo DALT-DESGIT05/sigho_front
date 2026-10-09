@@ -185,6 +185,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         next: (success) => {
           this.loginRequestInFlight = false;
           this.estado = false;
+          document.body.classList.remove('recaptcha-visible');
           // if (success) {
           //   this.two_fa_enable();
           // }

@@ -5,23 +5,23 @@
         <li class="app-breadcrumb__entry">
           @if (!isActive(item, $index)) {
             @if (item.href) {
-              <a class="app-breadcrumb__item" [ngClass]="'app-breadcrumb__item--' + itemColor(item)" [href]="item.href" [title]="item.title || item.label">
+              <a class="app-breadcrumb__item" [class]="'app-breadcrumb__item--' + itemColor(item)" [href]="item.href" [title]="item.title || item.label">
                 @if (item.icon) { <i [class]="item.icon" aria-hidden="true"></i> }
                 <span>{{ item.label }}</span>
               </a>
             } @else if (item.link) {
-              <a class="app-breadcrumb__item" [ngClass]="'app-breadcrumb__item--' + itemColor(item)" [routerLink]="item.link" [title]="item.title || item.label">
+              <a class="app-breadcrumb__item" [class]="'app-breadcrumb__item--' + itemColor(item)" [routerLink]="item.link" [title]="item.title || item.label">
                 @if (item.icon) { <i [class]="item.icon" aria-hidden="true"></i> }
                 <span>{{ item.label }}</span>
               </a>
             } @else {
-              <span class="app-breadcrumb__item" [ngClass]="'app-breadcrumb__item--' + itemColor(item)">
+              <span class="app-breadcrumb__item" [class]="'app-breadcrumb__item--' + itemColor(item)">
                 @if (item.icon) { <i [class]="item.icon" aria-hidden="true"></i> }
                 <span>{{ item.label }}</span>
               </span>
             }
           } @else {
-            <span class="app-breadcrumb__item app-breadcrumb__item--current" [ngClass]="'app-breadcrumb__item--' + itemColor(item)" aria-current="page" [title]="item.title || item.label">
+            <span class="app-breadcrumb__item app-breadcrumb__item--current" [class]="'app-breadcrumb__item--' + itemColor(item)" aria-current="page" [title]="item.title || item.label">
               @if (item.icon) { <i [class]="item.icon" aria-hidden="true"></i> }
               <span>{{ item.label }}</span>
             </span>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, computed, effect, forwardRef, inject, input, output, signal } from '@angular/core';
+import { Component, ElementRef, computed, effect, forwardRef, inject, input, output, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ComponentSize, PaletteColor } from '../../interfaces/util.interface';
 import { LabelComponent } from '../label/label.component';
@@ -8,7 +8,7 @@ export type SelectValue = string | number | null;
 export interface SelectOption { value: SelectValue; label: string; detail?: string; count?: number; icon?: string; image?: string; tone?: PaletteColor; disabled?: boolean; }
 export interface SelectChangeEvent { value: SelectValue; option: SelectOption | null; }
 
-@Component({ selector: 'app-select', standalone: true, imports: [CommonModule, LabelComponent], templateUrl: './select.component.html', styleUrl: './select.component.scss', providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SelectComponent), multi: true }] })
+@Component({ selector: 'app-select', imports: [CommonModule, LabelComponent], templateUrl: './select.component.html', styleUrl: './select.component.scss', providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SelectComponent), multi: true }], host: { '(document:click)': 'closeWhenClickingOutside($event.target)' } })
 export class SelectComponent implements ControlValueAccessor {
   readonly label = input(''); readonly title = input(''); readonly nombre = input(''); readonly helpText = input(''); readonly error = input(''); readonly id = input('');
   readonly required = input(false); readonly invalid = input(false); readonly ariaLabel = input(''); readonly color = input<PaletteColor>('primary');
@@ -50,7 +50,7 @@ export class SelectComponent implements ControlValueAccessor {
   registerOnChange(fn: (value: SelectValue) => void): void { this.onChange = fn; }
   registerOnTouched(fn: () => void): void { this.onTouched = fn; }
   setDisabledState(disabled: boolean): void { this.disabledByForm.set(disabled); if (disabled) this.isOpen.set(false); }
-  @HostListener('document:click', ['$event.target']) closeWhenClickingOutside(target: EventTarget | null): void { if (target instanceof Node && !this.elementRef.nativeElement.contains(target)) this.isOpen.set(false); }
+  closeWhenClickingOutside(target: EventTarget | null): void { if (target instanceof Node && !this.elementRef.nativeElement.contains(target)) this.isOpen.set(false); }
   private setValue(value: SelectValue, emit: boolean): void { this.innerValue.set(value); if (emit) { this.onChange(value); this.selectedValueChange.emit(value); this.change.emit({ value, option: this.selectedOption() }); } }
   private read(item: object, path: string): unknown { return path.split('.').reduce<unknown>((value, key) => value && typeof value === 'object' ? (value as Record<string, unknown>)[key] : undefined, item); }
   private sameValue(first: SelectValue, second: SelectValue): boolean { return String(first) === String(second); }

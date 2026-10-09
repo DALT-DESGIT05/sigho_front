@@ -1,0 +1,53 @@
+:host { align-self: flex-start; display: block; height: auto !important; max-width: 100%; min-width: 0; }
+
+.app-summary-card {
+  --bs-card-spacer-x: .55rem;
+  --bs-card-spacer-y: .4rem;
+  --app-summary-card-color: var(--palette-primary-fap-text);
+  --app-summary-card-border: var(--palette-primary-fap-200);
+  --app-summary-card-accent: var(--palette-primary-fap-text);
+  border: 1px solid var(--app-summary-card-border);
+  border-left: 3px solid var(--app-summary-card-accent);
+  border-radius: .6rem;
+  box-shadow: none;
+  align-self: flex-start;
+  height: fit-content !important;
+  margin-bottom: 0 !important;
+  min-width: 0;
+}
+
+.app-summary-card__body { align-content: start; display: grid; flex: 0 0 auto !important; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto; min-height: 0 !important; min-width: 0; padding: var(--bs-card-spacer-y) var(--bs-card-spacer-x) !important; }
+.app-summary-card__icon { color: var(--app-summary-card-color); flex: 0 0 auto; font-size: .78rem; line-height: 1; }
+.app-summary-card__content { display: grid; gap: .06rem; min-width: 0; }
+.app-summary-card__header { align-items: center; display: flex; gap: .35rem; min-width: 0; }
+.app-summary-card__label { color: var(--app-summary-card-color); font-size: .7rem; font-weight: 600; line-height: 1.2; }
+.app-summary-card__value { color: var(--palette-dark); font-size: clamp(.68rem, 2vw, .78rem); line-height: 1.25; min-height: 1.25em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-summary-card__actions { align-items: center; align-self: end; display: flex; flex-wrap: wrap; gap: .35rem; justify-content: flex-end; justify-self: end; max-width: 100%; min-height: 16px; min-width: 0; }
+:host ::ng-deep .app-summary-card__actions > * { max-width: 100%; min-width: 0; }
+
+.app-summary-card--danger { --app-summary-card-color: var(--palette-danger-text); --app-summary-card-accent: var(--palette-danger); }
+.app-summary-card--success { --app-summary-card-color: var(--palette-success-text); --app-summary-card-accent: var(--palette-success); }
+.app-summary-card--warning { --app-summary-card-color: var(--palette-warning-text); --app-summary-card-accent: var(--palette-warning); }
+.app-summary-card--secondary { --app-summary-card-color: var(--palette-secondary-text); --app-summary-card-accent: var(--palette-secondary); }
+.app-summary-card--info { --app-summary-card-color: var(--palette-info-text); --app-summary-card-accent: var(--palette-info); }
+.app-summary-card--purple { --app-summary-card-color: var(--palette-purple-text); --app-summary-card-accent: var(--palette-purple); }
+.app-summary-card--fuchsia { --app-summary-card-color: var(--palette-fuchsia-text); --app-summary-card-accent: var(--palette-fuchsia); }
+
+.app-summary-card--icon-primary .app-summary-card__icon { color: var(--palette-primary-fap-text); }
+.app-summary-card--icon-danger .app-summary-card__icon { color: var(--palette-danger-text); }
+.app-summary-card--icon-success .app-summary-card__icon { color: var(--palette-success-text); }
+.app-summary-card--icon-warning .app-summary-card__icon { color: var(--palette-warning-text); }
+.app-summary-card--icon-secondary .app-summary-card__icon { color: var(--palette-secondary-text); }
+.app-summary-card--icon-info .app-summary-card__icon { color: var(--palette-info-text); }
+.app-summary-card--icon-purple .app-summary-card__icon { color: var(--palette-purple-text); }
+.app-summary-card--icon-fuchsia .app-summary-card__icon { color: var(--palette-fuchsia-text); }
+
+.app-summary-card--content-primary .app-summary-card__value { color: var(--palette-primary-fap-text); }
+.app-summary-card--content-danger .app-summary-card__value { color: var(--palette-danger-text); }
+.app-summary-card--content-success .app-summary-card__value { color: var(--palette-success-text); }
+.app-summary-card--content-warning .app-summary-card__value { color: var(--palette-warning-text); }
+.app-summary-card--content-secondary .app-summary-card__value { color: var(--palette-secondary-text); }
+.app-summary-card--content-info .app-summary-card__value { color: var(--palette-info-text); }
+.app-summary-card--content-purple .app-summary-card__value { color: var(--palette-purple-text); }
+.app-summary-card--content-fuchsia .app-summary-card__value { color: var(--palette-fuchsia-text); }
+

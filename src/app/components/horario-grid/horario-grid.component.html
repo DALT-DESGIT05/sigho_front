@@ -1,0 +1,12 @@
+<div class="row g-2">
+  @for (horario of horarios(); track horario.hora) {
+    <div class="col-4 col-sm-3 col-md-2">
+      <app-horario-button
+        [horario]="horario"
+        [disabled]="disabled()"
+        [loading]="hora_cargando() === horario.hora"
+        (horario_seleccionado)="seleccionar_horario($event)"
+      />
+    </div>
+  }
+</div>

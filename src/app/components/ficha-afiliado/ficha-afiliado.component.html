@@ -1,0 +1,58 @@
+<app-modal
+  #modalFicha
+  titulo="Ficha del paciente"
+  size="lg"
+  [centered]="true"
+  [scrollable]="true"
+  [showFooter]="true"
+  (closed)="cerrarFicha()">
+
+
+
+    @if (cargando()) {
+      <div class="estado-contenido">
+        <div class="spinner"></div>
+        <p>Cargando ficha del paciente...</p>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="mensaje-error">
+        {{ error() }}
+      </div>
+    }
+
+    @let paciente = ficha();
+
+    @if (paciente && !cargando()) {
+      <div class="ficha-contenido">
+        <app-patient-identity
+          [identificador]="paciente.cod_afiliado"
+          [nombre]="paciente.nombres + ' ' + paciente.apellido_paterno + ' ' + paciente.apellido_materno"
+          [historia]="paciente.historia"
+          [codigoAfiliado]="paciente.cod_afiliado"
+          [vertical]="true">
+        </app-patient-identity>
+
+        <section class="informacion-paciente">
+          <h3>Información General</h3>
+
+          <app-summary-card-group>
+            <app-summary-card etiqueta="Situación" [valor]="paciente.situacion || 'No registrada'" icon="fa-solid fa-circle-check" [color]="colorSituacion(paciente.situacion || '')" [iconColor]="colorSituacion(paciente.situacion || '')"></app-summary-card>
+            <app-summary-card etiqueta="DNI" [valor]="paciente.dni || 'No registrado'" icon="fa-regular fa-address-card"></app-summary-card>
+            <app-summary-card etiqueta="Parentesco" [valor]="paciente.parentesco || 'No registrado'" icon="fa-solid fa-people-roof"></app-summary-card>
+            <app-summary-card [wide]="true" etiqueta="Correo electrónico" [valor]="paciente.correo || 'No registrado'" icon="fa-regular fa-envelope"></app-summary-card>
+            <app-summary-card  [wide]="true" etiqueta="Teléfonos"  [valor]="paciente.telefonos.length? paciente.telefonos.join(' / ') : (paciente.telefono || 'No registrado')" icon="fa-solid fa-phone"></app-summary-card>
+
+          </app-summary-card-group>
+        </section>
+      </div>
+    }
+    <div modal-footer>
+      <app-button
+        action="close"
+        (clicked)="modalFicha.close()">
+      </app-button>
+    </div>
+
+</app-modal>

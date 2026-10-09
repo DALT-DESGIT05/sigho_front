@@ -1,0 +1,38 @@
+:host { display: block; max-width: 100%; }
+
+.app-progress-bars {
+  --progress-color: var(--palette-secondary);
+  --progress-track: var(--palette-secondary-100);
+  background-color: var(--progress-track);
+  border-radius: 999px;
+  height: .75rem;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.app-progress-bars__bar {
+  background-color: var(--progress-color);
+  color: var(--palette-white);
+  font-size: var(--app-size-md-font-size, .875rem);
+  font-weight: 600;
+  min-width: 0;
+  transition: width .25s ease;
+}
+
+.app-progress-bars--sm { height: .5rem; }
+.app-progress-bars--xs { height: .35rem; }
+.app-progress-bars--xs .app-progress-bars__bar { font-size: var(--app-size-xs-font-size, .6rem); }
+.app-progress-bars--sm .app-progress-bars__bar { font-size: var(--app-size-sm-font-size, .75rem); }
+.app-progress-bars--lg { height: 1.25rem; }
+.app-progress-bars--lg .app-progress-bars__bar { font-size: var(--app-size-lg-font-size, 1rem); }
+
+.app-progress-bars--danger { --progress-color: var(--palette-danger); --progress-track: var(--palette-danger-400); }
+.app-progress-bars--success { --progress-color: var(--palette-success); --progress-track: var(--palette-success-400); }
+.app-progress-bars--warning { --progress-color: var(--palette-warning); --progress-track: var(--palette-warning-400); }
+.app-progress-bars--secondary { --progress-color: var(--palette-secondary); --progress-track: var(--palette-secondary-400); }
+.app-progress-bars--info { --progress-color: var(--palette-info); --progress-track: var(--palette-info-400); }
+.app-progress-bars--purple { --progress-color: var(--palette-purple); --progress-track: var(--palette-purple-400); }
+.app-progress-bars--fuchsia { --progress-color: var(--palette-fuchsia); --progress-track: var(--palette-fuchsia-400); }
+.app-progress-bars--md { height: .75rem; }
+.app-progress-bars--md .app-progress-bars__bar { font-size: var(--app-size-md-font-size, .875rem); }
+

@@ -1,0 +1,6 @@
+@if (tiempo_transcurrido(); as tiempo) {
+  <span class="last-activity" [title]="last_activity_title()">
+    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+    <span>Activo {{ tiempo }}</span>
+  </span>
+}

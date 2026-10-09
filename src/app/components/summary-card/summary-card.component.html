@@ -1,0 +1,19 @@
+<article [class]="cardClasses()" [attr.title]="title() || null">
+  <div class="card-body app-summary-card__body">
+    <div class="app-summary-card__content">
+      @if (resolvedLabel() || icon()) {
+        <div class="app-summary-card__header">
+          @if (icon()) { <i class="app-summary-card__icon" [class]="'app-summary-card__icon ' + icon()" aria-hidden="true"></i> }
+          @if (resolvedLabel()) { <span class="app-summary-card__label">{{ resolvedLabel() }}</span> }
+        </div>
+      }
+      <span class="app-summary-card__value" [attr.title]="resolvedValueTitle() || null">{{ resolvedValue() }}</span>
+    </div>
+    <div class="app-summary-card__actions">
+      @if (actionIcon()) {
+        <app-icon-link [icon]="actionIcon()" size="xs" [texto]="actionText()" [color]="actionColor()" [href]="actionHref()" [asButton]="actionHref() === '#'" [ariaLabel]="actionAriaLabel()" [title]="actionAriaLabel()" (clicked)="actionClicked.emit($event)"></app-icon-link>
+      }
+      <ng-content></ng-content>
+    </div>
+  </div>
+</article>

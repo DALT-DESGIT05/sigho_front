@@ -1,0 +1,39 @@
+:host { display: block; }
+
+.app-alert {
+  --alert-background: var(--palette-info-100);
+  --alert-border: var(--palette-info-200);
+  --alert-text: var(--palette-info-text);
+  align-items: flex-start;
+  background-color: var(--alert-background);
+  border: 1px solid var(--alert-border);
+  border-radius: .375rem;
+  color: var(--alert-text);
+  display: flex;
+  gap: .6rem;
+  line-height: 1.4;
+  width: 100%;
+}
+
+.app-alert__icon { flex: 0 0 auto; line-height: inherit; }
+.app-alert__content { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.app-alert__close { flex: 0 0 auto; margin: -.18rem -.18rem -.18rem 0; }
+
+.app-alert--xs { font-size: .65rem; padding: .35rem .5rem; }
+.app-alert--sm { font-size: .75rem; padding: .45rem .6rem; }
+.app-alert--md { font-size: .875rem; padding: .6rem .75rem; }
+.app-alert--lg { font-size: 1rem; padding: .8rem 1rem; }
+
+.app-alert--primary { --alert-background: var(--palette-primary-100); --alert-border: var(--palette-primary-200); --alert-text: var(--palette-primary-text); }
+.app-alert--danger { --alert-background: var(--palette-danger-100); --alert-border: var(--palette-danger-200); --alert-text: var(--palette-danger-text); }
+.app-alert--success { --alert-background: var(--palette-success-100); --alert-border: var(--palette-success-200); --alert-text: var(--palette-success-text); }
+.app-alert--warning { --alert-background: var(--palette-warning-100); --alert-border: var(--palette-warning-200); --alert-text: var(--palette-warning-text); }
+.app-alert--secondary { --alert-background: var(--palette-secondary-100); --alert-border: var(--palette-secondary-200); --alert-text: var(--palette-secondary-text); }
+.app-alert--info { --alert-background: var(--palette-info-100); --alert-border: var(--palette-info-200); --alert-text: var(--palette-info-text); }
+.app-alert--purple { --alert-background: var(--palette-purple-100); --alert-border: var(--palette-purple-200); --alert-text: var(--palette-purple-text); }
+.app-alert--fuchsia { --alert-background: var(--palette-fuchsia-100); --alert-border: var(--palette-fuchsia-200); --alert-text: var(--palette-fuchsia-text); }
+
+@media (max-width: 575.98px) {
+  .app-alert { gap: .45rem; }
+  .app-alert--md, .app-alert--lg { padding: .55rem .65rem; }
+}

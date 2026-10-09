@@ -1,0 +1,22 @@
+<ng-template #modalTemplate>
+  <div class="modal-header app-modal__header">
+    <div class="app-modal__header-content">
+      @if (resolvedTitle() || icon()) {
+        <div class="app-modal__title-row">
+          @if (icon()) { <i [class]="icon()" aria-hidden="true"></i> }
+          @if (resolvedTitle()) { <h5 class="modal-title">{{ resolvedTitle() }}</h5> }
+        </div>
+      }
+      <ng-content select="[modal-header]"></ng-content>
+    </div>
+    @if (showCloseButton()) {
+      <app-button class="app-modal__close" [iconOnly]="true" hoverColor="danger" icon="fa-solid fa-xmark" color="secondary" variant="outline" size="sm" ariaLabel="Cerrar" (click)="close()"></app-button>
+    }
+  </div>
+
+  <div class="modal-body"><ng-content></ng-content></div>
+
+  @if (showFooter()) {
+    <div class="modal-footer app-modal__footer"><ng-content select="[modal-footer]"></ng-content></div>
+  }
+</ng-template>

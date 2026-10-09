@@ -1,0 +1,219 @@
+{
+  "citas": [
+      {
+          "id": 1,
+          "link": "/citas/menu_reservas",
+          "imagen": "assets/svg/citas medicas.png",
+          "description": "Descripción del ítem 1",
+          "titulo": "Cita Médica"
+      },
+      {
+          "id": 2,
+          "link": "/citas/resultados_laboratorio",
+          "imagen": "assets/svg/laboratorio general.png",
+          "description": "Descripción del ítem 1",
+          "titulo": "Resultados de Laboratorio"
+      }
+  ],
+  "reservas": [
+      {
+          "id": 1,
+          "link": "/citas/reserva_citas",
+          "imagen": "assets/svg/reservaciones.png",
+          "description": "Descripción del ítem 1",
+          "titulo": "Reserva de Citas"
+      },
+      {
+          "id": 2,
+          "link": "/citas/anulacion_citas",
+          "imagen": "assets/svg/anular citas.png",
+          "description": "Descripción del ítem 1",
+          "titulo": "Anulación de Citas"
+      },
+      {
+          "id": 3,
+          "link": "/citas/historial_citas",
+          "imagen": "assets/svg/historial.png",
+          "description": "Descripción del ítem 1",
+          "titulo": "Historial de Citas"
+      },
+      {
+          "id": 4,
+          "link": "/citas/citas_virtuales",
+          "imagen": "assets/svg/telemedicina.png",
+          "description": "Telemedicina",
+          "titulo": "Telemedicina"
+      }
+  ],
+  "tipo_reservas": [
+      {
+          "id": 1,
+          "link": "/citas/reserva_citas",
+          "imagen": "assets/svg/presencial.png",
+          "description": "Descripción del ítem 1",
+          "titulo": "CONSULTA PRESENCIAL",
+          "codigo":"01"
+      },
+      {
+          "id": 2,
+          "link": "/citas/anulacion_citas",
+          "imagen": "assets/svg/virtual.png",
+          "description": "Descripción del ítem 1",
+          "titulo": "CONSULTA VIRTUAL",
+          "codigo":"16"
+      }
+  ],
+  "consultorios":[
+      {
+          "codigo": "102",
+          "consultorio": "CARDIOLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "823",
+          "imagen": "assets/svg/102.png"
+      },
+      {
+          "codigo": "002",
+          "consultorio": "CARDIOLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "103",
+          "consultorio": "CIRUGIA GENERAL",
+          "cantidad": "0",
+          "cod_unicon": "assets/svg/103.png"
+      },
+      {
+          "codigo": "003",
+          "consultorio": "CIRUGIA GENERAL",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "004",
+          "consultorio": "CIRUGIA PLASTICA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "016",
+          "consultorio": "CIRUGIA TORAX Y CARDIOVASCULAR",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "017",
+          "consultorio": "DERMATOLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "024",
+          "consultorio": "ENDOCRINOLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "009",
+          "consultorio": "GASTROENTEROLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "048",
+          "consultorio": "HEMATOLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "083",
+          "consultorio": "INFECTOLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "079",
+          "consultorio": "LABORATORIO",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "018",
+          "consultorio": "MEDICINA FISICA Y REHABILITACION",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "011",
+          "consultorio": "MEDICINA INTERNA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "022",
+          "consultorio": "NEFROLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "014",
+          "consultorio": "NEUMOLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "015",
+          "consultorio": "NEUROLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "008",
+          "consultorio": "OFTALMOLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "046",
+          "consultorio": "ONCOLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "006",
+          "consultorio": "OTORRINOLARINGOLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "012",
+          "consultorio": "PSICOLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "013",
+          "consultorio": "PSIQUIATRIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "020",
+          "consultorio": "REUMATOLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "021",
+          "consultorio": "TRAUMATOLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      },
+      {
+          "codigo": "005",
+          "consultorio": "UROLOGIA",
+          "cantidad": "0",
+          "cod_unicon": "721"
+      }
+  ]
+}

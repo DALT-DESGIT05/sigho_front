@@ -1,0 +1,409 @@
+<!-- ============================================================== -->
+<!-- Main wrapper - style you can find in pages.scss -->
+<!-- ============================================================== -->
+<div id="main-wrapper" [class.sidebar-collapsed]="isSidebarCollapsed">
+  <!-- ============================================================== -->
+  <!-- Topbar header - style you can find in pages.scss -->
+  <!-- ============================================================== -->
+  <header class="topbar" [class.topbar--scrolled]="isHeaderScrolled">
+    <nav class="navbar top-navbar navbar-expand-md navbar-light">
+      <!-- ============================================================== -->
+      <!-- Logo -->
+      <!-- ============================================================== -->
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">
+          <!-- Logo icon --><b class="brand-fap-logo">
+            <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
+            <!-- Dark Logo icon -->
+
+            <img src="assets/images/escudo_fap.png" alt="FAP" />
+
+          </b>
+          <!--End Logo icon -->
+          <!-- Logo text --><span>
+            <!-- dark Logo text -->
+            <!-- <img src="assets/images/logofinal.png" alt="homepage" class="dark-logo dark-log logo-new" /> -->
+             <span class="brand-system-name">SIGO WEB FAP</span>
+            <!-- Light Logo text -->
+            </span>
+        </a>
+      </div>
+      <!-- ============================================================== -->
+      <!-- End Logo -->
+      <!-- ============================================================== -->
+      <div class="navbar-collapse">
+        <!-- ============================================================== -->
+        <!-- toggle and nav items -->
+        <!-- ============================================================== -->
+        <ul class="navbar-nav me-auto">
+            <!-- Texto agregado al lado izquierdo -->
+            <!-- Este es -->
+            <li class="nav-item">
+                <button
+                  type="button"
+                  class="nav-link sidebar-toggle waves-effect waves-dark"
+                  [attr.aria-expanded]="isSidebarVisible"
+                  aria-controls="dashboard-sidebar"
+                  [attr.aria-label]="isSidebarVisible ? 'Ocultar menú lateral' : 'Mostrar menú lateral'"
+                  [attr.title]="isSidebarVisible ? 'Ocultar menú lateral' : 'Mostrar menú lateral'"
+                  (click)="toggleSidebar()">
+                  <i class="fa-solid fa-bars" aria-hidden="true"></i>
+                </button>
+            </li>
+            <li class="nav-item">
+              @if(es_ipress){
+                <span class="nombre_ipress">IPRESS - {{nombre_unidad}} </span>
+              }
+          </li>
+            <!-- ============================================================== -->
+            <!-- Search -->
+            <!-- ============================================================== -->
+        </ul>
+
+        <!-- ============================================================== -->
+        <!-- User profile and search -->
+        <!-- ============================================================== -->
+        <ul class="navbar-nav my-lg-0">
+          <li class="nav-item topbar-last-activity">
+            <app-last-activity />
+          </li>
+          <!-- Profile -->
+          <li class="nav-item dropdown u-pro">
+              <button
+                type="button"
+                class="nav-link dropdown-toggle waves-effect waves-dark profile-pic top-profile-trigger"
+                id="topProfileMenu"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
+                  <span class="top-profile-photo"><app-image-lazy tipo="mi-foto" alt="Foto de perfil" imageClass="rounded-circle" objectFit="contain" /></span>
+                  <span class="hidden-md-down">
+                    <span class="p-2 text-afiliado">
+                      {{ (usuario()?.nombres || 'Usuario') + ' ' + (usuario()?.apellidos || '') }}
+                    </span>
+                  </span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end top-profile-menu" aria-labelledby="topProfileMenu">
+                <li>
+                  <a class="dropdown-item" routerLink="/perfil/perfil-usuario">
+                    <i class="fa-solid fa-user" aria-hidden="true"></i>
+                    <span>Mi perfil</span>
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <button type="button" class="dropdown-item top-profile-logout" (click)="logout()">
+                    <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+                    <span>Cerrar Sesión</span>
+                  </button>
+                </li>
+              </ul>
+          </li>
+      </ul>
+    </div>
+
+    </nav>
+  </header>
+  <!-- ============================================================== -->
+  <!-- End Topbar header -->
+  <!-- ============================================================== -->
+  <!-- ============================================================== -->
+  <!-- Left Sidebar - style you can find in sidebar.scss  -->
+  <!-- ============================================================== -->
+  <aside id="dashboard-sidebar" class="left-sidebar" [class.open]="isSidebarOpen">
+    <div class="sidebar-brand">
+      <a class="sidebar-brand-link" routerLink="/" aria-label="Ir al inicio">
+        <img src="assets/images/escudo_fap.png" alt="FAP" />
+        <span class="sidebar-brand-copy">
+          <strong>SIGHO WEB FAP</strong>
+          <small>Sistema de Gestión Hospitalaria</small>
+        </span>
+      </a>
+      <button
+        type="button"
+        class="sidebar-close"
+        aria-label="Cerrar menú"
+        (click)="closeSidebarOnMobile()">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+    </div>
+    <!-- Sidebar scroll-->
+    <div class="scroll-sidebar">
+      <!-- Sidebar navigation-->
+      <nav class="sidebar-nav">
+        <ul id="sidebarnav" class="menu-scrollable modern-sidebar-menu">
+          @if(isMenuLoading) {
+            <li class="menu-item">
+              <span class="waves-effect waves-dark menu-link">
+                <i class="fa fa-spinner fa-spin"></i>
+                <span class="hide-menu">Cargando menú...</span>
+              </span>
+            </li>
+          } @else {
+            @for(option of menuItems; track trackMenuOption($index, option)) {
+              @if(option.children?.length) {
+                <li class="menu-item menu-group" [ngClass]="{'menu-item-active': isActiveMenuGroup(option)}">
+                  <a
+                    class="waves-effect waves-dark menu-group-toggle"
+                    href="javascript:void(0)"
+                    [attr.aria-expanded]="isMenuGroupOpen(option)"
+                    [attr.title]="option.label"
+                    [ngClass]="{'menu-link-active': isActiveMenuGroup(option)}"
+                    (click)="toggleMenuGroup(option)">
+                    <i [class]="option.icon"></i>
+                    <span class="hide-menu">{{ option.label }}</span>
+                    <i class="fa menu-arrow" [ngClass]="isMenuGroupOpen(option) ? 'fa-angle-down' : 'fa-angle-right'"></i>
+                  </a>
+
+                  @if(isMenuGroupOpen(option)) {
+                    <ul class="submenu">
+                      @for(child of option.children; track trackMenuChild($index, child)) {
+                        <li class="submenu-item" [ngClass]="{'submenu-item-active': isActiveMenuOption(child)}">
+                          @if(child.children?.length) {
+                            <a
+                              class="waves-effect waves-dark submenu-link submenu-group-toggle"
+                              href="javascript:void(0)"
+                              [attr.aria-expanded]="isMenuGroupOpen(child)"
+                              [attr.title]="child.label"
+                              [ngClass]="{'menu-link-active': isActiveMenuOption(child)}"
+                              (click)="toggleMenuGroup(child, option)">
+                              <i [class]="child.icon"></i>
+                              <span class="hide-menu">{{ child.label }}</span>
+                              <i class="fa menu-arrow" [ngClass]="isMenuGroupOpen(child) ? 'fa-angle-down' : 'fa-angle-right'"></i>
+                            </a>
+
+                            @if(isMenuGroupOpen(child)) {
+                              <ul class="submenu submenu-level-3">
+                                @for(grandChild of child.children; track trackMenuChild($index, grandChild)) {
+                                  <li class="submenu-item" [ngClass]="{'submenu-item-active': grandChild.link && isActiveLink(grandChild.link)}">
+                                    @if(grandChild.link) {
+                                      <a
+                                        class="waves-effect waves-dark submenu-link"
+                                        [routerLink]="grandChild.link"
+                                        aria-expanded="false"
+                                        [attr.title]="grandChild.label"
+                                        [ngClass]="{'menu-link-active': isActiveLink(grandChild.link)}"
+                                        (click)="closeSidebarOnMobile()">
+                                        <i [class]="grandChild.icon"></i>
+                                        <span class="hide-menu">{{ grandChild.label }}</span>
+                                      </a>
+                                    } @else {
+                                      <span class="waves-effect waves-dark submenu-link submenu-link-disabled" [attr.title]="grandChild.label">
+                                        <i [class]="grandChild.icon"></i>
+                                        <span class="hide-menu">{{ grandChild.label }}</span>
+                                      </span>
+                                    }
+                                  </li>
+                                }
+                              </ul>
+                            }
+                          } @else if(child.link) {
+                            <a
+                              class="waves-effect waves-dark submenu-link"
+                              [routerLink]="child.link"
+                              aria-expanded="false"
+                              [attr.title]="child.label"
+                              [ngClass]="{'menu-link-active': isActiveLink(child.link)}"
+                              (click)="closeSidebarOnMobile()">
+                              <i [class]="child.icon"></i>
+                              <span class="hide-menu">{{ child.label }}</span>
+                            </a>
+                          } @else {
+                            <span class="waves-effect waves-dark submenu-link submenu-link-disabled" [attr.title]="child.label">
+                              <i [class]="child.icon"></i>
+                              <span class="hide-menu">{{ child.label }}</span>
+                            </span>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  }
+                </li>
+              } @else {
+                <li class="menu-item" [ngClass]="{'menu-item-active': isActiveMenuOption(option)}">
+                  @if(option.link) {
+                    <a class="waves-effect waves-dark menu-link" [routerLink]="option.link" aria-expanded="false" [attr.title]="option.label" [ngClass]="{'menu-link-active': isActiveMenuOption(option)}" (click)="closeSidebarOnMobile()">
+                      <i [class]="option.icon"></i>
+                      <span class="hide-menu">{{ option.label }}</span>
+                    </a>
+                  } @else {
+                    <span class="waves-effect waves-dark menu-link submenu-link-disabled" [attr.title]="option.label">
+                      <i [class]="option.icon"></i>
+                      <span class="hide-menu">{{ option.label }}</span>
+                    </span>
+                  }
+                </li>
+              }
+            }
+          }
+
+        </ul>
+      </nav>
+      <!-- End Sidebar navigation-->
+    </div>
+    <!-- End Sidebar scroll-->
+    <div class="sidebar-user">
+      <button type="button" class="sidebar-profile-trigger" data-bs-toggle="modal" data-bs-target="#profileModal">
+        <app-image-lazy tipo="mi-foto" alt="Foto de perfil" />
+        <span class="sidebar-user-copy">
+          <strong [title]="(usuario()?.nombres || 'Usuario') + ' ' + (usuario()?.apellidos || '')">{{ (usuario()?.nombres || 'Usuario') + ' ' + (usuario()?.apellidos || '') }}</strong>
+          <small [title]="roles_usuario().join(', ') || 'SIN ROL'">{{ roles_usuario().join(', ') || 'SIN ROL' }}</small>
+          <span class="online-status"><i></i> En línea</span>
+        </span>
+      </button>
+      <button
+        type="button"
+        class="sidebar-logout"
+        aria-label="Cerrar Sesión"
+        title="Cerrar Sesión"
+        (click)="logout()">
+        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+      </button>
+    </div>
+  </aside>
+
+  @if (isSidebarOpen) {
+    <button
+      type="button"
+      class="sidebar-backdrop"
+      aria-label="Cerrar menú lateral"
+      (click)="closeSidebarOnMobile()">
+    </button>
+  }
+
+  <!-- ============================================================== -->
+  <!-- End Left Sidebar - style you can find in sidebar.scss  -->
+  <!-- ============================================================== -->
+  <!-- ============================================================== -->
+  <!-- Page wrapper  -->
+  <!-- ============================================================== -->
+  <div class="page-wrapper" (scroll)="onPageScroll($event)">
+    <!-- ============================================================== -->
+    <!-- Container fluid  -->
+    <!-- ============================================================== -->
+    <div class="container-fluid">
+      <!-- ============================================================== -->
+      <!-- Bread crumb and right sidebar toggle -->
+      <!-- ============================================================== -->
+
+
+      <!-- ============================================================== -->
+      <!-- End Bread crumb and right sidebar toggle -->
+      <!-- ============================================================== -->
+      <!-- ============================================================== -->
+      <!-- Start Page Content -->
+      <!-- ============================================================== -->
+      @if(breadcrumbs.length) {
+        <nav aria-label="Migas de pan" class="page-breadcrumbs">
+          <ol class="breadcrumb mb-3">
+            @for (breadcrumb of breadcrumbs; track $index; let first = $first; let last = $last) {
+              <li class="breadcrumb-item" [class.active]="last" [attr.aria-current]="last ? 'page' : null">
+                @if (!last && breadcrumb.url) {
+                  <a [routerLink]="breadcrumb.url">
+                    @if (first) { <i [class]="pageMenuIcon" class="breadcrumb-icon" aria-hidden="true"></i> }
+                    {{ breadcrumb.label }}
+                  </a>
+                } @else {
+                  <span>
+                    @if (first) { <i [class]="pageMenuIcon" class="breadcrumb-icon" aria-hidden="true"></i> }
+                    {{ breadcrumb.label }}
+                  </span>
+                }
+              </li>
+            }
+          </ol>
+        </nav>
+      }
+
+      <div class="row routed-page-content">
+        <router-outlet />
+      </div>
+      <!-- ============================================================== -->
+      <!-- End PAge Content -->
+      <!-- ============================================================== -->
+      <!-- ============================================================== -->
+      <!-- Right sidebar -->
+      <!-- ============================================================== -->
+      <!-- .right-sidebar -->
+      <div class="right-sidebar">
+        <div class="slimscrollright">
+          <div class="rpanel-title"> Service Panel <span><i class="ti-close right-side-toggle"></i></span>
+          </div>
+          <div class="r-panel-body">
+            <ul id="themecolors" class="mt-3">
+              <li><b>With Light sidebar</b></li>
+              <li><a href="javascript:void(0)" data-theme="default" class="default-theme">1</a></li>
+              <li><a href="javascript:void(0)" data-theme="green" class="green-theme">2</a></li>
+              <li><a href="javascript:void(0)" data-theme="red" class="red-theme">3</a></li>
+              <li><a href="javascript:void(0)" data-theme="blue" class="blue-theme">4</a></li>
+              <li><a href="javascript:void(0)" data-theme="purple" class="purple-theme">5</a></li>
+              <li><a href="javascript:void(0)" data-theme="megna" class="megna-theme">6</a></li>
+              <li class="d-block mt-4"><b>With Dark sidebar</b></li>
+              <li><a href="javascript:void(0)" data-theme="default-dark" class="default-dark-theme working">7</a></li>
+              <li><a href="javascript:void(0)" data-theme="green-dark" class="green-dark-theme">8</a>
+              </li>
+              <li><a href="javascript:void(0)" data-theme="red-dark" class="red-dark-theme">9</a></li>
+              <li><a href="javascript:void(0)" data-theme="blue-dark" class="blue-dark-theme">10</a>
+              </li>
+              <li><a href="javascript:void(0)" data-theme="purple-dark" class="purple-dark-theme">11</a></li>
+              <li><a href="javascript:void(0)" data-theme="megna-dark" class="megna-dark-theme ">12</a></li>
+            </ul>
+
+          </div>
+        </div>
+      </div>
+      <!-- ============================================================== -->
+      <!-- End Right sidebar -->
+      <!-- ============================================================== -->
+    </div>
+    <!-- ============================================================== -->
+    <!-- End Container fluid  -->
+    <!-- ============================================================== -->
+    <!-- ============================================================== -->
+    <!-- footer -->
+    <!-- ============================================================== -->
+    <!-- <footer class="footer"> © 2024 Adminwrap by </footer> -->
+    <!-- ============================================================== -->
+    <!-- End footer -->
+    <!-- ============================================================== -->
+  </div>
+  <!-- ============================================================== -->
+  <!-- End Page wrapper  -->
+  <!-- ============================================================== -->
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="profileModalLabel">Información del Usuario</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <div class="d-flex align-items-center">
+                  <app-image-lazy tipo="mi-foto" alt="Foto de perfil" imageClass="rounded-circle" objectFit="cover" class="profile-modal-image" />
+                  <div>
+                      <h6>{{ usuario()?.nombres }} {{ usuario()?.apellidos }}</h6>
+                      <div class="d-flex flex-column mt-2 mb-2">
+                        <span class="text-muted mt-1 mb-1">Correo: {{ usuario()?.email || 'No disponible' }}</span>
+                        <span class="text-muted">Celular: {{ usuario()?.telefono || 'No disponible' }}</span>
+                      </div>
+                  <a href="/perfil/perfil-usuario" class="btn dashboard-primary-button btn-sm">Ir a mi perfil <i class="fa fa-user ml-4"></i></a>
+                  </div>
+              </div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn dashboard-primary-button" data-bs-dismiss="modal" (click)="salir()">Cerrar Sesión</button>
+              <button type="button" class="btn btn-danger close-button" data-bs-dismiss="modal">Cerrar</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- End Wrapper -->
+<!-- ============================================================== -->
+<!-- ============================================================== -->
+<!-- All Jquery -->
+<!-- ============================================================== -->

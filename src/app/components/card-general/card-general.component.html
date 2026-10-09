@@ -1,0 +1,23 @@
+<section class="card app-card-general">
+  @if (showHeader()) {
+    <header class="card-header app-card-general__header" [class]="'card-header app-card-general__header ' + headerClass()">
+      <div class="app-card-general__header-content">
+        @if (resolvedTitle()) { <h5 class="app-card-general__title">{{ resolvedTitle() }}</h5> }
+        <ng-content select="[card-header]"></ng-content>
+      </div>
+      <div class="app-card-general__header-actions"><ng-content select="[card-header-actions]"></ng-content></div>
+    </header>
+  }
+
+  <div class="card-body app-card-general__body" [class]="'card-body app-card-general__body ' + bodyClass()">
+    <ng-content></ng-content>
+  </div>
+
+  @if (showFooter()) {
+    <footer class="card-footer app-card-general__footer" [class]="'card-footer app-card-general__footer ' + footerClass()">
+      <div class="app-card-general__footer-content">
+        <ng-content select="[card-footer]"></ng-content>
+      </div>
+    </footer>
+  }
+</section>

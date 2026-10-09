@@ -1,0 +1,258 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  color: #12213a;
+}
+
+.login-stage {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #0759c5 url("/assets/images/fondo_login/fondo_login.png") center / cover no-repeat;
+}
+
+.login-stage::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  background: radial-gradient(circle at 51% 47%, rgba(255, 255, 255, 0.2), transparent 30%);
+  pointer-events: none;
+}
+
+.login-header {
+  position: absolute;
+  z-index: 3;
+  top: clamp(20px, 4vh, 54px);
+  left: 50%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: min(92vw, 1200px);
+  transform: translateX(-50%);
+  color: #050b14;
+  text-align: center;
+  text-shadow: 0 2px 3px rgba(255, 255, 255, 0.5);
+}
+
+.fap-logo {
+  position: absolute;
+  left: clamp(-340px, calc((1200px - 100vw) / 2 + 35px), 0px);
+  top: -14px;
+  width: clamp(85px, 8vw, 140px);
+  height: clamp(85px, 8vw, 140px);
+  object-fit: contain;
+}
+
+.login-title h1,
+.login-title strong,
+.login-title p {
+  margin: 0;
+}
+
+.login-title h1,
+.login-title strong {
+  display: block;
+  font-weight: 900;
+  line-height: 1.08;
+}
+
+.login-title h1 { font-size: clamp(1.55rem, 2.6vw, 3rem); }
+.login-title strong { font-size: clamp(1.45rem, 2.5vw, 2.85rem); }
+.login-title p { margin-top: 4px; font-size: clamp(1rem, 1.55vw, 1.65rem); font-weight: 600; }
+
+.login-card {
+  position: absolute;
+  z-index: 4;
+  top: 51%;
+  left: 50%;
+  width: min(92vw, 510px);
+  padding: clamp(28px, 3vw, 48px);
+  transform: translate(-50%, -43%);
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 28px 70px rgba(0, 26, 88, 0.26);
+  backdrop-filter: blur(12px);
+}
+
+.login-form { display: flex; flex-direction: column; gap: 14px; }
+.login-form h2 { margin: 0 0 8px; color: #0b4f9e; text-align: center; font-weight: 800; }
+.login-field {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 58px;
+  padding: 0 16px;
+  border: 2px solid #c7ced8;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(10, 42, 85, .05);
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.login-field:focus-within {
+  border-color: #126ab6;
+  box-shadow: 0 0 0 4px rgba(18, 106, 182, .12);
+}
+
+.login-field input {
+  flex: 1;
+  min-width: 0;
+  height: 54px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: #17233a;
+  background: transparent;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+
+.login-field__icon { flex: 0 0 auto; color: #1b2b46; font-size: 1.35rem; }
+
+.login-title > h1{
+  color: white;
+  text-shadow: 2px 2px 4px black;
+}
+.login-title > p{
+  text-shadow: 1px 2px 4px white;
+}
+
+.label-login{
+  padding-left: 5px;
+  font-weight: 500;
+}
+
+.input-login::placeholder{
+  color: #b3c4d6;
+  opacity: 1;
+  font-weight: 200;
+  font-size: 13px;
+}
+
+.password-toggle {
+  display: grid;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  place-items: center;
+  color: #1b2b46;
+  background: transparent;
+}
+
+.password-toggle:hover,
+.password-toggle:focus-visible { color: #075aa9; background: #eaf3fc; outline: 0; }
+.password-toggle .fa-solid { display: block; font-size: 1.2rem; }
+
+.forgot-link {
+  align-self: flex-end;
+  margin-top: -4px;
+  padding: 0;
+  border: 0;
+  color: #083e6d;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.forgot-link:hover {
+  //text-decoration: underline;
+  text-shadow: 0px 0px 1px rgb(93, 100, 199);
+}
+
+.login-form .row-default .forgot-link {
+  align-self: auto;
+  margin-top: 0;
+}
+
+.login-submit {
+  min-height: 58px;
+  margin-top: 4px;
+  border: 2px solid #0a5aa9;
+  border-radius: 3px;
+  color: #07509a;
+  background: #fff;
+  font-size: 1.08rem;
+  font-weight: 800;
+  transition: color .2s ease, background .2s ease, transform .2s ease;
+}
+
+.login-submit:hover:not(:disabled) { color: #fff; background: #075bb4; transform: translateY(-1px); }
+.login-submit:disabled { cursor: not-allowed; opacity: .48; }
+
+.login-primary-button {
+  background-color: var(--palette-primary-fap);
+  border-color: var(--palette-primary-fap);
+  color: var(--palette-white);
+}
+
+.login-primary-button:hover,
+.login-primary-button:focus {
+  background-color: var(--palette-primary-fap-hover);
+  border-color: var(--palette-primary-fap-hover);
+  color: var(--palette-white);
+}
+
+.module { position: absolute; z-index: 2; width: clamp(125px, 11vw, 205px); filter: drop-shadow(0 12px 16px rgba(0, 23, 85, .34)); }
+.module img { display: block; width: 100%; height: auto; }
+.module--pacientes { top: 5%; left: 18%; }
+.module--citas { top: 18%; left: 10%; }
+.module--historia { top: 34%; left: 1%; }
+.module--analitica { bottom: 20%; left: 9%; }
+.module--admision { top: 5%; right: 16%; }
+.module--hospitalizacion { top: 18%; right: 7%; }
+.module--emergencia { top: 34%; right: 0; }
+.module--farmacia { bottom: 21%; right: 6%; }
+.module--finanzas { bottom: 7%; right: 15%; }
+
+.values {
+  position: absolute;
+  z-index: 3;
+  bottom: clamp(24px, 5vh, 54px);
+  left: 50%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(12px, 1.8vw, 28px);
+  transform: translateX(-50%);
+}
+
+.values img {
+  display: block;
+  width: clamp(135px, 10vw, 180px);
+  height: auto;
+}
+
+.login-modal .modal-content { border: 0; box-shadow: 0 28px 80px rgba(0, 25, 75, .25); }
+.otp-group { display: flex; justify-content: center; gap: 8px; }
+
+@media (max-width: 1199.98px) {
+  .fap-logo { left: 0; }
+  .module { width: clamp(105px, 14vw, 155px); opacity: .92; }
+  .module--pacientes, .module--admision { top: 14%; }
+  .module--citas, .module--hospitalizacion { top: 31%; }
+  .module--historia, .module--emergencia { top: 51%; }
+  .module--analitica, .module--farmacia { bottom: 8%; }
+  .module--finanzas { display: none; }
+  .values { bottom: 3%; }
+  .values img { width: clamp(100px, 12vw, 135px); }
+}
+
+@media (max-width: 767.98px) {
+  .login-stage { overflow-y: auto; background-position: 55% center; }
+  .login-stage::before { position: absolute; inset: 0; z-index: -1; content: ""; background: rgba(0, 48, 133, .28); }
+  .login-header { position: relative; top: auto; left: auto; flex-direction: column; align-items: center; width: 100%; padding: 18px 14px 0; transform: none; }
+  .fap-logo { position: static; width: 76px; height: 76px; margin-bottom: 5px; }
+  .login-title h1 { font-size: 1.25rem; }
+  .login-title strong { font-size: 1.2rem; }
+  .login-title p { font-size: .86rem; }
+  .login-card { position: relative; top: auto; left: auto; width: calc(100% - 28px); margin: 24px auto 36px; padding: 25px 20px; transform: none; }
+  .module, .values { display: none; }
+}

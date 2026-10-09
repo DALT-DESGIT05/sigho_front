@@ -1,0 +1,15 @@
+﻿@if (resumen(); as resumen) {
+  <div class="app-pagination__summary">
+    <span>Mostrando {{ resumen.from }} - {{ resumen.to }} de {{ resumen.total }} registros</span>
+    <span>Pagina {{ resumen.currentPage }} de {{ resumen.lastPage }} · {{ resumen.perPage }} por pagina</span>
+  </div>
+}
+<nav [class]="'app-pagination app-pagination--' + size()" aria-label="Paginacion">
+  <div class="app-pagination__group">
+    @for (item of items(); track $index) {
+      <button type="button" class="app-pagination__item" [class.is-active]="item.active" [class.is-disabled]="!item.url" [disabled]="!item.url" [attr.aria-current]="item.active ? 'page' : null" (click)="changePage(item)">
+        {{ item.text }}
+      </button>
+    }
+  </div>
+</nav>

@@ -1,0 +1,24 @@
+﻿@if (estaVisible()) {
+  <section
+    class="app-alert"
+    [class]="clases()"
+    role="alert" aria-live="polite">
+
+    <i class="app-alert__icon" [class]="iconoResuelto()" aria-hidden="true"></i>
+
+    <div class="app-alert__content">{{ texto() }}</div>
+    @if (dismissible()) {
+      <app-button
+        class="app-alert__close"
+        icon="fa-solid fa-xmark"
+        [iconOnly]="true"
+        color="secondary"
+        hoverColor="danger"
+        variant="outline"
+        [size]="'xs'"
+        ariaLabel="Cerrar alerta"
+        (clicked)="cerrar()">
+      </app-button>
+    }
+  </section>
+}

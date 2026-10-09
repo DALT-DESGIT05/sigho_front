@@ -1,0 +1,18 @@
+:host { container-type: inline-size; display: block; height: fit-content !important; max-height: none !important; min-height: 0 !important; min-width: 0; }
+
+.app-summary-card-group {
+  align-content: flex-start;
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: .35rem !important;
+  height: fit-content !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  min-width: 0;
+  row-gap: .35rem !important;
+}
+
+:host ::ng-deep app-summary-card { align-self: flex-start; flex: 1 0 min(100%, var(--app-summary-card-group-min-width)); max-width: 100%; min-width: 0; }
+:host ::ng-deep app-summary-card.app-summary-card--wide { flex-basis: min(100%, calc(var(--app-summary-card-group-min-width) * 2 + .5rem)); }
+

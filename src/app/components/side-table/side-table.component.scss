@@ -1,0 +1,56 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.side-table {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--palette-primary-fap-150);
+  border-radius: .75rem;
+  box-shadow: none;
+}
+
+.side-table__header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .85rem 1rem;
+  border: 0;
+  border-left: .3rem solid var(--palette-primary-fap);
+  background: linear-gradient(90deg, var(--palette-primary-fap), var(--palette-primary-fap-text));
+  color: var(--palette-white);
+}
+
+.side-table__header h5 {
+  color: var(--palette-white) !important;
+}
+
+
+.side-table__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+  background-color: var(--palette-white);
+}
+
+.side-table__body app-table {
+  display: block;
+  height: 100%;
+}
+
+:host ::ng-deep .side-table .app-table thead th {
+  border-color: var(--palette-primary-fap-text);
+  background-color: var(--palette-primary-fap);
+  color: var(--palette-white);
+}
+
+:host ::ng-deep .side-table .table-container {
+  height: 100% !important;
+}
+

@@ -1,0 +1,114 @@
+:host { display: contents; }
+
+.document-viewer-book__header {
+  display: flex;
+  min-width: 0;
+}
+
+.document-viewer-book__file-name {
+  display: block;
+  max-width: min(58vw, 48rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-viewer-book {
+  background: linear-gradient(135deg, var(--palette-primary-fap-800), var(--palette-primary-fap-900));
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 8.5rem);
+  min-height: 18rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.document-viewer-book__state {
+  align-items: center;
+  color: var(--palette-white);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: .75rem;
+  justify-content: center;
+  padding: 1.5rem;
+  position: absolute;
+  inset: 0;
+  text-align: center;
+  z-index: 1;
+}
+
+.document-viewer-book__state > i { font-size: 2rem; }
+.document-viewer-book__state > p { margin: 0; max-width: 30rem; }
+
+.document-viewer-book__book {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  min-height: 0;
+  overflow: auto;
+  padding: clamp(.75rem, 2vw, 2rem);
+}
+
+.document-viewer-book__book--hidden { visibility: hidden; }
+
+:host ::ng-deep .document-viewer-book__flip-root {
+  margin: auto;
+  max-height: 100%;
+}
+
+:host ::ng-deep .document-viewer-book__page {
+  background: var(--palette-white);
+  box-shadow: inset 0 0 .2rem rgb(0 0 0 / 12%);
+  overflow: hidden;
+  position: relative;
+}
+
+:host ::ng-deep .document-viewer-book__page canvas {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+:host ::ng-deep .document-viewer-book__page-number {
+  background: rgb(255 255 255 / 86%);
+  bottom: 0;
+  color: var(--palette-gray-text);
+  font-size: .75rem;
+  left: 0;
+  padding: .2rem .5rem;
+  position: absolute;
+  right: 0;
+  text-align: center;
+}
+
+.document-viewer-book__book--protected,
+.document-viewer-book__book--protected * {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.document-viewer-book__navigation {
+  align-items: center;
+  color: var(--palette-white);
+  display: flex;
+  gap: .75rem;
+  justify-content: center;
+  padding: .75rem;
+}
+
+@media (max-width: 575.98px) {
+  .document-viewer-book { height: calc(100dvh - 8rem); }
+  .document-viewer-book__file-name { max-width: 48vw; }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .document-viewer-book { height: calc(100dvh - 8.25rem); }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .document-viewer-book { height: calc(100dvh - 8.5rem); }
+}
+

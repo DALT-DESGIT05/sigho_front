@@ -1,0 +1,7 @@
+interface:
+  display_name: "Angular Signal Forms"
+  short_description: "Build all project forms with Angular Signal Forms"
+  default_prompt: "Use $signal-forms to create an Angular 22 form with validation and tests."
+
+policy:
+  allow_implicit_invocation: true

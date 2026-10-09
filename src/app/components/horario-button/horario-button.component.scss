@@ -1,0 +1,44 @@
+:host { display: block; }
+
+.app-horario-button {
+  align-items: center;
+  border: 1px solid transparent;
+  color: var(--palette-white);
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  justify-content: center;
+  line-height: 1.1;
+  min-height: 3.25rem;
+  width: 100%;
+}
+
+.app-horario-button--disponible {
+  background-color: var(--palette-success);
+  border-color: var(--palette-success);
+}
+
+.app-horario-button--disponible:hover:not(:disabled) {
+  background-color: var(--palette-success-700);
+  border-color: var(--palette-success-700);
+}
+
+.app-horario-button--ocupado {
+  background-color: var(--palette-danger);
+  border-color: var(--palette-danger);
+}
+
+.app-horario-button--ocupado:disabled {
+  background-color: var(--palette-danger);
+  border-color: var(--palette-danger);
+  color: var(--palette-white);
+  cursor: not-allowed;
+  opacity: .72;
+}
+
+.app-horario-button img {
+  display: block;
+  height: 16px;
+  width: 16px;
+}
+

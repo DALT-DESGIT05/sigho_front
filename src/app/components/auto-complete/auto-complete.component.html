@@ -1,0 +1,29 @@
+<div class="auto-complete" [class.is-disabled]="disabled()" [class.has-floating-label]="useFloatingLabel()" [class.size-xs]="size() === 'xs'" [class.size-sm]="size() === 'sm'" [class.size-lg]="size() === 'lg'">
+  @if (showExternalLabel()) { <app-label class="text-truncate" [texto]="visibleLabel()" [title]="label_title()" [forId]="id()" [required]="required()" [color]="color()" [size]="size() === 'xs' ? 'sm' : 'md'" (click)="on_label_click($event)"></app-label> }
+  @if (useFloatingLabel()) { <label class="auto-complete__floating-label" [for]="id()">{{ visibleLabel() }}</label> }
+  <div class="auto-complete__control" [class.is-open]="isOpen()" [class.has-value]="hasSelection()">
+    <input #input_control type="text" class="auto-complete__input" [id]="id() || null" [formControl]="searchControl" [placeholder]="placeholder()" autocomplete="off"
+      role="combobox" [attr.aria-expanded]="isOpen()" aria-controls="auto-complete-options" (focus)="open()" (blur)="close()" (keydown)="onKeydown($event)" />
+    @if (clearable() && searchText() && !disabled()) {
+      <button type="button" class="auto-complete__clear" aria-label="Limpiar selección" (mousedown)="clear($event)">&times;</button>
+    }
+    @if (isLoading()) {
+      <span class="spinner-border spinner-border-sm auto-complete__loading" aria-label="Buscando"></span>
+    } @else {
+      <button type="button" class="auto-complete__arrow" [attr.aria-label]="isOpen() ? 'Cerrar opciones' : 'Mostrar opciones'" [attr.aria-expanded]="isOpen()" (mousedown)="toggle($event)">▾</button>
+    }
+  </div>
+  @if (isOpen()) {
+    <div id="auto-complete-options" class="auto-complete__menu" role="listbox">
+      @if (isLoading()) { <div class="auto-complete__message">{{ loadingMessage() }}</div> }
+      @if (!isLoading() && hasError()) { <div class="auto-complete__message auto-complete__message--error">No fue posible obtener los resultados.</div> }
+      @if (!isLoading() && !hasError()) {
+        @for (option of options(); track trackByOption($index, option); let index = $index) {
+          <button type="button" class="auto-complete__option" [class.is-active]="index === activeIndex()" [class.is-selected]="option === selectedOption()"
+            role="option" [attr.aria-selected]="option === selectedOption()" (mousedown)="select(option)">{{ getLabel(option) }}</button>
+        }
+        @if (!options().length) { <div class="auto-complete__message">{{ emptyStateMessage() }}</div> }
+      }
+    </div>
+  }
+</div>

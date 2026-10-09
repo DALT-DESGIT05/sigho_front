@@ -1,0 +1,105 @@
+<app-modal
+  title="Vista previa del documento"
+  icon="fa-solid fa-file-lines"
+  [size]="size()"
+  [showFooter]="true"
+  [scrollable]="false"
+  (closed)="al_cerrar_modal()"
+>
+  <div modal-header class="document-viewer__header">
+    <span class="document-viewer__file-name" [title]="archivo_nombre()">
+      {{ archivo_nombre() }}
+    </span>
+  </div>
+
+  <section class="document-viewer" aria-live="polite">
+    @if (cargando()) {
+      <div class="document-viewer__state">
+        <span class="spinner-border" aria-hidden="true"></span>
+        <span>Preparando documento, espere un momento...</span>
+      </div>
+    } @else if (mensaje_error()) {
+      <div class="document-viewer__state">
+        <i class="fa-solid fa-file-circle-exclamation" aria-hidden="true"></i>
+        <p>{{ mensaje_error() }}</p>
+      </div>
+    } @else if (es_pdf() && url_pdf()) {
+      <iframe
+        class="document-viewer__pdf"
+        [src]="url_pdf()"
+        title="Vista previa del PDF"
+      ></iframe>
+    } @else if (es_excel()) {
+      <div class="document-viewer__excel">
+        @if (hojas_excel().length > 1) {
+          <nav class="document-viewer__sheets" aria-label="Hojas de cálculo">
+            @for (hoja of hojas_excel(); track hoja) {
+              <button
+                type="button"
+                class="btn btn-sm"
+                [class.document-viewer__sheet--active]="hoja === hoja_excel_activa()"
+                [class.btn-outline-secondary]="hoja !== hoja_excel_activa()"
+                (click)="seleccionar_hoja_excel(hoja)"
+              >
+                {{ hoja }}
+              </button>
+            }
+          </nav>
+        }
+
+        @if (filas_excel().length > 0) {
+          <div class="document-viewer__table-wrap">
+            <table class="table table-sm table-bordered mb-0">
+              <tbody>
+                @for (fila of filas_excel(); track $index; let indice_fila = $index) {
+                  <tr>
+                    @for (celda of fila; track $index) {
+                      @if (indice_fila === 0) {
+                        <th scope="col">{{ celda }}</th>
+                      } @else {
+                        <td>{{ celda }}</td>
+                      }
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="document-viewer__state">La hoja no contiene datos para mostrar.</div>
+        }
+      </div>
+    } @else if (es_word()) {
+      <article class="document-viewer__word" [innerHTML]="contenido_word()"></article>
+    } @else if (es_powerpoint() && contenido_powerpoint()) {
+      <div
+        #powerpoint_container
+        class="document-viewer__powerpoint"
+        aria-label="Vista previa de la presentación"
+      ></div>
+    } @else if (es_imagen() && url_imagen()) {
+      <div
+        class="document-viewer__image-wrap"
+        [class.document-viewer__image-wrap--protected]="restringir_interaccion()"
+        (contextmenu)="bloquear_menu_contextual($event)"
+      >
+        <img
+          class="document-viewer__image"
+          [src]="url_imagen()"
+          [attr.draggable]="restringir_interaccion() ? 'false' : null"
+          [alt]="archivo_nombre()"
+        />
+      </div>
+    }
+  </section>
+
+  <div modal-footer>
+    @if (puede_imprimir()) {
+      <app-button action="print" size="sm" (clicked)="imprimir()" />
+    }
+    @if (permitir_descarga()) {
+      <app-button action="download" size="sm" (clicked)="descargar()" />
+    }
+    <app-button action="close" size="sm" (clicked)="cerrar()" />
+  </div>
+</app-modal>

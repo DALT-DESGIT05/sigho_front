@@ -1,0 +1,22 @@
+:host { display: inline-block; }
+
+.app-check { margin-bottom: 0; }
+.app-check--sm { font-size: var(--app-size-sm-font-size, .75rem); }
+.app-check--lg { font-size: var(--app-size-lg-font-size, 1rem); }
+.app-check--xs { font-size: var(--app-size-xs-font-size, .6rem); }
+.app-check--xs .form-check-label { font-size: var(--app-size-xs-font-size, .6rem); line-height: .65rem; }
+.app-check--xs .form-check-input { height: .65rem; margin-top: .18rem; width: .65rem; }
+.app-check--sm .form-check-input { height: .85rem; margin-top: .2rem; width: .85rem; }
+.app-check--lg .form-check-input { height: 1.2rem; margin-top: .15rem; width: 1.2rem; }
+
+.app-check--primary .form-check-input:checked { background-color: var(--palette-primary); border-color: var(--palette-primary); }
+.app-check--danger .form-check-input:checked { background-color: var(--palette-danger); border-color: var(--palette-danger); }
+.app-check--success .form-check-input:checked { background-color: var(--palette-success); border-color: var(--palette-success); }
+.app-check--warning .form-check-input:checked { background-color: var(--palette-warning); border-color: var(--palette-warning); }
+.app-check--secondary .form-check-input:checked { background-color: var(--palette-secondary); border-color: var(--palette-secondary); }
+.app-check--info .form-check-input:checked { background-color: var(--palette-info); border-color: var(--palette-info); }
+.app-check--purple .form-check-input:checked { background-color: var(--palette-purple); border-color: var(--palette-purple); }
+.app-check--fuchsia .form-check-input:checked { background-color: var(--palette-fuchsia); border-color: var(--palette-fuchsia); }
+.app-check--md { font-size: var(--app-size-md-font-size, .875rem); }
+.app-check--md .form-check-input { height: 1rem; margin-top: .18rem; width: 1rem; }
+

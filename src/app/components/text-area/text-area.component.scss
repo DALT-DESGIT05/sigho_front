@@ -1,0 +1,13 @@
+:host { display: block; }
+:host ::ng-deep app-label.text-truncate .app-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-text-area__control { border-color: var(--palette-gray-300); min-height: 4rem; }.app-text-area__control:focus { border-color: var(--text-area-color); box-shadow: 0 0 0 .16rem var(--palette-primary-100); }.app-text-area__floating-label { color: var(--palette-secondary-700); opacity: .65; }
+.app-text-area--xs .app-text-area__control { font-size: var(--app-size-xs-font-size, .6rem); min-height: 3.2rem; padding: .35rem .45rem; }
+.app-text-area--xs .form-floating > label { font-size: var(--app-size-xs-font-size, .6rem); }
+.app-text-area--sm .app-text-area__control { font-size: var(--app-size-sm-font-size, .75rem); }.app-text-area--lg .app-text-area__control { font-size: var(--app-size-lg-font-size, 1rem); }
+.app-text-area__help, .app-text-area__error { font-size: .72rem; margin-top: .28rem; }.app-text-area__help { color: var(--palette-gray-500); }.app-text-area__error { color: var(--palette-danger); }
+.app-text-area--primary { --text-area-color: var(--palette-primary); }.app-text-area--danger { --text-area-color: var(--palette-danger); }.app-text-area--success { --text-area-color: var(--palette-success); }.app-text-area--warning { --text-area-color: var(--palette-warning); }.app-text-area--secondary { --text-area-color: var(--palette-secondary); }.app-text-area--info { --text-area-color: var(--palette-info); }.app-text-area--purple { --text-area-color: var(--palette-purple); }.app-text-area--fuchsia { --text-area-color: var(--palette-fuchsia); }
+.app-text-area--xs .app-text-area__control { min-height: calc(var(--app-size-xs-min-height, 25px) + 26px); padding: var(--app-size-xs-padding, .35rem .45rem); }
+.app-text-area--sm .app-text-area__control { min-height: calc(var(--app-size-sm-min-height, 30px) + 26px); padding: var(--app-size-sm-padding, .25rem .55rem); }
+.app-text-area--md .app-text-area__control { font-size: var(--app-size-md-font-size, .875rem); min-height: calc(var(--app-size-md-min-height, 38px) + 26px); padding: var(--app-size-md-padding, .375rem .75rem); }
+.app-text-area--lg .app-text-area__control { min-height: calc(var(--app-size-lg-min-height, 44px) + 26px); padding: var(--app-size-lg-padding, .55rem 1rem); }
+

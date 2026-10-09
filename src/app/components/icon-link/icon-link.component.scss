@@ -1,0 +1,23 @@
+:host { display: inline-block; }
+.app-icon-link { align-items: center; display: inline-flex; font-weight: 600; gap: .35rem; max-width: 100%; min-width: 0; text-decoration: none; transition: color .15s ease; }
+button.app-icon-link { background: transparent; border: 0; cursor: pointer; padding: 0; }
+.app-icon-link__icon { line-height: 1; transition: transform .2s ease; }
+.app-icon-link__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-icon-link__projected-icon:empty { display: none; }
+.app-icon-link:hover .app-icon-link__icon { transform: var(--app-icon-link-transform, none); }
+.app-icon-link--none { --app-icon-link-transform: none; }
+.app-icon-link--up { --app-icon-link-transform: translate3d(0, -.125rem, 0); }
+.app-icon-link--down { --app-icon-link-transform: translate3d(0, .125rem, 0); }
+.app-icon-link--left { --app-icon-link-transform: translate3d(-.125rem, 0, 0); }
+.app-icon-link--right { --app-icon-link-transform: translate3d(.125rem, 0, 0); }
+.app-icon-link--scale { --app-icon-link-transform: scale(1.16); }
+.app-icon-link--rotate { --app-icon-link-transform: rotate(12deg); }
+.app-icon-link--xs { font-size: .6rem; gap: .2rem; }
+.app-icon-link--sm { font-size: .75rem; }
+.app-icon-link--md { font-size: .875rem; }
+.app-icon-link--lg { font-size: 1rem; }
+.app-icon-link[aria-disabled='true'] { cursor: not-allowed; opacity: .55; pointer-events: none; }
+button.app-icon-link:disabled { cursor: not-allowed; opacity: .55; }
+.app-icon-link--primary { color: var(--palette-primary-fap-900); }.app-icon-link--danger { color: var(--palette-danger-text); }.app-icon-link--success { color: var(--palette-success-text); }.app-icon-link--warning { color: var(--palette-warning-text); }.app-icon-link--secondary { color: var(--palette-secondary-text); }.app-icon-link--info { color: var(--palette-info-text); }.app-icon-link--purple { color: var(--palette-purple-text); }.app-icon-link--fuchsia { color: var(--palette-fuchsia-text); }
+.app-icon-link--primary:hover { color: var(--palette-primary-fap-hover); }.app-icon-link--danger:hover { color: var(--palette-danger-700); }.app-icon-link--success:hover { color: var(--palette-success-700); }.app-icon-link--warning:hover { color: var(--palette-warning-700); }.app-icon-link--secondary:hover { color: var(--palette-secondary-700); }.app-icon-link--info:hover { color: var(--palette-info-700); }.app-icon-link--purple:hover { color: var(--palette-purple-700); }.app-icon-link--fuchsia:hover { color: var(--palette-fuchsia-700); }
+

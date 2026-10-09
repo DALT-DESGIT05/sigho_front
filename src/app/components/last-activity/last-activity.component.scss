@@ -1,0 +1,20 @@
+:host {
+  align-items: center;
+  display: inline-flex;
+}
+
+.last-activity {
+  align-items: center;
+  color: var(--palette-secondary-text);
+  display: inline-flex;
+  font-size: .72rem;
+  gap: .35rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.last-activity i {
+  color: var(--palette-primary-fap-text);
+  font-size: .76rem;
+}
+

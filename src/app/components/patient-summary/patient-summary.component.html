@@ -1,0 +1,79 @@
+<section class="patient-summary" aria-label="Información del paciente">
+  <div class="patient-summary__identity">
+    <div class="patient-summary__avatar" aria-hidden="true">
+      <i class="fa-solid fa-user"></i>
+    </div>
+    <div class="patient-summary__name">
+      <span class="patient-summary__eyebrow">Paciente</span>
+      <strong>{{ patientName }}</strong>
+      @if (patient.historia) {
+        <span class="patient-summary__history">HC {{ patient.historia }}</span>
+      }
+    </div>
+  </div>
+
+  <dl class="patient-summary__grid">
+    @if (showDemographics) {
+    <div class="patient-summary__item patient-summary__item--compact">
+      <dt><i class="fa-regular fa-calendar" aria-hidden="true"></i> Edad</dt>
+      <dd>{{ age }}</dd>
+    </div>
+    <div class="patient-summary__item patient-summary__item--compact">
+      <dt><i class="fa-solid fa-venus-mars" aria-hidden="true"></i> Sexo</dt>
+      <dd>{{ value(patient.sexo) }}</dd>
+    </div>
+    <div class="patient-summary__item patient-summary__item--compact">
+      <dt><i class="fa-solid fa-droplet" aria-hidden="true"></i> Grupo sanguíneo</dt>
+      <dd>{{ bloodGroup }}</dd>
+    </div>
+    }
+    @if (showStatus) {
+      <div class="patient-summary__item patient-summary__item--compact">
+        <dt><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Estado</dt>
+        <dd>{{ value(patient.estado) }}</dd>
+      </div>
+    }
+    @if (showPaymentMethod) {
+      <div class="patient-summary__item patient-summary__item--compact">
+        <dt><i class="fa-regular fa-credit-card" aria-hidden="true"></i> Forma de pago</dt>
+        <dd>{{ value(patient.forma_pago) }}</dd>
+      </div>
+    }
+    @if (showDni) {
+      <div class="patient-summary__item patient-summary__item--compact">
+        <dt><i class="fa-regular fa-address-card" aria-hidden="true"></i> DNI</dt>
+        <dd>{{ value(patient.dni) }}</dd>
+      </div>
+    }
+    @if (showPhone) {
+      <div class="patient-summary__item patient-summary__item--compact">
+        <dt><i class="fa-solid fa-phone" aria-hidden="true"></i> Celular</dt>
+        <dd class="patient-summary__value-with-action">
+          <span>{{ phone }}</span>
+          @if (allowPhoneUpdate) {
+            <button type="button" class="patient-summary__action" (click)="phoneUpdate.emit()">
+              <i class="fa-solid fa-pen" aria-hidden="true"></i> Actualizar
+            </button>
+          }
+        </dd>
+      </div>
+    }
+    @if (showEmail) {
+      <div class="patient-summary__item patient-summary__item--wide">
+        <dt><i class="fa-regular fa-envelope" aria-hidden="true"></i> Correo electrónico</dt>
+        <dd class="patient-summary__value-with-action">
+          <span>{{ value(patient.email) }}</span>
+          @if (allowEmailUpdate) {
+            <button type="button" class="patient-summary__action" (click)="emailUpdate.emit()">
+              <i class="fa-solid fa-pen" aria-hidden="true"></i> Actualizar
+            </button>
+          }
+        </dd>
+      </div>
+    }
+    <div class="patient-summary__item patient-summary__item--responsible">
+      <dt><i class="fa-regular fa-id-card" aria-hidden="true"></i> Titular responsable</dt>
+      <dd>{{ responsibleName }}</dd>
+    </div>
+  </dl>
+</section>

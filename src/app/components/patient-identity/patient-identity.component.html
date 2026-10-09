@@ -1,0 +1,31 @@
+<div class="app-patient-identity">
+  <div class="app-patient-identity__avatar">
+    @if (fotoNoDisponible()) {
+      <i class="fa-solid fa-user" aria-hidden="true"></i>
+    } @else {
+      <app-image-lazy
+        [tipo]="tipoImagen()"
+        [identificador]="identificador()"
+        [alt]="fotoAlt()"
+        imageClass="app-patient-identity__image"
+        objectFit="contain"
+        (imageError)="marcarFotoNoDisponible()">
+      </app-image-lazy>
+    }
+  </div>
+
+  <div class="app-patient-identity__details">
+    <span class="app-patient-identity__label">{{ etiqueta() }}</span>
+    <div class="app-patient-identity__data">
+      <strong class="app-patient-identity__name" [title]="nombre()">{{ nombre() }}</strong>
+      <span class="app-patient-identity__identifiers">
+      @if (historia() !== null && historia() !== '') {
+        <span class="app-patient-identity__history" [title]="'Historia Clinica ' + historia()">HC {{ historia() }}</span>
+      }
+      @if (codigoAfiliado()) {
+        <span class="app-patient-identity__history" [title]="'Código de afiliado ' + codigoAfiliado()">CA {{ codigoAfiliado() }}</span>
+      }
+      </span>
+    </div>
+  </div>
+</div>

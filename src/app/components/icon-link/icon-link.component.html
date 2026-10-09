@@ -1,0 +1,26 @@
+@if (asButton()) {
+  <button [class]="linkClasses()" [type]="buttonType()" [disabled]="disabled()" [title]="resolvedTitle()" [attr.aria-label]="ariaLabel() || resolvedText() || null" (click)="onClick($event)">
+    @if (iconPosition() === 'start') {
+      @if (icon()) { <i class="app-icon-link__icon" [class]="'app-icon-link__icon ' + icon()" aria-hidden="true"></i> }
+      <span class="app-icon-link__icon app-icon-link__projected-icon"><ng-content select="[iconStart]"></ng-content></span>
+    }
+    @if (resolvedText()) { <span class="app-icon-link__text">{{ resolvedText() }}</span> }
+    @if (iconPosition() === 'end') {
+      <span class="app-icon-link__icon app-icon-link__projected-icon"><ng-content select="[iconEnd]"></ng-content></span>
+      @if (icon()) { <i class="app-icon-link__icon" [class]="'app-icon-link__icon ' + icon()" aria-hidden="true"></i> }
+    }
+  </button>
+} @else {
+<a [class]="linkClasses()" [href]="disabled() ? null : href()" [target]="target()" [attr.rel]="resolvedRel()" [title]="resolvedTitle()"
+  [attr.aria-label]="ariaLabel() || resolvedText() || null" [attr.aria-disabled]="disabled() || null" [attr.tabindex]="disabled() ? -1 : null" (click)="onClick($event)">
+  @if (iconPosition() === 'start') {
+    @if (icon()) { <i class="app-icon-link__icon" [class]="'app-icon-link__icon ' + icon()" aria-hidden="true"></i> }
+    <span class="app-icon-link__icon app-icon-link__projected-icon"><ng-content select="[iconStart]"></ng-content></span>
+  }
+  @if (resolvedText()) { <span class="app-icon-link__text">{{ resolvedText() }}</span> }
+  @if (iconPosition() === 'end') {
+    <span class="app-icon-link__icon app-icon-link__projected-icon"><ng-content select="[iconEnd]"></ng-content></span>
+    @if (icon()) { <i class="app-icon-link__icon" [class]="'app-icon-link__icon ' + icon()" aria-hidden="true"></i> }
+  }
+</a>
+}

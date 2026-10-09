@@ -1,0 +1,11 @@
+.type-indicator { display: inline-flex; align-items: center; gap: .375rem; white-space: nowrap; }
+.type-indicator-icon { width: .875rem; text-align: center; flex-shrink: 0; }
+.type-indicator-text { font-weight: 400; color: inherit; }
+.type-indicator-xs { font-size: .6rem; }
+.type-indicator-sm { font-size: .625rem; }
+.type-indicator-md { font-size: .75rem; }
+.type-indicator-lg { font-size: .875rem; }
+.tipo-laboratorio { color: var(--palette-purple); }
+.tipo-imagenes { color: var(--palette-primary); }
+.tipo-procedimiento { color: var(--palette-success); }
+.tipo-otro { color: var(--palette-secondary); }

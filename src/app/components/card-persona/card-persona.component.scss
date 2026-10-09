@@ -1,0 +1,97 @@
+:host {
+  display: block;
+  max-width: 100%;
+}
+
+.card-persona {
+  align-items: center;
+  background: var(--palette-white);
+  border: 1px solid var(--palette-gray-200);
+  border-radius: 0.75rem;
+  box-shadow: 0 0.2rem 0.6rem rgba(16, 24, 40, 0.08);
+  display: flex;
+  gap: 0.85rem;
+  max-width: 100%;
+  padding: 0.85rem;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  width: 100%;
+}
+
+.card-persona:hover {
+  box-shadow: 0 0.65rem 1.35rem rgba(16, 24, 40, 0.14);
+  transform: translateY(-0.2rem);
+}
+
+.card-persona__photo {
+  align-items: center;
+  background: var(--palette-primary-fap-50);
+  border: 1px solid var(--palette-gray-200);
+  border-radius: 50%;
+  color: var(--palette-primary-fap);
+  display: flex;
+  flex: 0 0 76px;
+  height: 76px;
+  justify-content: center;
+  overflow: hidden;
+  width: 76px;
+}
+
+.card-persona__photo app-image-lazy {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.card-persona__photo img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+.card-persona__content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.card-persona__name {
+  color: var(--palette-gray-800);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-persona__document,
+.card-persona__detail {
+  color: var(--palette-gray-500);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  margin-top: 0.2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-persona__detail {
+  color: var(--palette-gray-600);
+  margin-bottom: 0.55rem;
+}
+
+.card-persona__document:not(:has(+ .card-persona__detail)) {
+  margin-bottom: 0.55rem;
+}
+
+@media (max-width: 575.98px) {
+  .card-persona {
+    align-items: stretch;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .card-persona__photo {
+    align-self: center;
+  }
+}

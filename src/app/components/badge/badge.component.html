@@ -1,0 +1,3 @@
+@if (shouldRender()) {
+  <span class="badge app-badge" [ngClass]="clases()" [class.app-badge--xs]="size() === 'xs'" [class.app-badge--sm]="size() === 'sm'" [class.app-badge--md]="size() === 'md'" [class.app-badge--lg]="size() === 'lg'" [title]="title()">{{ texto() }}</span>
+}

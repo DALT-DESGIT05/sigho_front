@@ -1,0 +1,19 @@
+<div
+  class="progress app-progress-bars"
+  [class]="'progress app-progress-bars app-progress-bars--' + color() + ' app-progress-bars--' + size()"
+  [ngClass]="clases()"
+  [style.width]="widthStyle()"
+  role="progressbar"
+  [attr.aria-label]="ariaLabel()"
+  aria-valuemin="0"
+  aria-valuemax="100"
+  [attr.aria-valuenow]="progress()">
+  <div
+    class="progress-bar app-progress-bars__bar"
+    [ngClass]="clasesBarra()"
+    [style.width.%]="progress()">
+    @if (showValue()) {
+      <span>{{ progress() }}%</span>
+    }
+  </div>
+</div>

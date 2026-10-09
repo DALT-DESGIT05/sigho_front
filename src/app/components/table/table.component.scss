@@ -1,0 +1,144 @@
+.table-container {
+  max-width: 100%;
+  overflow: auto;
+  position: relative;
+}
+
+.app-table th,
+.app-table td {
+  vertical-align: middle;
+}
+
+.app-table__loading {
+  padding-block: 1.25rem !important;
+  text-align: center;
+}
+
+.app-table__loading img {
+  height: auto;
+  opacity: .55;
+  width: 5.75rem;
+}
+
+.app-table--xs { --app-table-cell-padding: .3rem .4rem; --app-table-head-padding: .35rem .4rem; --app-table-body-padding: .3rem .4rem; --app-table-header-font-size: .6rem; font-size: .6rem; }
+.app-table--sm { --app-table-cell-padding: .5rem .6rem; --app-table-head-padding: .45rem .55rem; --app-table-body-padding: .4rem .55rem; --app-table-header-font-size: .72rem; font-size: .75rem; }
+.app-table--md { --app-table-cell-padding: .75rem .85rem; --app-table-head-padding: .6rem .65rem; --app-table-body-padding: .55rem .65rem; --app-table-header-font-size: .78rem; font-size: .75rem; }
+.app-table--lg { --app-table-cell-padding: .95rem 1rem; --app-table-head-padding: .8rem .9rem; --app-table-body-padding: .75rem .85rem; --app-table-header-font-size: .88rem; font-size: .875rem; }
+
+.app-table thead th {
+  background-color: var(--palette-primary-50);
+  box-shadow: inset 0 -1px 0 var(--palette-primary-200);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  text-align: center;
+}
+
+.app-table tbody tr {
+  transition: background-color 0.16s ease;
+}
+
+.app-table tbody tr:hover > td {
+  background-color: var(--palette-primary-50) !important;
+}
+
+.app-table tbody tr.table-row-selected > td {
+  background-color: var(--palette-primary-150) !important;
+}
+
+.app-table tbody tr.table-row-selected:hover > td {
+  background-color: var(--palette-primary-200) !important;
+}
+
+/* Referencia temporal de la última fila sobre la que se ejecutó una acción. */
+.app-table tbody tr.table-row-action-highlighted > td,
+.app-table tbody tr.table-row-action-highlighted:hover > td {
+  background-color: var(--palette-fuchsia-150) !important;
+}
+
+/* La selección explícita por check tiene prioridad sobre un resaltado temporal. */
+.app-table tbody tr.table-row-selected.table-row-action-highlighted > td,
+.app-table tbody tr.table-row-selected.table-row-action-highlighted:hover > td {
+  background-color: var(--palette-primary-150) !important;
+}
+
+.table-actions {
+  text-align: center;
+  vertical-align: middle !important;
+  white-space: nowrap;
+}
+
+.table-actions__content {
+  align-items: center;
+  display: flex;
+  gap: 0.35rem;
+  justify-content: center;
+}
+
+.table-actions .btn,
+.table-select-button {
+  border: 1px solid var(--palette-secondary-200);
+  color: var(--palette-secondary-800);
+  transition: background-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+
+.table-actions .btn:hover,
+.table-select-button:hover,
+.table-select-button.is-selected {
+  background-color: var(--palette-secondary) !important;
+  border-color: var(--palette-secondary) !important;
+  color: var(--palette-white) !important;
+  transform: translateY(-1px);
+}
+
+.table-actions .btn-outline-primary {
+  border-color: var(--palette-primary-200);
+  color: var(--palette-primary-800);
+}
+
+.table-actions .btn-outline-primary:hover {
+  background-color: var(--palette-primary) !important;
+  border-color: var(--palette-primary) !important;
+}
+
+.table-actions .btn-outline-danger {
+  border-color: var(--palette-danger-200);
+  color: var(--palette-danger-800);
+}
+
+.table-actions .btn-outline-danger:hover {
+  background-color: var(--palette-danger) !important;
+  border-color: var(--palette-danger) !important;
+}
+
+.table-actions .btn-outline-success {
+  border-color: var(--palette-success-200);
+  color: var(--palette-success-800);
+}
+
+.table-actions .btn-outline-success:hover {
+  background-color: var(--palette-success) !important;
+  border-color: var(--palette-success) !important;
+}
+
+.table-actions .btn-outline-warning {
+  border-color: var(--palette-warning-200);
+  color: var(--palette-warning-800);
+}
+
+.table-actions .btn-outline-warning:hover {
+  background-color: var(--palette-warning) !important;
+  border-color: var(--palette-warning) !important;
+}
+
+.table-selection {
+  text-align: center;
+  width: 2.75rem;
+}
+
+@media (max-width: 575.98px) {
+  .table-actions__content {
+    gap: 0.25rem;
+  }
+}
+

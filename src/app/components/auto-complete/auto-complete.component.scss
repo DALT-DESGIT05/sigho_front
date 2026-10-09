@@ -1,0 +1,51 @@
+:host { display: block; max-width: 100%; min-width: 0; }
+:host ::ng-deep app-label.text-truncate .app-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Evita que Bootstrap agregue padding al host del componente. */
+:host(.form-select-sm), :host(.form-control-sm), :host(.select-sm),
+:host(.form-select-lg), :host(.form-control-lg), :host(.select-lg) {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0;
+  padding: 0 !important;
+}
+
+.auto-complete { font-size: .875rem; max-width: 100%; min-width: 0; position: relative; width: 100%; }
+.auto-complete.has-floating-label .auto-complete__control { min-height: 3.25rem; }
+.auto-complete.has-floating-label .auto-complete__input { padding-top: 1.15rem; }
+.auto-complete__floating-label { color: var(--palette-secondary-700); font-size: .75rem; left: .65rem; line-height: 1; opacity: .65; pointer-events: none; position: absolute; top: .38rem; z-index: 1; }
+.auto-complete__control { align-items: center; background: var(--palette-white); border: 1px solid var(--palette-secondary-200); border-radius: .375rem; display: flex; min-height: 2.45rem; transition: border-color .15s ease, box-shadow .15s ease; }
+.auto-complete__control.is-open, .auto-complete__control:focus-within { border-color: var(--palette-primary); box-shadow: 0 0 0 .16rem var(--palette-primary-100); }
+.auto-complete__input { background: transparent; border: 0; border-radius: .375rem; color: var(--palette-secondary-800); min-width: 0; outline: 0; padding: .4rem .65rem; text-align: left; width: 100%; }
+.auto-complete__input::placeholder { color: var(--palette-secondary-700); opacity: 1; }
+.auto-complete__clear { background: transparent; border: 0; color: var(--palette-secondary-700); cursor: pointer; font-size: 1.25rem; line-height: 1; padding: 0 .35rem; }
+.auto-complete__clear:hover { color: var(--palette-danger-text); }
+.auto-complete__arrow { background: transparent; border: 0; color: var(--palette-secondary-700); cursor: pointer; padding: 0 .65rem 0 .3rem; }
+.auto-complete__arrow:focus-visible { border-radius: .25rem; outline: 2px solid var(--palette-primary); outline-offset: -2px; }
+.auto-complete__loading { color: var(--palette-primary-fap); flex: 0 0 auto; height: .85rem; margin: 0 .65rem 0 .3rem; width: .85rem; }
+.auto-complete__menu { background: var(--palette-white); border: 1px solid var(--palette-secondary-200); border-radius: .375rem; box-shadow: 0 .5rem 1rem rgba(31, 41, 55, .14); box-sizing: border-box; left: 0; max-height: 15rem; max-width: 100%; overflow-x: hidden; overflow-y: auto; position: absolute; right: 0; top: calc(100% + .25rem); z-index: 1050; }
+.auto-complete__option { background: transparent; border: 0; color: var(--palette-secondary-800); cursor: pointer; display: block; padding: .55rem .7rem; text-align: left; width: 100%; }
+.auto-complete__option:hover { background-color: var(--palette-primary-50); }
+.auto-complete__option.is-active { background-color: var(--palette-primary-50); }
+.auto-complete__option.is-selected { background-color: var(--palette-primary-100); color: var(--palette-primary-800); }
+.auto-complete__message { color: var(--palette-secondary-700); padding: .65rem .75rem; text-align: left; }
+.auto-complete__message--error { color: var(--palette-danger-text); }
+.is-disabled .auto-complete__control { background-color: var(--palette-secondary-100); cursor: not-allowed; opacity: .75; }
+
+/* Se puede configurar como [size]="'sm'" o class="form-select-sm". */
+.auto-complete.size-xs { font-size: .6rem; }
+.auto-complete.size-xs .auto-complete__control { min-height: 1.7rem; }
+.auto-complete.size-xs .auto-complete__input, .auto-complete.size-xs .auto-complete__option { padding: .15rem .35rem; }
+.auto-complete.size-xs.has-floating-label .auto-complete__control { min-height: 2.2rem; }
+.auto-complete.size-xs.has-floating-label .auto-complete__input { padding-top: .75rem; }
+.auto-complete.size-xs .auto-complete__floating-label { font-size: .6rem; left: .35rem; top: .18rem; }
+.auto-complete.size-sm, :host(.form-select-sm) .auto-complete, :host(.form-control-sm) .auto-complete, :host(.select-sm) .auto-complete { font-size: .8rem; }
+.auto-complete.size-sm .auto-complete__control, :host(.form-select-sm) .auto-complete__control, :host(.form-control-sm) .auto-complete__control, :host(.select-sm) .auto-complete__control { min-height: calc(1.5em + .5rem + 2px); }
+.auto-complete.size-sm .auto-complete__input, :host(.form-select-sm) .auto-complete__input, :host(.form-control-sm) .auto-complete__input, :host(.select-sm) .auto-complete__input { padding: .25rem .5rem; }
+.auto-complete.size-sm .auto-complete__option, :host(.form-select-sm) .auto-complete__option, :host(.form-control-sm) .auto-complete__option, :host(.select-sm) .auto-complete__option { padding: .4rem .5rem; }
+
+.auto-complete.size-lg, :host(.form-select-lg) .auto-complete, :host(.form-control-lg) .auto-complete, :host(.select-lg) .auto-complete { font-size: 1.25rem; }
+.auto-complete.size-lg .auto-complete__control, :host(.form-select-lg) .auto-complete__control, :host(.form-control-lg) .auto-complete__control, :host(.select-lg) .auto-complete__control { min-height: calc(1.5em + 1rem + 2px); }
+.auto-complete.size-lg .auto-complete__input, :host(.form-select-lg) .auto-complete__input, :host(.form-control-lg) .auto-complete__input, :host(.select-lg) .auto-complete__input { padding: .5rem 1rem; }
+.auto-complete.size-lg .auto-complete__option, :host(.form-select-lg) .auto-complete__option, :host(.form-control-lg) .auto-complete__option, :host(.select-lg) .auto-complete__option { padding: .7rem 1rem; }
+

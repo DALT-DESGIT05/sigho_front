@@ -1,0 +1,67 @@
+<app-modal
+  title="Vista de libro PDF"
+  icon="fa-solid fa-book-open"
+  [size]="size()"
+  [showFooter]="true"
+  [scrollable]="false"
+  (closed)="al_cerrar_modal()"
+>
+  <div modal-header class="document-viewer-book__header">
+    <span class="document-viewer-book__file-name" [title]="nombre_archivo()">
+      {{ nombre_archivo() }}
+    </span>
+  </div>
+
+  <section class="document-viewer-book" aria-live="polite">
+    <div
+      #book_host
+      class="document-viewer-book__book"
+      [class.document-viewer-book__book--hidden]="cargando() || mensaje_error()"
+      [class.document-viewer-book__book--protected]="restringir_interaccion()"
+      (contextmenu)="bloquear_menu_contextual($event)"
+    ></div>
+
+    @if (cargando()) {
+      <div class="document-viewer-book__state">
+        <span class="spinner-border" aria-hidden="true"></span>
+        <span>Preparando el libro, espere un momento...</span>
+      </div>
+    } @else if (mensaje_error()) {
+      <div class="document-viewer-book__state">
+        <i class="fa-solid fa-file-circle-exclamation" aria-hidden="true"></i>
+        <p>{{ mensaje_error() }}</p>
+      </div>
+    } @else {
+      <nav class="document-viewer-book__navigation" aria-label="Navegación del libro">
+        <app-button
+          [iconOnly]="true"
+          icon="fa-solid fa-chevron-left"
+          color="primary"
+          variant="outline"
+          size="sm"
+          ariaLabel="Página anterior"
+          [disabled]="!puede_retroceder()"
+          (clicked)="retroceder()"
+        />
+        <span>{{ pagina_actual() }} de {{ total_paginas() }}</span>
+        <app-button
+          [iconOnly]="true"
+          icon="fa-solid fa-chevron-right"
+          color="primary"
+          variant="outline"
+          size="sm"
+          ariaLabel="Página siguiente"
+          [disabled]="!puede_avanzar()"
+          (clicked)="avanzar()"
+        />
+      </nav>
+    }
+  </section>
+
+  <div modal-footer>
+    @if (permitir_descarga()) {
+      <app-button action="download" size="sm" (clicked)="descargar()" />
+    }
+    <app-button action="close" size="sm" (clicked)="cerrar()" />
+  </div>
+</app-modal>

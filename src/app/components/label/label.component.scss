@@ -1,0 +1,46 @@
+:host {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.app-label {
+  align-items: center;
+  background: transparent;
+  display: flex;
+  font-size: var(--app-size-md-font-size, .875rem);
+  font-weight: 600;
+  justify-content: flex-start;
+  line-height: 1.35;
+  margin-bottom: .35rem;
+  max-width: 100%;
+  text-align: left;
+  width: 100%;
+}
+
+.app-label--xs { font-size: var(--app-size-xs-font-size, .6rem); line-height: 1.2; margin-bottom: .15rem; }
+.app-label--sm { font-size: var(--app-size-sm-font-size, .75rem); margin-bottom: .25rem; }
+.app-label--lg { font-size: var(--app-size-lg-font-size, 1rem); margin-bottom: .4rem; }
+
+.app-label--truncate {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.label-primary { color: var(--palette-primary-fap-900) !important; }
+.label-danger { color: var(--palette-danger-text) !important; }
+.label-success { color: var(--palette-success-text) !important; }
+.label-warning { color: var(--palette-warning-text) !important; }
+.label-secondary { color: var(--palette-secondary-text) !important; }
+.label-info { color: var(--palette-info-text) !important; }
+.label-purple { color: var(--palette-purple-text) !important; }
+.label-fuchsia { color: var(--palette-fuchsia-text) !important; }
+
+.label-required {
+  color: var(--palette-danger-text);
+  margin-left: .2rem;
+}
+.app-label--md { font-size: var(--app-size-md-font-size, .875rem); margin-bottom: .35rem; }
+

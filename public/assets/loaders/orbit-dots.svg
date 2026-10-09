@@ -1,0 +1,1 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 70" role="img" aria-label="Puntos orbitando"><g fill="#003B7A"><animateTransform attributeName="transform" type="rotate" from="0 35 35" to="360 35 35" dur="1.5s" repeatCount="indefinite"/><circle cx="35" cy="7" r="6"/><circle cx="63" cy="35" r="6"/><circle cx="35" cy="63" r="6"/><circle cx="7" cy="35" r="6"/></g></svg>

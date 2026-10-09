@@ -1,0 +1,25 @@
+<section class="card side-table" [style.height]="height()">
+  <div class="card-header side-table__header">
+    <h5 class="mb-0">{{ title() }}</h5>
+    @if (showExport()) {
+      <app-button
+        [text]="exportLabel()"
+        [icon]="exportIcon()"
+        [color]="exportColor()"
+        size="sm"
+        [disabled]="isExportDisabled()"
+        (clicked)="exportRequested.emit()">
+      </app-button>
+    }
+  </div>
+  <div class="card-body side-table__body">
+    <app-table
+      [rows]="rows()"
+      [columns]="columns()"
+      [loading]="loading()"
+      [emptyMessage]="emptyMessage()"
+      [scrollHeight]="resolvedTableHeight()"
+      size="sm">
+    </app-table>
+  </div>
+</section>

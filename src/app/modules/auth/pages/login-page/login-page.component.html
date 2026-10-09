@@ -1,0 +1,335 @@
+<main class="login-stage">
+  <header class="login-header">
+    <img src="assets/images/escudo_fap.png" alt="Escudo FAP de la Fuerza Aérea del Perú" class="fap-logo">
+    <div class="login-title">
+      <h1>SISTEMA DE GESTIÓN HOSPITALARIA</h1>
+      <strong>SIGHO WEB FAP</strong>
+      <p>Plataforma Digital del Sistema de Salud FAP</p>
+    </div>
+  </header>
+
+  <div class="module module--pacientes"><img src="assets/images/bg/Pacientes.png" alt="Pacientes"></div>
+  <div class="module module--citas"><img src="assets/images/bg/Citas.png" alt="Citas"></div>
+  <div class="module module--historia"><img src="assets/images/bg/Hist. Clinica.png" alt="Historia clínica"></div>
+  <div class="module module--analitica"><img src="assets/images/bg/Analitica.png" alt="Analítica"></div>
+  <div class="module module--admision"><img src="assets/images/bg/Admision.png" alt="Admisión"></div>
+  <div class="module module--hospitalizacion"><img src="assets/images/bg/ChatGPT Image 17 jul 2026, 05_41_38 p.m..png" alt="Hospitalización"></div>
+  <div class="module module--emergencia"><img src="assets/images/bg/Emergencia.png" alt="Emergencia"></div>
+  <div class="module module--farmacia"><img src="assets/images/bg/Farmacia.png" alt="Farmacia"></div>
+  <div class="module module--finanzas"><img src="assets/images/bg/Finanzas.png" alt="Finanzas"></div>
+
+  <div class="values" aria-label="Valores institucionales">
+    <img src="assets/images/bg/Integridad%20Personal.png" alt="Integridad personal">
+    <img src="assets/images/bg/Vocaci%C3%B3n%20Servicio.png" alt="Vocación de servicio">
+    <img src="assets/images/bg/Excelencia%20Profesional.png" alt="Excelencia profesional">
+  </div>
+
+  <section class="login-card" aria-label="Acceso al sistema">
+    @if(!reset_psw){
+      <form class="login-form" [formGroup]="loginForm" (ngSubmit)="ingresar()">
+        <div class="row row-default">
+          <div class="col-12">
+            <label style="padding-left: 5px;font-weight: 500;">Usuario: </label>
+            <div class="login-field">
+              <input type="text" class="input-login" formControlName="usuario" autocomplete="username" placeholder="Ingrese su usuario" (input)="clearLoginValidationError('usuario')">
+              <i class="fa-solid fa-circle-user login-field__icon" aria-hidden="true" title="Usuario"></i>
+            </div>
+            @if (error_usuario) {
+              <small class="text-danger d-block mt-1">{{ error_usuario }}</small>
+            }
+          </div>
+        </div>
+
+        <div class="row row-default">
+          <div class="col-12">
+            <label class="label-login">Contraseña: </label>
+            <div class="login-field">
+              <input [type]="isPasswordVisible ? 'text' : 'password'" class="input-login" formControlName="contrasena" autocomplete="current-password" placeholder="Ingrese su contraseña" (input)="clearLoginValidationError('contrasena')">
+              <button type="button" class="password-toggle" (click)="togglePasswordVisibility()" [title]="isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                <i class="fa-solid" [class.fa-eye-slash]="isPasswordVisible" [class.fa-eye]="!isPasswordVisible" aria-hidden="true"></i>
+              </button>
+            </div>
+            @if (error_contrasena) {
+              <small class="text-danger d-block mt-1">{{ error_contrasena }}</small>
+            }
+          </div>
+        </div>
+        <div class="row row-default">
+          <div class="col-6 d-flex align-items-center justify-content-start">
+            <app-check label="Recuérdame" color="primary" size="sm" [font_size]="11" formControlName="recuerdame"></app-check>
+          </div>
+          <div class="col-6 d-flex align-items-center justify-content-end">
+            <a type="button" class="forgot-link" (click)="open_reset()">Olvidé mi contraseña</a>
+          </div>
+        </div>
+
+        <app-recaptcha (tokenEmitter)="handleToken($event)" (errorEmitter)="handle_recaptcha_error()"></app-recaptcha>
+        <button class="login-submit" type="submit" [disabled]="!loginForm.valid || estado">Ingresar</button>
+      </form>
+    } @else {
+      <form class="login-form" [formGroup]="resetForm" (ngSubmit)="enviar_restablecimiento()">
+        <h2>Restablecer contraseña</h2>
+        <div class="row row-default">
+          <div class="col-12">
+            <label class="label-login">Usuario: </label>
+            <div class="login-field">
+              <input type="text" class="input-login" formControlName="usuario_rest" placeholder="Ingrese su usuario" (input)="clearResetValidationError('usuario')">
+              <i class="fa-solid fa-circle-user login-field__icon" aria-hidden="true"></i>
+            </div>
+            @if (error_usuario_rest) {
+              <small class="text-danger d-block mt-1">{{ error_usuario_rest }}</small>
+            }
+          </div>
+        </div>
+
+        <div class="row row-default">
+          <div class="col-12">
+            <label class="label-login">Correo: </label>
+            <div class="login-field">
+              <input type="email" class="input-login" formControlName="email_rest" placeholder="E-mail@dominio.com" (input)="clearResetValidationError('email')">
+              <i class="fa-solid fa-envelope login-field__icon" aria-hidden="true"></i>
+            </div>
+            @if (error_email_rest) {
+              <small class="text-danger d-block mt-1">{{ error_email_rest }}</small>
+            }
+          </div>
+        </div>
+
+        <button type="button" class="forgot-link" (click)="open_reset()">Retornar</button>
+        <app-recaptcha (tokenEmitter)="handleToken($event)" (errorEmitter)="handle_recaptcha_error()"></app-recaptcha>
+        <button class="login-submit" type="submit" [disabled]="!canSendPasswordReset">Enviar</button>
+      </form>
+    }
+  </section>
+</main>
+<!-- Previous login layout removed.
+<section>
+  <div class="container-fluid vh-100 m-0 p-0">
+    <div class="row h-100 m-0 p-0">
+
+      <div id="carouselExampleIndicators" class="carousel slide col-xl-6 d-none d-xl-flex bg-custom-primary align-items-center justify-content-center text-white" data-bs-ride="carousel">
+        <div class="align-items-center m-0">
+          <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="3" aria-label="Slide 4"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="4" aria-label="Slide 5"></button>
+          </div>
+          <div class="carousel-inner">
+            <div class="carousel-item active">
+              <img src="assets/images/sliders/5.png" class="d-block w-100" alt="...">
+            </div>
+            <div class="carousel-item">
+              <img src="assets/images/sliders/2.png" class="d-block w-100" alt="...">
+            </div>
+            <div class="carousel-item">
+              <img src="assets/images/sliders/3.png" class="d-block w-100" alt="...">
+            </div>
+            <div class="carousel-item">
+              <img src="assets/images/sliders/4.png" class="d-block w-100" alt="...">
+            </div>
+            <div class="carousel-item">
+              <img src="assets/images/sliders/5.png" class="d-block w-100" alt="...">
+            </div>
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="col-12 col-xl-6 d-flex flex-column justify-content-between p-4 bg-logo-marca">
+        @if(!reset_psw){
+          <div class="container-fluid">
+            <div class="row vertical-center align-items-center justify-content-center">
+              <form class="col-11 col-sm-8 col-md-6 col-lg-8" [formGroup]="formGroup">
+                <h1 class="text-dark mb-4 d-flex text-center fw-titulo align-items-center justify-content-center">
+                  SISTEMA DE GESTIÓN HOSPITALARIA <br>
+                </h1>
+                <h1 class="text-danger text-center fw-bold">SIGHO WEB FAP</h1>
+                <h2 class="text-custom mb-4 d-flex align-items-center justify-content-center">Inicia sesión</h2>
+
+                <div class="mb-2">
+                  <mat-form-field appearance="outline" style="width: 100%;">
+                    <mat-label>N° Dni</mat-label>
+                    <input matInput type="text" formControlName="usuario">
+                    <mat-icon matSuffix>account_circle</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div>
+                  <mat-form-field appearance="outline" style="width: 100%;">
+                    <mat-label>Contraseña</mat-label>
+                    <input matInput [type]="isPasswordVisible ? 'text' : 'password'" formControlName="contrasena">
+                    <mat-icon matSuffix style="cursor: pointer;" (click)="togglePasswordVisibility()">
+                      {{ isPasswordVisible ? 'visibility_off' : 'remove_red_eye' }}
+                    </mat-icon>
+                  </mat-form-field>
+                  <a class="d-block mb-2 text-end" style="cursor: pointer;" (click)="open_reset()">Olvidé mi contraseña</a>
+                  <hr>
+                </div>
+
+                <app-recaptcha (tokenEmitter)="handleToken($event)"></app-recaptcha>
+                <button class="btn login-primary-button w-100 custom-btn py-3" type="submit" (click)="ingresar()" [disabled]="!formGroup.valid">
+                  Ingresar
+                </button>
+              </form>
+            </div>
+          </div>
+        } @else {
+          <div class="container-fluid">
+            <div class="row vertical-center align-items-center justify-content-center">
+              <form class="col-11 col-sm-8 col-md-6 col-lg-8" [formGroup]="formGroup">
+                <h1 class="text-dark mb-4 d-flex text-center fw-azul align-items-center justify-content-center">
+                  SISTEMA DE GESTIÓN HOSPITALARIA FAP SIGHO
+                </h1>
+                <h2 class="text-custom mb-4 d-flex align-items-center justify-content-center">Olvidé Contraseña</h2>
+
+                <div class="mb-2">
+                  <mat-form-field appearance="outline" style="width: 100%;">
+                    <mat-label>Usuario</mat-label>
+                    <input matInput type="text" formControlName="usuario_rest">
+                    <mat-icon matSuffix>account_circle</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="row">
+                  <div class="col-12">
+                    <mat-form-field appearance="outline" style="width: 100%;">
+                      <mat-label>E-mail&#64;dominio.com</mat-label>
+                      <input matInput type="text" formControlName="email_rest">
+                      <mat-icon matSuffix>email</mat-icon>
+                    </mat-form-field>
+                  </div>
+                </div>
+                <a class="d-block mb-2 text-end" style="cursor: pointer;" (click)="open_reset()">Usar mis credenciales</a>
+                <hr>
+                <app-recaptcha (tokenEmitter)="handleToken($event)"></app-recaptcha>
+                <button class="btn login-primary-button w-100 custom-btn py-3" type="button" (click)="enviar_restablecimiento()">
+                  Enviar
+                </button>
+              </form>
+            </div>
+          </div>
+        }
+
+        <div class="text-center mt-4">
+          <span class="text-secondary fw-azul">SISTEMA DE GESTIÓN HOSPITALARIA FAP SIGHO</span>
+          <div class="flex flex-col">
+            <span>Todos los derechos reservados <br>© Copyright Fuerza Aérea del Perú</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section> -->
+
+
+<!-- Modal -->
+<div class="modal fade" id="modal_code" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">RESTABLECER CONTRASEÑA</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="resetForm">
+          <div class="mb-3">
+            <label for="codigo_rest" class="form-label">Código de Verificación</label>
+            <input type="text" class="form-control" formControlName="codigo_rest" aria-describedby="emailHelp">
+          </div>
+          <div class="mb-3">
+            <label for="psw_rest" class="form-label">Nueva Contraseña</label>
+            <input type="password" class="form-control" formControlName="psw_rest">
+          </div>
+          <div class="mb-3">
+            <label for="psw2_rest" class="form-label">Repetir Nueva Contraseña</label>
+            <input type="password" class="form-control" formControlName="psw2_rest">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn login-primary-button me-1 btn-sm" (click)="restablecer_by_correo()">Confirmar <i class="fa fa-check ml-4"
+            aria-hidden="true"></i></button>
+        <app-button action="close" size="sm" (clicked)="close_modal()" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modal_code_2auth" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Autenticación de Dos Factores</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body text-center">
+        <!-- QR -->
+         @if(mostrarQr == false){
+           <qrcode *ngIf="qrcode_url" [qrdata]="qrcode_url" [width]="200"></qrcode>
+         }
+
+        <!-- Inputs OTP: 6 inputs MANUALES -->
+        <div class="d-flex justify-content-center mt-4 gap-2">
+          <input #otp id="otp-0" maxlength="1" inputmode="numeric" autocomplete="one-time-code"
+                 type="text" class="form-control text-center"
+                 style="width: 45px; font-size: 1.5rem;"
+                 (input)="onOtpInput($event, 0)"
+                 (keydown)="onOtpKeydown($event, 0)"
+                 (paste)="onOtpPaste($event, 0)">
+
+          <input #otp id="otp-1" maxlength="1" inputmode="numeric" autocomplete="one-time-code"
+                 type="text" class="form-control text-center"
+                 style="width: 45px; font-size: 1.5rem;"
+                 (input)="onOtpInput($event, 1)"
+                 (keydown)="onOtpKeydown($event, 1)"
+                 (paste)="onOtpPaste($event, 1)">
+
+          <input #otp id="otp-2" maxlength="1" inputmode="numeric" autocomplete="one-time-code"
+                 type="text" class="form-control text-center"
+                 style="width: 45px; font-size: 1.5rem;"
+                 (input)="onOtpInput($event, 2)"
+                 (keydown)="onOtpKeydown($event, 2)"
+                 (paste)="onOtpPaste($event, 2)">
+
+          <input #otp id="otp-3" maxlength="1" inputmode="numeric" autocomplete="one-time-code"
+                 type="text" class="form-control text-center"
+                 style="width: 45px; font-size: 1.5rem;"
+                 (input)="onOtpInput($event, 3)"
+                 (keydown)="onOtpKeydown($event, 3)"
+                 (paste)="onOtpPaste($event, 3)">
+
+          <input #otp id="otp-4" maxlength="1" inputmode="numeric" autocomplete="one-time-code"
+                 type="text" class="form-control text-center"
+                 style="width: 45px; font-size: 1.5rem;"
+                 (input)="onOtpInput($event, 4)"
+                 (keydown)="onOtpKeydown($event, 4)"
+                 (paste)="onOtpPaste($event, 4)">
+
+          <input #otp id="otp-5" maxlength="1" inputmode="numeric" autocomplete="one-time-code"
+                 type="text" class="form-control text-center"
+                 style="width: 45px; font-size: 1.5rem;"
+                 (input)="onOtpInput($event, 5)"
+                 (keydown)="onOtpKeydown($event, 5)"
+                 (paste)="onOtpPaste($event, 5)">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <app-button action="close" size="sm" (clicked)="close_modal_2fa()" />
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

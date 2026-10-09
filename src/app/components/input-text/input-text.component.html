@@ -1,0 +1,38 @@
+<div [class]="'app-input-text app-input-text--' + color() + ' app-input-text--' + size() + ' ' + cssClass()">
+  @if (showExternalLabel()) {
+    <app-label class="text-truncate" [texto]="visibleLabel()" [title]="label_title()" [forId]="id()" [required]="required()" [color]="color()" [size]="size() === 'xs' ? 'sm' : 'md'" (click)="on_label_click($event)"></app-label>
+  }
+
+  <div [class.form-floating]="useFloatingLabel()">
+  <input
+    #input_control
+    class="form-control app-input-text__control"
+    [class.is-invalid]="hasError()"
+    [class]="'form-control app-input-text__control ' + alignmentClass() + (textColor() ? ' app-input-text--text-' + textColor() : '')"
+    [id]="id()"
+    [type]="type()"
+    [name]="name()"
+    [value]="inputValue()"
+    [placeholder]="useFloatingLabel() ? ' ' : placeholder()"
+    [autocomplete]="autocomplete()"
+    [disabled]="isDisabled()"
+    [readonly]="readonly()"
+    [required]="required()"
+    [attr.maxlength]="maxlength()"
+    [attr.minlength]="minlength()"
+    [attr.aria-label]="ariaLabel() || visibleLabel() || null"
+    (input)="handleInput($event)"
+    (change)="handleChange($event)"
+    (focus)="handleFocus($event)"
+    (blur)="handleBlur($event)"
+    (keydown)="handleKeydown($event)"
+    (keyup)="handleKeyup($event)">
+  @if (useFloatingLabel()) { <label class="app-input-text__floating-label" [for]="id()">{{ visibleLabel() }}</label> }
+  </div>
+
+  @if (error()) {
+    <div class="app-input-text__error">{{ error() }}</div>
+  } @else if (helpText()) {
+    <div class="app-input-text__help">{{ helpText() }}</div>
+  }
+</div>

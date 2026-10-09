@@ -1,0 +1,3 @@
+interface:
+  display_name: "Naming Conventions"
+  short_description: "Use this project's snake_case naming rules"

@@ -1,0 +1,24 @@
+<label
+  class="app-label"
+  [class.label-primary]="color() === 'primary'"
+  [class.label-danger]="color() === 'danger'"
+  [class.label-success]="color() === 'success'"
+  [class.label-warning]="color() === 'warning'"
+  [class.label-secondary]="color() === 'secondary'"
+  [class.label-info]="color() === 'info'"
+  [class.label-purple]="color() === 'purple'"
+  [class.label-fuchsia]="color() === 'fuchsia'"
+  [class.app-label--xs]="size() === 'xs'"
+  [class.app-label--sm]="size() === 'sm'"
+  [class.app-label--md]="size() === 'md'"
+  [class.app-label--lg]="size() === 'lg'"
+  [class.app-label--truncate]="truncate()"
+  [attr.title]="title() || (truncate() ? texto() : null)"
+  [attr.for]="forId() || null"
+  [style.color]="color_css()"
+>
+  {{ texto() }}
+  @if (esRequerido()) {
+    <span class="label-required" aria-hidden="true">*</span>
+  }
+</label>

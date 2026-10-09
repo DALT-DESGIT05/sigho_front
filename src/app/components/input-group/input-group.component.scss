@@ -1,0 +1,36 @@
+:host { display: block; min-width: 0; }
+:host ::ng-deep app-label.text-truncate .app-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:host ::ng-deep .input-group { align-items: stretch; flex-wrap: nowrap; gap: 0 !important; }
+.app-input-group__control { border-color: var(--palette-gray-300); color: var(--palette-gray-800); }
+.app-input-group__control:hover:not(:disabled), .app-input-group__control:focus { border-color: var(--app-input-group-color); box-shadow: 0 0 0 .16rem var(--app-input-group-glow); }
+.app-input-group__control:disabled { background-color: var(--palette-gray-100); border-color: var(--palette-gray-200); color: var(--palette-gray-500); opacity: 1; }
+.app-input-group__addon:empty { display: none; }
+.app-input-group__projected-control { align-self: stretch; border: 1px solid var(--palette-gray-300); border-radius: .375rem 0 0 .375rem; flex: 1 1 auto; min-width: 0; position: relative; width: 1%; }
+:host ::ng-deep .app-input-group__projected-control > app-auto-complete { display: block; width: 100%; }
+:host ::ng-deep .app-input-group__projected-control .auto-complete__control { border: 0; border-radius: 0; box-shadow: none; min-height: 100%; }
+:host ::ng-deep .app-input-group__projected-control .auto-complete__control:focus-within { box-shadow: none; }
+:host ::ng-deep .input-group:has(.app-input-group__projected-control .auto-complete__input:focus) .app-input-group__projected-control { border-color: var(--app-input-group-color); box-shadow: 0 0 0 .16rem var(--app-input-group-glow); z-index: 3; }
+.app-input-group__addon--projected { background: transparent !important; border: 0 !important; margin-left: -1px !important; padding: 0 !important; z-index: 2; }
+:host ::ng-deep .app-input-group__addon--projected > app-button { align-self: stretch; display: flex !important; margin: 0 !important; }
+:host ::ng-deep .app-input-group__addon--projected > app-button .app-button { border-bottom-left-radius: 0; border-top-left-radius: 0; height: 100%; }
+.app-input-group__help, .app-input-group__error { font-size: .72rem; margin-top: .28rem; }
+.app-input-group__help { color: var(--palette-gray-500); }
+.app-input-group__error { color: var(--palette-danger); }
+.app-input-group--xs .app-input-group__control { font-size: var(--app-size-xs-font-size, .6rem); min-height: var(--app-size-xs-min-height, 25px); padding: var(--app-size-xs-padding, .15rem .4rem); }
+.app-input-group--xs .app-input-group__addon { font-size: var(--app-size-xs-font-size, .6rem); padding: var(--app-size-xs-padding, .15rem .4rem); }
+.app-input-group--sm .app-input-group__control { font-size: var(--app-size-sm-font-size, .75rem); min-height: var(--app-size-sm-min-height, 30px); padding: var(--app-size-sm-padding, .25rem .55rem); }
+.app-input-group--sm .app-input-group__addon { font-size: var(--app-size-sm-font-size, .75rem); padding: var(--app-size-sm-padding, .25rem .55rem); }
+.app-input-group--lg .app-input-group__control { font-size: var(--app-size-lg-font-size, 1rem); min-height: var(--app-size-lg-min-height, 44px); padding: var(--app-size-lg-padding, .55rem 1rem); }
+.app-input-group--lg .app-input-group__addon { font-size: var(--app-size-lg-font-size, 1rem); padding: var(--app-size-lg-padding, .55rem 1rem); }
+.app-input-group--primary { --app-input-group-color: var(--palette-primary); --app-input-group-glow: var(--palette-primary-100); }
+.app-input-group--danger { --app-input-group-color: var(--palette-danger); --app-input-group-glow: var(--palette-danger-100); }
+.app-input-group--success { --app-input-group-color: var(--palette-success); --app-input-group-glow: var(--palette-success-100); }
+.app-input-group--warning { --app-input-group-color: var(--palette-warning); --app-input-group-glow: var(--palette-warning-100); }
+.app-input-group--secondary { --app-input-group-color: var(--palette-secondary); --app-input-group-glow: var(--palette-secondary-100); }
+.app-input-group--info { --app-input-group-color: var(--palette-info); --app-input-group-glow: var(--palette-info-100); }
+.app-input-group--purple { --app-input-group-color: var(--palette-purple); --app-input-group-glow: var(--palette-purple-100); }
+.app-input-group--fuchsia { --app-input-group-color: var(--palette-fuchsia); --app-input-group-glow: var(--palette-fuchsia-100); }
+.app-input-group--md .app-input-group__control { font-size: var(--app-size-md-font-size, .875rem); min-height: var(--app-size-md-min-height, 38px); padding: var(--app-size-md-padding, .375rem .75rem); }
+.app-input-group--md .app-input-group__addon { font-size: var(--app-size-md-font-size, .875rem); padding: var(--app-size-md-padding, .375rem .75rem); }
+.app-input-group--primary {.app-input-group__addon--suffix { background-color: var(--palette-primary-100);border-color: var(--palette-primary-300);color: var(--palette-primary-700);font-weight: 600; }}
+

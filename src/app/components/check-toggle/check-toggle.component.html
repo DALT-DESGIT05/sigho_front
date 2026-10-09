@@ -1,0 +1,21 @@
+<div
+  class="check-toggle"
+  [class]="'check-toggle check-toggle--' + color() + ' check-toggle--' + size()"
+  [class.check-toggle--neutral-unchecked]="!hasInactiveColor()">
+  <input
+    class="check-toggle__input"
+    type="checkbox"
+    [id]="id()"
+    [name]="name()"
+    [value]="value()"
+    [checked]="isChecked()"
+    [disabled]="isDisabled()"
+    [required]="required()"
+    [attr.aria-label]="ariaLabel() || visibleLabel() || null"
+    (change)="handleChange($event)"
+    (blur)="handleBlur()">
+
+  @if (visibleLabel()) {
+    <label class="check-toggle__label" [for]="id()">{{ visibleLabel() }}</label>
+  }
+</div>

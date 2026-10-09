@@ -1,0 +1,217 @@
+﻿<div class="table-container table-responsive" [style.height]="scrollHeight()">
+  <table [class]="'table table-bordered table-hover app-table app-table--' + size()">
+    <thead>
+      @for (headerRow of resolvedHeaderRows(); track $index; let headerRowIndex = $index) {
+        <tr>
+          @if (hasSelection() && headerRowIndex === 0) {
+            <th class="table-selection" [attr.rowspan]="resolvedHeaderRows().length">
+              @if (selectionHeaderTemplate()) {
+                <ng-container
+                  [ngTemplateOutlet]="selectionHeaderTemplate()!"
+                  [ngTemplateOutletContext]="{ selected: allVisibleSelected(), toggle: toggleAllVisible.bind(this) }">
+                </ng-container>
+              } @else if (selectionMode() === 'checkbox' && showSelectAll()) {
+                <app-check
+                  ariaLabel="Seleccionar filas visibles"
+                  [checked]="allVisibleSelected()"
+                  (checkedChange)="toggleAllVisible($any($event))">
+                </app-check>
+              }
+            </th>
+          }
+          @for (header of headerRow; track $index) {
+            <th
+              [attr.colspan]="header.colspan || null"
+              [attr.rowspan]="header.rowspan || null"
+              [class]="mergeClasses(header.cssClass, alignmentClass(header.align))"
+            >{{ header.label }}</th>
+          }
+          @if (hasActions() && headerRowIndex === 0) {
+            <th class="text-center" [attr.rowspan]="resolvedHeaderRows().length">{{ actionsLabel() }}</th>
+          }
+        </tr>
+      }
+    </thead>
+    <tbody>
+      @if (loading()) {
+        <tr>
+          <td class="app-table__loading" [attr.colspan]="emptyColspan()">
+            <img src="assets/loaders/dot-chase.svg" alt="Cargando datos">
+          </td>
+        </tr>
+      } @else {
+        @for (row of tableRows(); track $index; let rowIndex = $index) {
+          <tr
+            [class.table-row-selected]="isSelected(row)"
+            [class.table-row-action-highlighted]="isActionHighlighted(row)">
+            @if (hasSelection()) {
+              <td class="table-selection">
+                @if (selectionCellTemplate()) {
+                  <ng-container
+                  [ngTemplateOutlet]="selectionCellTemplate()!"
+                    [ngTemplateOutletContext]="{ $implicit: row, selected: isSelected(row), toggle: toggleSelection.bind(this, row) }">
+                  </ng-container>
+                } @else if (selectionMode() === 'checkbox') {
+                  <app-check
+                    ariaLabel="Seleccionar fila"
+                    [checked]="isSelected(row)"
+                    (checkedChange)="toggleSelection(row, $any($event))">
+                  </app-check>
+                } @else if (selectionMode() === 'radio') {
+                  <app-radio
+                    name="table-row-selection"
+                    ariaLabel="Seleccionar fila"
+                    [value]="rowSelectionKey(row)"
+                    [checked]="isSelected(row)"
+                    (checkedChange)="toggleSelection(row, $any($event))">
+                  </app-radio>
+                } @else {
+                  <app-button
+                    icon="fa-solid fa-check"
+                    [variant]="isSelected(row) ? 'solid' : 'outline'"
+                    size="sm"
+                    ariaLabel="Seleccionar fila"
+                    (click)="toggleSelection(row)">
+                  </app-button>
+                }
+              </td>
+            }
+            @for (column of resolvedColumns(); track column.key) {
+              <td [class]="mergeClasses(column.cssClass, alignmentClass(column.align))">
+                @if (cellTemplate(column); as template) {
+                  <ng-container
+                    [ngTemplateOutlet]="template"
+                    [ngTemplateOutletContext]="{ $implicit: row, value: valueFor(row, column.key), column: column, index: rowIndex }"
+                  ></ng-container>
+                } @else if (column.badge) {
+                  <app-badge
+                    [texto]="badgeText(column, row)"
+                    [clases]="badgeClasses(column, row)"
+                    [title]="badgeTitle(column, row)"
+                    [size]="column.badge.size || 'md'">
+                  </app-badge>
+                } @else if (column.statusCircle) {
+                  <app-status-circle
+                    [clases]="statusCircleClasses(column, row)"
+                    [title]="statusCircleTitle(column, row)"
+                    [size]="column.statusCircle.size || 'md'">
+                  </app-status-circle>
+                } @else if (column.typeIndicatorOrdenesMedicas) {
+                  <app-type-indicator-ordenes-medicas
+                    [tipo]="typeIndicatorText('tipo', column, row)"
+                    [texto]="typeIndicatorText('texto', column, row)"
+                    [codigoTipo]="typeIndicatorCode(column, row)"
+                    [size]="column.typeIndicatorOrdenesMedicas.size || 'md'">
+                  </app-type-indicator-ordenes-medicas>
+                } @else if (column.progressBars) {
+                  <app-progress-bars
+                    [value]="progressValue('value', column, row)"
+                    [porcentaje]="progressValue('porcentaje', column, row)"
+                    [width]="progressWidth(column, row)"
+                    [color]="progressColor(column, row)"
+                    [clases]="progressTextOption('clases', column, row)"
+                    [clasesBarra]="progressTextOption('clasesBarra', column, row)"
+                    [ariaLabel]="progressTextOption('ariaLabel', column, row) || 'Progreso'"
+                    [showValue]="progressShowValue(column, row)"
+                    [size]="column.progressBars.size || 'md'">
+                  </app-progress-bars>
+                } @else if (column.select) {
+                  <app-select
+                    [options]="selectOptions(column, row)"
+                    [selectedValue]="selectValue(column, row)"
+                    [placeholder]="column.select.placeholder || 'Seleccionar'"
+                    [disabled]="selectDisabled(column, row)"
+                    [size]="column.select.size || 'md'"
+                    (change)="emitSelectChange(column, row, $event)">
+                  </app-select>
+                } @else if (column.check) {
+                  <app-check
+                    [label]="controlLabel(column.check, column, row)"
+                    [checked]="controlValue(column.check, column, row)"
+                    [disabled]="controlDisabled(column.check, column, row)"
+                    [color]="column.check.color || 'primary'"
+                    [size]="column.check.size || 'md'"
+                    (checkedChange)="emitControlChange('check', column, row, $event)">
+                  </app-check>
+                } @else if (column.checkToggle) {
+                  <app-check-toggle
+                    [label]="controlLabel(column.checkToggle, column, row)"
+                    [checked]="controlValue(column.checkToggle, column, row)"
+                    [disabled]="controlDisabled(column.checkToggle, column, row)"
+                    [color]="column.checkToggle.color || 'primary'"
+                    [size]="column.checkToggle.size || 'md'"
+                    (checkedChange)="emitControlChange('checkToggle', column, row, $event)">
+                  </app-check-toggle>
+                } @else if (column.radio) {
+                  <app-radio
+                    [name]="column.radio.name || column.key"
+                    [label]="controlLabel(column.radio, column, row)"
+                    [value]="radioValue(column.radio, column, row)"
+                    [checked]="radioChecked(column.radio, column, row)"
+                    [disabled]="controlDisabled(column.radio, column, row)"
+                    [color]="column.radio.color || 'primary'"
+                    [size]="column.radio.size || 'md'"
+                    (valueChange)="emitControlChange('radio', column, row, $event)">
+                  </app-radio>
+                } @else if (column.iconLink) {
+                  <app-icon-link
+                    [texto]="iconLinkText(column, row)"
+                    [href]="iconLinkHref(column, row)"
+                    [icon]="iconLinkValue('icon', column, row)"
+                    [iconPosition]="column.iconLink.iconPosition || 'start'"
+                    [color]="column.iconLink.color || 'primary'"
+                    [size]="column.iconLink.size || 'md'"
+                    [animation]="column.iconLink.animation || 'up'"
+                    [target]="column.iconLink.target || '_self'"
+                    [rel]="iconLinkValue('rel', column, row)"
+                    [title]="iconLinkValue('title', column, row)"
+                    [ariaLabel]="iconLinkValue('ariaLabel', column, row)"
+                    [clases]="iconLinkValue('clases', column, row)"
+                    [disabled]="iconLinkDisabled(column, row)"
+                    (clicked)="emitIconLinkClick(column, row, $event)">
+                  </app-icon-link>
+                } @else {
+                  {{ displayValue(column, row) }}
+                }
+              </td>
+            }
+            @if (hasActions()) {
+              <td class="table-actions">
+                <div class="table-actions__content">
+                  @for (rowAction of actions(); track rowAction.id) {
+                    @if (isVisible(rowAction, row)) {
+                      <app-button
+                        [action]="rowAction.action || null"
+                        [text]="rowAction.label || ''"
+                        [icon]="rowAction.icon || ''"
+                        [color]="rowAction.color"
+                        [variant]="rowAction.variant || 'outline'"
+                        [iconOnly]="rowAction.iconOnly ?? false"
+                        [outlineHover]="rowAction.outlineHover || 'fill'"
+                        size="sm"
+                        [disabled]="isDisabled(rowAction, row)"
+                        [title]="rowAction.title || rowAction.label || rowAction.id"
+                        (click)="emitAction(rowAction, row)">
+                      </app-button>
+                    }
+                  }
+                </div>
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr><td class="text-center" [attr.colspan]="emptyColspan()">{{ emptyMessage() }}</td></tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (page() && page()!.last_page > 1) {
+  <app-pagination
+    [size]="paginationSize()"
+    [page]="page()!"
+    [links]="page()!.links"
+    (pageChange)="pageChange.emit($event)">
+  </app-pagination>
+}

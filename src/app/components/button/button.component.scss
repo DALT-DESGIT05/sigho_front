@@ -1,0 +1,102 @@
+:host { display: inline-block; }
+
+.app-button {
+  align-items: center;
+  border: 1px solid transparent;
+  display: inline-flex;
+  font-weight: 600;
+  gap: .45rem;
+  justify-content: center;
+}
+
+.app-button--sm { font-size: .75rem; min-height: 30px; padding: .25rem .55rem; }
+.app-button--xs { font-size: .6rem; min-height: 24px; padding: .12rem .35rem; }
+.app-button--md { font-size: .875rem; min-height: 36px; padding: .375rem .8rem; }
+.app-button--lg { font-size: 1rem; min-height: 44px; padding: .55rem 1rem; }
+.app-button--block { width: 100%; }
+.app-button--icon-only { gap: 0; justify-content: center; padding-left: 0; padding-right: 0; width: 36px; }
+.app-button--icon-only.app-button--sm { width: 30px; }
+.app-button--icon-only.app-button--xs { width: 24px; }
+.app-button--icon-only.app-button--lg { width: 44px; }
+.app-button--loading { cursor: wait; opacity: 1 !important; }
+.app-button--solid { color: var(--palette-white) !important; }
+.app-button__icon { line-height: 1; }
+
+.app-button:hover:not(:disabled) { opacity: 1 !important; }
+
+.app-button:disabled:not(.app-button--loading),
+.app-button[disabled]:not(.app-button--loading) {
+  background: var(--palette-gray-200) !important;
+  border-color: var(--palette-gray-300) !important;
+  box-shadow: none !important;
+  color: var(--palette-gray-500) !important;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.app-button:disabled:not(.app-button--loading) *,
+.app-button[disabled]:not(.app-button--loading) * {
+  color: inherit !important;
+}
+
+.app-button--solid.app-button--primary { background: var(--palette-primary-fap) ; border-color: var(--palette-primary-fap); color: var(--palette-white); }
+.app-button--solid.app-button--danger { background: var(--palette-danger); border-color: var(--palette-danger); color: var(--palette-white); }
+.app-button--solid.app-button--success { background: var(--palette-success); border-color: var(--palette-success); color: var(--palette-white); }
+.app-button--solid.app-button--warning { background: var(--palette-warning-600); border-color: var(--palette-warning-600); color: var(--palette-white); }
+.app-button--solid.app-button--secondary { background: var(--palette-secondary); border-color: var(--palette-secondary); color: var(--palette-white); }
+.app-button--solid.app-button--info { background: var(--palette-info-600); border-color: var(--palette-info-600); color: var(--palette-white); }
+.app-button--solid.app-button--purple { background: var(--palette-purple); border-color: var(--palette-purple); color: var(---palette-white); }
+.app-button--solid.app-button--fuchsia { background: var(--palette-fuchsia); border-color: var(--palette-fuchsia); color: var(---palette-white); }
+
+.app-button--solid.app-button--primary:hover:not(:disabled) { background: var(--palette-primary-fap-hover); border-color: var(--palette-primary-fap-hover); }
+.app-button--solid.app-button--danger:hover:not(:disabled) { background: var(--palette-danger-700); border-color: var(--palette-danger-700); }
+.app-button--solid.app-button--success:hover:not(:disabled) { background: var(--palette-success-700); border-color: var(--palette-success-700); }
+.app-button--solid.app-button--warning:hover:not(:disabled) { background: var(--palette-warning-700) ; border-color: var(--palette-warning-700); }
+.app-button--solid.app-button--secondary:hover:not(:disabled) { background: var(--palette-secondary-700); border-color: var(--palette-secondary-700); }
+.app-button--solid.app-button--info:hover:not(:disabled) { background: var(--palette-info-700); border-color: var(--palette-info-700); }
+.app-button--solid.app-button--purple:hover:not(:disabled) { background: var(--palette-purple-700); border-color: var(--palette-purple-700); }
+.app-button--solid.app-button--fuchsia:hover:not(:disabled) { background: var(--palette-fuchsia-700); border-color: var(--palette-fuchsia-700); }
+
+.app-button--outline { background: transparent; }
+.app-button--outline.app-button--primary { border-color: var(--palette-primary); color: var(--palette-primary) !important; }
+.app-button--outline.app-button--danger { border-color: var(--palette-danger); color: var(--palette-danger) !important; }
+.app-button--outline.app-button--success { border-color: var(--palette-success); color: var(--palette-success) !important; }
+.app-button--outline.app-button--warning { border-color: var(--palette-warning); color: var(--palette-warning) !important; }
+.app-button--outline.app-button--secondary { border-color: var(--palette-secondary); color: var(--palette-secondary) !important; }
+.app-button--outline.app-button--info { border-color: var(--palette-info); color: var(--palette-info) !important; }
+.app-button--outline.app-button--purple { border-color: var(--palette-purple); color: var(--palette-purple) !important; }
+.app-button--outline.app-button--fuchsia { border-color: var(--palette-fuchsia); color: var(--palette-fuchsia) !important; }
+
+.app-button--outline:hover:not(:disabled) { color: var(--palette-white) !important; }
+.app-button--outline.app-button--primary:hover:not(:disabled) { background: var(--palette-primary-600); border-color: var(--palette-primary-600); }
+.app-button--outline.app-button--danger:hover:not(:disabled) { background: var(--palette-danger-600); border-color: var(--palette-danger-600); }
+.app-button--outline.app-button--success:hover:not(:disabled) { background: var(--palette-success-600); border-color: var(--palette-success-600); }
+.app-button--outline.app-button--warning:hover:not(:disabled) { background: var(--palette-warning-600); border-color: var(--palette-warning-600); }
+.app-button--outline.app-button--secondary:hover:not(:disabled) { background: var(--palette-secondary-600); border-color: var(--palette-secondary-600); }
+.app-button--outline.app-button--info:hover:not(:disabled) { background: var(--palette-info-600); border-color: var(--palette-info-600); }
+.app-button--outline.app-button--purple:hover:not(:disabled) { background: var(--palette-purple-600); border-color: var(--palette-purple-600); }
+.app-button--outline.app-button--fuchsia:hover:not(:disabled) { background: var(--palette-fuchsia-600); border-color: var(--palette-fuchsia-600); }
+
+.app-button--hover-primary:hover:not(:disabled) { background: var(--palette-primary) !important; border-color: var(--palette-primary) !important; color: var(--palette-white) !important; }
+.app-button--hover-danger:hover:not(:disabled) { background: var(--palette-danger) !important; border-color: var(--palette-danger) !important; color: var(--palette-white) !important; }
+.app-button--hover-success:hover:not(:disabled) { background: var(--palette-success) !important; border-color: var(--palette-success) !important; color: var(--palette-white) !important; }
+.app-button--hover-warning:hover:not(:disabled) { background: var(--palette-warning) !important; border-color: var(--palette-warning) !important; color: var(--palette-white) !important; }
+.app-button--hover-secondary:hover:not(:disabled) { background: var(--palette-secondary) !important; border-color: var(--palette-secondary) !important; color: var(--palette-white) !important; }
+.app-button--hover-info:hover:not(:disabled) { background: var(--palette-info) !important; border-color: var(--palette-info) !important; color: var(--palette-white) !important; }
+.app-button--hover-purple:hover:not(:disabled) { background: var(--palette-purple) !important; border-color: var(--palette-purple) !important; color: var(--palette-white) !important; }
+.app-button--hover-fuchsia:hover:not(:disabled) { background: var(--palette-fuchsia) !important; border-color: var(--palette-fuchsia) !important; color: var(--palette-white) !important; }
+
+.app-button--outline-border-hover:hover:not(:disabled) {
+  background: transparent !important;
+  border-width: 2px;
+  box-shadow: 0 0 0 .14rem color-mix(in srgb, currentColor 20%, transparent);
+}
+.app-button--outline-border-hover.app-button--primary:hover:not(:disabled), .app-button--outline-border-hover.app-button--hover-primary:hover:not(:disabled) { border-color: var(--palette-action-primary-200) !important; color: var(--palette-action-primary-200) !important; }
+.app-button--outline-border-hover.app-button--danger:hover:not(:disabled), .app-button--outline-border-hover.app-button--hover-danger:hover:not(:disabled) { border-color: var(--palette-danger-300) !important; color: var(--palette-danger-300) !important; }
+.app-button--outline-border-hover.app-button--success:hover:not(:disabled), .app-button--outline-border-hover.app-button--hover-success:hover:not(:disabled) { border-color: var(--palette-success-300) !important; color: var(--palette-success-300) !important; }
+.app-button--outline-border-hover.app-button--warning:hover:not(:disabled), .app-button--outline-border-hover.app-button--hover-warning:hover:not(:disabled) { border-color: var(--palette-warning-200) !important; color: var(--palette-warning-200) !important; }
+.app-button--outline-border-hover.app-button--secondary:hover:not(:disabled), .app-button--outline-border-hover.app-button--hover-secondary:hover:not(:disabled) { border-color: var(--palette-secondary-300) !important; color: var(--palette-secondary-300) !important; }
+.app-button--outline-border-hover.app-button--info:hover:not(:disabled), .app-button--outline-border-hover.app-button--hover-info:hover:not(:disabled) { border-color: var(--palette-info-200) !important; color: var(--palette-info-200) !important; }
+.app-button--outline-border-hover.app-button--purple:hover:not(:disabled), .app-button--outline-border-hover.app-button--hover-purple:hover:not(:disabled) { border-color: var(--palette-purple-200) !important; color: var(--palette-purple-200) !important; }
+.app-button--outline-border-hover.app-button--fuchsia:hover:not(:disabled), .app-button--outline-border-hover.app-button--hover-fuchsia:hover:not(:disabled) { border-color: var(--palette-fuchsia-300) !important; color: var(--palette-fuchsia-300) !important; }
+

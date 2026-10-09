@@ -1,0 +1,81 @@
+:host { display: contents; }
+
+.app-modal__title-row .modal-title { margin: 0; }
+
+.app-modal__header {
+  align-items: flex-start;
+  background-color: var(--palette-primary-fap-600);
+  border-bottom-color: var(--palette-primary-fap-700);
+  color: var(--palette-white);
+  min-height: 58px;
+  position: relative;
+}
+
+.app-modal__header::after {
+  background-color: var(--palette-gray-300);
+  border-radius: 999px;
+  bottom: .7rem;
+  content: '';
+  opacity: .72;
+  position: absolute;
+  left: .55rem;
+  top: .7rem;
+  width: .14rem;
+}
+
+.app-modal__header-content { padding-right: 3rem; }
+.app-modal__header-content :is(.modal-title, small) { color: inherit; }
+
+.app-modal__title-row {
+  align-items: center;
+  display: flex;
+  gap: .5rem;
+}
+
+.app-modal__close {
+  position: absolute;
+  right: 1rem;
+  top: .75rem;
+  z-index: 1;
+}
+
+.app-modal__footer {
+  background-color: var(--palette-gray-100);
+  border-top-color: var(--palette-gray-200);
+  color: var(--palette-gray-text);
+}
+
+.app-modal__footer [modal-footer] {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  justify-content: flex-end;
+}
+
+.app-modal__footer [modal-footer] > app-button + app-button > .btn {
+  margin-left: .75rem;
+}
+
+/* El servicio de ngx-bootstrap comparte un solo backdrop entre modales.
+   Esta capa devuelve la separación visual cuando un app-modal abre otro. */
+modal-container:has(.app-modal--separated)::before {
+  background: rgba(10, 30, 55, .42);
+  content: '';
+  inset: 0;
+  pointer-events: auto;
+  position: fixed;
+  z-index: -1;
+}
+.modal-xxl {
+  max-width: 90vw;
+
+  .modal-content {
+    min-height: 60vh;
+  }
+}
+
+.modal-xxl.app-modal--fit-content .modal-content {
+  min-height: 0;
+}
+

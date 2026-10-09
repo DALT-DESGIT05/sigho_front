@@ -1,0 +1,11 @@
+<div [class]="'app-text-area app-text-area--' + color() + ' app-text-area--' + size() + ' ' + cssClass()">
+  @if (showExternalLabel()) { <app-label class="text-truncate" [texto]="visibleLabel()" [title]="label_title()" [forId]="id()" [required]="required()" [color]="color()" [size]="size() === 'xs' ? 'sm' : 'md'"></app-label> }
+  <div [class.form-floating]="useFloatingLabel()">
+    <textarea class="form-control app-text-area__control" [class.is-invalid]="hasError()" [id]="id()" [name]="name()" [value]="inputValue()"
+      [placeholder]="useFloatingLabel() ? ' ' : placeholder()" [rows]="rows()" [style.resize]="resize()" [disabled]="isDisabled()" [readonly]="readonly()"
+      [required]="required()" [attr.maxlength]="maxlength()" [attr.minlength]="minlength()" [attr.aria-label]="ariaLabel() || visibleLabel() || null"
+      (input)="handleInput($event)" (change)="handleChange($event)" (focus)="handleFocus($event)" (blur)="handleBlur($event)"></textarea>
+    @if (useFloatingLabel()) { <label class="app-text-area__floating-label" [for]="id()">{{ visibleLabel() }}</label> }
+  </div>
+  @if (error()) { <div class="app-text-area__error">{{ error() }}</div> } @else if (helpText()) { <div class="app-text-area__help">{{ helpText() }}</div> }
+</div>

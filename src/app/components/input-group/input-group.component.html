@@ -1,0 +1,36 @@
+<div [class]="'app-input-group app-input-group--' + color() + ' app-input-group--' + size() + (projectedControl() ? ' app-input-group--projected' : '') + ' ' + cssClass()">
+  @if (visibleLabel()) {
+    <app-label
+      class="text-truncate"
+      [texto]="visibleLabel()"
+      [title]="label_title()"
+      [forId]="id()"
+      [required]="required()"
+      [color]="color()"
+      [size]="size() === 'xs' ? 'sm' : 'md'">
+    </app-label> }
+
+  <div class="input-group has-validation">
+    <span class="input-group-text app-input-group__addon app-input-group__addon--prefix">
+      <ng-content select="[prefix]"></ng-content>@if (prefix()) { {{ prefix() }} }</span>
+    @if (projectedControl()) {
+      <div class="app-input-group__projected-control">
+            <ng-content select="[input-group-control]"></ng-content></div>
+          } @else {
+          <input
+            class="form-control app-input-group__control" [class.is-invalid]="hasError()" [class]="'form-control app-input-group__control ' + alignmentClass()"
+            [id]="id()" [type]="type()" [name]="name()" [value]="inputValue()" [placeholder]="placeholder()" [autocomplete]="autocomplete()"
+            [disabled]="isDisabled()" [readonly]="readonly()" [required]="required()" [attr.min]="min()" [attr.maxlength]="maxlength()" [attr.minlength]="minlength()"
+            [attr.aria-label]="ariaLabel() || visibleLabel() || null" (input)="handleInput($event)" (change)="handleChange($event)"
+            (focus)="handleFocus($event)" (blur)="handleBlur($event)" (keydown)="handleKeydown($event)" (keyup)="handleKeyup($event)">
+          }
+        <span class="input-group-text app-input-group__addon app-input-group__addon--suffix" [class.app-input-group__addon--projected]="projectedControl()"><ng-content select="[suffix]"></ng-content>@if (suffix()) { {{ suffix() }} }</span>
+        @if (error()) {
+          <div class="invalid-feedback app-input-group__error">{{ error() }}</div>
+        }
+
+      </div>
+    @if (!error() && helpText()) {
+      <div class="app-input-group__help">{{ helpText() }}</div>
+    }
+</div>

@@ -1,0 +1,32 @@
+<div class="app-input-date" [class]="'app-input-date app-input-date--' + color() + ' app-input-date--' + size() + ' ' + cssClass()">
+  @if (showExternalLabel()) {
+    <app-label class="text-truncate" [texto]="visibleLabel()" [title]="label_title()" [forId]="id()" [required]="required()" [size]="size() === 'xs' ? 'sm' : 'md'" (click)="on_label_click($event)"></app-label>
+  }
+
+  <div [class.form-floating]="useFloatingLabel()">
+  <input
+    #input_control
+    class="form-control app-input-date__control"
+    [class.is-invalid]="hasError()"
+    [id]="id()"
+    [type]="type()"
+    [name]="name()"
+    [value]="inputValue()"
+    [min]="min() || null"
+    [max]="max() || null"
+    [placeholder]="useFloatingLabel() ? ' ' : placeholder()"
+    [autocomplete]="autocomplete()"
+    [disabled]="isDisabled()"
+    [readonly]="readonly()"
+    [required]="required()"
+    (input)="handleInput($event)"
+    (blur)="handleBlur()">
+  @if (useFloatingLabel()) { <label class="app-input-date__floating-label" [for]="id()">{{ visibleLabel() }}</label> }
+  </div>
+
+  @if (error()) {
+    <div class="app-input-date__error">{{ error() }}</div>
+  } @else if (helpText()) {
+    <div class="app-input-date__help">{{ helpText() }}</div>
+  }
+</div>

@@ -1,0 +1,21 @@
+:host { display: inline-block; }
+.app-radio.form-check { align-items: center; display: inline-flex; gap: .15rem; margin-bottom: 0; padding-left: 0; }
+.app-radio .form-check-input { flex: 0 0 auto; float: none; margin: 0; }
+.app-radio .form-check-label { align-items: center; cursor: pointer; display: inline-flex; font-size: inherit; line-height: 1; margin: 0; }
+.app-radio--xs { font-size: var(--app-size-xs-font-size, .6rem); }.app-radio--xs .form-check-input { height: .65rem; margin-top: 0; width: .65rem; }
+.app-radio--sm { font-size: var(--app-size-sm-font-size, .75rem); }.app-radio--sm .form-check-input { height: .85rem; margin-top: 0; width: .85rem; }
+.app-radio--lg { font-size: var(--app-size-lg-font-size, 1rem); }.app-radio--lg .form-check-input { height: 1.2rem; margin-top: 0; width: 1.2rem; }
+.app-radio--primary .form-check-input:checked { background-color: var(--palette-primary); border-color: var(--palette-primary); }
+.app-radio--danger .form-check-input:checked { background-color: var(--palette-danger); border-color: var(--palette-danger); }
+.app-radio--success .form-check-input:checked { background-color: var(--palette-success); border-color: var(--palette-success); }
+.app-radio--warning .form-check-input:checked { background-color: var(--palette-warning); border-color: var(--palette-warning); }
+.app-radio--secondary .form-check-input:checked { background-color: var(--palette-secondary); border-color: var(--palette-secondary); }
+.app-radio--info .form-check-input:checked { background-color: var(--palette-info); border-color: var(--palette-info); }
+.app-radio--purple .form-check-input:checked { background-color: var(--palette-purple); border-color: var(--palette-purple); }
+.app-radio--fuchsia .form-check-input:checked { background-color: var(--palette-fuchsia); border-color: var(--palette-fuchsia); }
+.app-radio--md { font-size: var(--app-size-md-font-size, .875rem); }
+.app-radio--md .form-check-input { height: 1rem; margin-top: 0; width: 1rem; }
+.app-radio .form-check-input { border: 1px solid var(--palette-gray-400);border-radius: 50%; background-color: var(--palette-white);}
+.app-radio .form-check-label::before,
+.app-radio .form-check-label::after {content: none !important;display: none !important;}
+

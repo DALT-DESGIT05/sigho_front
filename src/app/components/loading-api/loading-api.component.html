@@ -1,0 +1,8 @@
+@if (loadingService.activo()) {
+  <section class="loading-api" aria-live="polite" aria-busy="true" role="status">
+    <div class="loading-api__content">
+      <img class="loading-api__ring" src="assets/loaders/ring-pulse.svg" alt="">
+      <span>{{ message() }}</span>
+    </div>
+  </section>
+}

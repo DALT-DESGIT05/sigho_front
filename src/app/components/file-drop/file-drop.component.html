@@ -1,0 +1,28 @@
+<div class="file-drop" [class]="clases()">
+  <app-label [texto]="label()" />
+  <input #input_archivo class="visually-hidden" type="file" [accept]="accept()" [disabled]="esta_deshabilitado()" (change)="seleccionar_archivo($event)" />
+  <button
+    type="button"
+    class="file-drop__area"
+    [class.file-drop__area--dragging]="arrastrando()"
+    [class.file-drop__area--invalid]="invalid() || !!mensaje_error()"
+    [disabled]="esta_deshabilitado()"
+    (click)="abrir_selector()"
+    (dragover)="arrastrar_sobre($event)"
+    (dragleave)="salir_arrastre($event)"
+    (drop)="soltar_archivo($event)">
+    @if (archivo(); as archivo) {
+      <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+      <span class="file-drop__name" [title]="archivo.name">{{ archivo.name }}</span>
+      <span class="file-drop__size">{{ archivo.size / 1024 | number:'1.0-0' }} KB</span>
+      <span class="file-drop__remove" role="button" tabindex="0" title="Quitar archivo" (click)="quitar_archivo($event)"><i class="fa-solid fa-xmark"></i></span>
+    } @else {
+      <i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
+      <span>Arrastre el archivo o haga clic para seleccionarlo.</span>
+    }
+  </button>
+  <small class="file-drop__help">{{ help_text() }}</small>
+  @if (mensaje_error()) {
+    <app-label [texto]="mensaje_error()" color="danger" size="xs" />
+  }
+</div>

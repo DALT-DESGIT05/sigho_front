@@ -1,0 +1,9 @@
+export const TITLE_MODAL = 'SIGHO WEB FAP';
+export const MESSAGE_ERROR_DEFAULT = 'Error inesperado, comuníquese con soporte';
+export const MESSAGE_ERROR_DEFAULT_403 ='No tiene permisos para realizar esta acción.';
+export const MESSAGE_DEFAULT_TABLE= 'No se encontro resultados';
+export const MESSAGE_DEFAULT_TABLE_CITA_ANULADA= 'No existen citas activas para anular';
+export const MESSAGE_DEFAULT_TABLE_HISTORIAL_CITAS= 'No existen citas registradas';
+export const MESSAGE_DEFAULT_TABLE_CITAS_TELEMEDICINA= 'No existen citas activas';
+export const MESSAGE_DEFAULT_TABLE_NO_CONSULTADA ='Aun no se realizo una consulta';
+export const MESSAGE_DEFAULT_OPTION=" -- Seleccione -- ";

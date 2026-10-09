@@ -1,0 +1,55 @@
+<section
+  class="view-switcher"
+  [style.--view-switcher-accent]="accentColor()"
+  [style.--view-switcher-accent-soft]="accentSoftColor()"
+  [style.--view-switcher-transition-duration]="transitionDuration()"
+  aria-label="Vista de resultados">
+  <div class="view-switcher__toolbar">
+    <div>
+      @if (eyebrow()) { <p class="view-switcher__eyebrow mb-1">{{ eyebrow() }}</p> }
+      @if (heading()) { <h5 class="mb-0">{{ heading() }}</h5> }
+    </div>
+    <div class="view-switcher__tabs" role="tablist" aria-label="Seleccionar vista">
+      <app-button
+        [text]="chartLabel()"
+        [icon]="chartIcon()"
+        [color]="buttonColor()"
+        [showTitle]="false"
+        size="sm"
+        [variant]="displayedView() === 'chart' ? 'solid' : 'outline'"
+        [attr.aria-pressed]="displayedView() === 'chart'"
+        (clicked)="show('chart')">
+      </app-button>
+      <app-button
+        [text]="detailLabel()"
+        [icon]="detailIcon()"
+        [color]="buttonColor()"
+        [showTitle]="false"
+        size="sm"
+        [variant]="displayedView() === 'detail' ? 'solid' : 'outline'"
+        [attr.aria-pressed]="displayedView() === 'detail'"
+        (clicked)="show('detail')">
+      </app-button>
+    </div>
+  </div>
+
+  @if (displayedView() === 'chart') {
+    <div
+      class="view-switcher__panel"
+      [class.view-switcher__panel--entering]="transitionPhase() === 'entering'"
+      [class.view-switcher__panel--leaving]="transitionPhase() === 'leaving'"
+      [style.height]="contentHeight()"
+      role="tabpanel">
+      <ng-content select="[chart-content]"></ng-content>
+    </div>
+  } @else {
+    <div
+      class="view-switcher__panel"
+      [class.view-switcher__panel--entering]="transitionPhase() === 'entering'"
+      [class.view-switcher__panel--leaving]="transitionPhase() === 'leaving'"
+      [style.height]="contentHeight()"
+      role="tabpanel">
+      <ng-content select="[detail-content]"></ng-content>
+    </div>
+  }
+</section>

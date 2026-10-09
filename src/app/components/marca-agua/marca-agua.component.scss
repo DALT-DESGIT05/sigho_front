@@ -1,0 +1,43 @@
+:host {
+  display: block;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.marca-agua {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  padding: 1rem;
+  width: 100%;
+}
+
+.marca-agua__contenido {
+  color: var(--palette-danger-700);
+  max-width: min(90%, 48rem);
+  opacity: .15;
+  text-align: center;
+  transform: rotate(-28deg);
+}
+
+.marca-agua__texto {
+  font-size: clamp(1.65rem, 5vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.marca-agua__detalle {
+  font-size: clamp(.7rem, 1.8vw, 1rem);
+  font-weight: 600;
+  line-height: 1.35;
+  margin: .5rem 0 0;
+  overflow-wrap: anywhere;
+}
+

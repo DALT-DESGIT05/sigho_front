@@ -1,0 +1,17 @@
+<div class="form-check app-check" [class]="'form-check app-check app-check--' + color() + ' app-check--' + size()" [style.font-size]="font_size_value()">
+  <input
+    class="form-check-input"
+    type="checkbox"
+    [id]="id()"
+    [name]="name()"
+    [value]="value()"
+    [checked]="isChecked()"
+    [disabled]="isDisabled()"
+    [required]="required()"
+    [attr.aria-label]="ariaLabel() || visibleLabel() || null"
+    (change)="handleChange($event)"
+    (blur)="handleBlur()">
+  @if (visibleLabel()) {
+    <label class="form-check-label" [for]="id()" [style.font-size]="font_size_value()">{{ visibleLabel() }}</label>
+  }
+</div>

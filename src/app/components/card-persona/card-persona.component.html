@@ -1,0 +1,34 @@
+<article class="card-persona">
+  <div class="card-persona__photo">
+    @if (tipoImagen() && (tipoImagen() === 'mi-foto' || identificador())) {
+      <app-image-lazy
+        [tipo]="tipoImagen()!"
+        [identificador]="identificador()"
+        [alt]="'Foto de ' + nombre()"
+        objectFit="contain">
+      </app-image-lazy>
+    } @else if (imagen()) {
+      <img [src]="imagen()" [alt]="'Foto de ' + nombre()">
+    } @else {
+      <span class="fa-solid fa-user" aria-hidden="true"></span>
+    }
+  </div>
+
+  <div class="card-persona__content">
+    <div class="card-persona__name" [title]="nombre()">{{ nombre() || '-' }}</div>
+    <div class="card-persona__document" [title]="documento()">{{ documento() || '-' }}</div>
+
+    @if (detalle()) {
+      <div class="card-persona__detail" [title]="detalle()">{{ detalle() }}</div>
+    }
+
+    <app-button
+      [texto]="textoBoton()"
+      icon="fa-solid fa-check"
+      color="primary"
+      size="xs"
+      [block]="true"
+      (clicked)="onSeleccionar()">
+    </app-button>
+  </div>
+</article>

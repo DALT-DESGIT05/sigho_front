@@ -12,8 +12,8 @@ let alerta_403_abierta = false;
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 
   const baseUrl:string=environment.baseUrl;
-  const url_login = baseUrl + 'v1/login';
-  const url_logout = baseUrl + 'v1/cerrar_sesion';
+  const url_login = baseUrl + 'v1/auth/login';
+  const url_logout = baseUrl + 'v1/auth/cerrar_sesion';
   const injector = inject(Injector);
 
   const token = sessionStorage.getItem('token');

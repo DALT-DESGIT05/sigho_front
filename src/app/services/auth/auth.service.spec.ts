@@ -35,7 +35,7 @@ describe('AuthService', () => {
     sessionStorage.setItem('token', 'token-de-prueba');
     TestBed.inject(AuthService);
 
-    const request = httpTesting.expectOne(`${environment.baseUrl}v1/check_token`);
+    const request = httpTesting.expectOne(`${environment.baseUrl}v1/auth/check_token`);
     expect(request.request.context.get(MOSTRAR_LOADING)).toBe(true);
     request.flush({
       data: {

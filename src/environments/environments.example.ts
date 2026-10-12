@@ -1,3 +1,3 @@
 export const environment={
-  baseUrl:'https://hospi_back.test/api/'
+  baseUrl:'http://sigho_back.test/api/'
 }

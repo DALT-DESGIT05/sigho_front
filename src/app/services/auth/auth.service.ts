@@ -132,7 +132,7 @@ export class AuthService {
   login(usuario: string, contrasena: string, recuerdame: boolean, recaptcha: string): Observable<boolean> {
     this.imagenCache.limpiarCache();
 
-    const url = this.baseUrl + 'v1/login';
+    const url = this.baseUrl + 'v1/auth/login';
     const _recuerdame = recuerdame ? '1' : '0';
     const body = { usuario, contrasena, 'recuerdame': _recuerdame, 'g-recaptcha-response': recaptcha };
 
@@ -183,7 +183,7 @@ export class AuthService {
   }
 
   checkAuthStatus(mostrar_loading = false): Observable<boolean> {
-    const url = this.baseUrl + 'v1/check_token';
+    const url = this.baseUrl + 'v1/auth/check_token';
     const token = sessionStorage.getItem('token');
 
     if (!token) {
@@ -231,7 +231,7 @@ export class AuthService {
   }
 
   logout(mostrar_loading = false): Observable<boolean> {
-    const url = this.baseUrl + 'v1/cerrar_sesion';
+    const url = this.baseUrl + 'v1/auth/cerrar_sesion';
     const token = sessionStorage.getItem('token');
 
     if (!token) { return of(false); }

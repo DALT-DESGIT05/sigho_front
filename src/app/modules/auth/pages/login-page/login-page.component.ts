@@ -1,6 +1,6 @@
 import { Component, inject, ViewChild, CUSTOM_ELEMENTS_SCHEMA, signal, computed, OnDestroy, OnInit, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { FormField, email, form, minLength, required } from '@angular/forms/signals';
-import { AuthService } from '../../../../services/auth/auth.service';
+import { LoginService } from '../../../../services/auth/login.service';
 import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
 import { UtilService } from '../../../../services/util.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -42,7 +42,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   recaptchaToken: string | null = null;
   currentAction: 'login' | 'reset' | null = null;
   isPasswordVisible: boolean = false;
-  private readonly _authService = inject(AuthService);
+  private readonly login_service = inject(LoginService);
   private readonly utilService = inject(UtilService);
   private readonly menuService = inject(MenuService);
   private router = inject(Router);
@@ -74,7 +74,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     minLength(schema.psw2_rest, 8);
   });
 
-  constructor(private authService: AuthService, private mail_service: MailService) { }
+  constructor(private mail_service: MailService) { }
 
   isLoading: boolean = false;
 
@@ -84,13 +84,9 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
 
     document.body.classList.add('recaptcha-visible');
-    sessionStorage.removeItem('evaluacion');
-    sessionStorage.removeItem('llamado-paciente');
-    sessionStorage.removeItem('diagonostico');
 
     this.route.queryParams.subscribe(({ reason }) => {
       if (reason === 'session_expired') {
-        sessionStorage.removeItem('login_reason');
         Swal.fire({
           title: 'Sesión caducada',
           text: 'Tu sesión expiró. Inicia sesión nuevamente para continuar.',
@@ -188,7 +184,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this.recaptchaToken = null;
     this.loginRequestInFlight = true;
 
-    this._authService.login(usuario, contrasena, recuerdame, recaptchaToken)
+    this.login_service.login(usuario, contrasena, recuerdame, recaptchaToken)
       .subscribe({
         next: (success) => {
           this.loginRequestInFlight = false;
@@ -227,22 +223,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  cerrarSesion(): void {
-    sessionStorage.clear();
-    this.authService.logout();
-    this.router.navigateByUrl('/');
-  }
-
   private redirectAfterLogin(): void {
-    const urlActual = sessionStorage.getItem('url_actual');
-    sessionStorage.removeItem('url_actual');
-    sessionStorage.removeItem('login_reason');
-
-    if (urlActual?.startsWith('/') && !urlActual.startsWith('//')) {
-      this.router.navigateByUrl(urlActual);
-      return;
-    }
-
     this.menuService.loadMenu().subscribe({
       next: (menu) => {
         this.router.navigateByUrl(this.menuService.getFirstMenuLink(menu) ?? '/');
@@ -453,7 +434,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   }
 
   two_fa_enable() {
-    this.authService.two_fa_enable()
+    this.login_service.two_fa_enable()
       .subscribe({
         next: (resp: any) => {
           this.qrcode_url = resp.data.qrcode_url;
@@ -571,7 +552,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   validateOtp(otpCode: string) {
 
-    this.authService.validate_2fa(otpCode).subscribe({
+    this.login_service.validate_2fa(otpCode).subscribe({
       next: (resp) => {
         Swal.fire({
           title: 'Autenticación',

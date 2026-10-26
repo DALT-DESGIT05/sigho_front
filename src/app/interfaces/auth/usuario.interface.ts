@@ -1,10 +1,6 @@
 export interface Usuario{
-  usuario:string|null;
+  codigo_persona: number;
   nombres:string;
-  nsa:string;
-  apellidos:string|null;
-  telefono:string|null;
-  email:string|null;
-  f_ult_ingreso:Date|null;
-  contrasena_cambiada: string;
+  apellido_paterno:string | null;
+  apellido_materno:string | null;
 }

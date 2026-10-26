@@ -1,9 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { Observable, finalize, map, of, shareReplay, tap } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import { MenuFormularioApi, MenuItem, MenuModuloApi } from '../interfaces/menu.interface';
-import { UsuarioService } from './auth/usuario.service';
 
-const MENU_STORAGE_KEY = 'userMenu_v3';
 const FALLBACK_MENU_ICON = 'fa fa-exclamation-triangle';
 
 const MODULE_ICONS: Record<string, string> = {
@@ -21,50 +19,23 @@ const MODULE_ICONS: Record<string, string> = {
   providedIn: 'root'
 })
 export class MenuService {
-  private usuarioService = inject(UsuarioService);
   private menuCache: MenuItem[] | null = null;
-  private menuRequest$: Observable<MenuItem[]> | null = null;
 
   loadMenu(): Observable<MenuItem[]> {
     if (this.menuCache?.length) {
       return of(this.menuCache);
     }
 
-    const storedMenu = sessionStorage.getItem(MENU_STORAGE_KEY);
-    if (storedMenu) {
-      this.menuCache = this.parseStoredMenu(storedMenu);
-      if (this.menuCache.length) {
-        return of(this.menuCache);
-      }
-    }
-
     return this.fetchAndCache();
   }
 
   fetchAndCache(): Observable<MenuItem[]> {
-    if (this.menuRequest$) {
-      return this.menuRequest$;
-    }
-
-    const request$ = this.usuarioService.get_menu().pipe(
-      map((data) => this.normalizeMenuResponse(data)),
-      tap((menu) => this.saveMenu(menu)),
-      finalize(() => {
-        if (this.menuRequest$ === request$) {
-          this.menuRequest$ = null;
-        }
-      }),
-      shareReplay({ bufferSize: 1, refCount: false })
-    );
-
-    this.menuRequest$ = request$;
-    return request$;
+    this.menuCache = [];
+    return of([]);
   }
 
   clearMenu(): void {
     this.menuCache = null;
-    this.menuRequest$ = null;
-    sessionStorage.removeItem(MENU_STORAGE_KEY);
   }
 
   getFirstMenuLink(items: MenuItem[]): string | null {
@@ -89,16 +60,6 @@ export class MenuService {
 
   private saveMenu(menu: MenuItem[]): void {
     this.menuCache = menu;
-    sessionStorage.setItem(MENU_STORAGE_KEY, JSON.stringify(menu));
-  }
-
-  private parseStoredMenu(storedMenu: string): MenuItem[] {
-    try {
-      const parsed = JSON.parse(storedMenu);
-      return Array.isArray(parsed) ? this.normalizeLegacyMenuItems(parsed) : [];
-    } catch {
-      return [];
-    }
   }
 
   private menuItemsResponse(data: unknown): MenuItem[] {

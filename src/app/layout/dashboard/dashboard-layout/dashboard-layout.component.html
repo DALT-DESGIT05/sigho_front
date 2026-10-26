@@ -51,8 +51,8 @@
                 </button>
             </li>
             <li class="nav-item">
-              @if(es_ipress){
-                <span class="nombre_ipress">IPRESS - {{nombre_unidad}} </span>
+              @if(es_ipress()){
+                <span class="nombre_ipress">IPRESS - {{ipress_sigla()}} </span>
               }
           </li>
             <!-- ============================================================== -->
@@ -78,7 +78,7 @@
                   <span class="top-profile-photo"><app-image-lazy tipo="mi-foto" alt="Foto de perfil" imageClass="rounded-circle" objectFit="contain" /></span>
                   <span class="hidden-md-down">
                     <span class="p-2 text-afiliado">
-                      {{ (usuario()?.nombres || 'Usuario') + ' ' + (usuario()?.apellidos || '') }}
+                      {{ (usuario()?.nombres || 'Usuario') + ' ' + (usuario()?.apellido_paterno || '') + ' ' + (usuario()?.apellido_materno || '') }}
                     </span>
                   </span>
               </button>
@@ -245,7 +245,7 @@
       <button type="button" class="sidebar-profile-trigger" (click)="openProfileModal()">
         <app-image-lazy tipo="mi-foto" alt="Foto de perfil" />
         <span class="sidebar-user-copy">
-          <strong [title]="(usuario()?.nombres || 'Usuario') + ' ' + (usuario()?.apellidos || '')">{{ (usuario()?.nombres || 'Usuario') + ' ' + (usuario()?.apellidos || '') }}</strong>
+          <strong [title]="(usuario()?.nombres || 'Usuario') + ' ' + (usuario()?.apellido_paterno || '') + ' ' + (usuario()?.apellido_materno || '')">{{ (usuario()?.nombres || 'Usuario') + ' ' + (usuario()?.apellido_paterno || '') + ' ' + (usuario()?.apellido_materno || '') }}</strong>
           <small [title]="roles_usuario().join(', ') || 'SIN ROL'">{{ roles_usuario().join(', ') || 'SIN ROL' }}</small>
           <span class="online-status"><i></i> En línea</span>
         </span>
@@ -376,11 +376,7 @@
   <div class="d-flex align-items-center">
     <app-image-lazy tipo="mi-foto" alt="Foto de perfil" imageClass="rounded-circle" objectFit="cover" class="profile-modal-image" />
     <div>
-      <h6>{{ usuario()?.nombres }} {{ usuario()?.apellidos }}</h6>
-      <div class="d-flex flex-column mt-2 mb-2">
-        <span class="text-muted mt-1 mb-1">Correo: {{ usuario()?.email || 'No disponible' }}</span>
-        <span class="text-muted">Celular: {{ usuario()?.telefono || 'No disponible' }}</span>
-      </div>
+      <h6>{{ usuario()?.nombres }} {{ usuario()?.apellido_paterno }} {{ usuario()?.apellido_materno }}</h6>
       <a routerLink="/perfil/perfil-usuario" class="btn dashboard-primary-button btn-sm" (click)="closeProfileModal()">Ir a mi perfil <i class="fa fa-user ml-4"></i></a>
     </div>
   </div>

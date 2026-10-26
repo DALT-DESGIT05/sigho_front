@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router';
 import { App } from './app';
 import { AuthStatus } from './enums/auth-status.enum';
 import { AuthService } from './services/auth/auth.service';
+import { LoginService } from './services/auth/login.service';
 
 describe('App', () => {
   beforeEach(async () => {
@@ -12,6 +13,7 @@ describe('App', () => {
       providers: [
         provideRouter([]),
         { provide: AuthService, useValue: { authStatus: signal(AuthStatus.checking) } },
+        { provide: LoginService, useValue: {} },
       ],
     })
       .compileComponents();

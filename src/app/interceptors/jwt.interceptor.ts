@@ -1,6 +1,5 @@
 import { HttpEventType, HttpInterceptorFn } from '@angular/common/http';
 import { Injector, inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { catchError, EMPTY, tap, throwError } from 'rxjs';
 import { environment } from '../../environments/environments';
 import { MESSAGE_ERROR_DEFAULT_403, TITLE_MODAL } from '../config/constants';
@@ -12,11 +11,12 @@ let alerta_403_abierta = false;
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 
   const baseUrl:string=environment.baseUrl;
-  const url_login = baseUrl + 'v1/auth/login';
-  const url_logout = baseUrl + 'v1/auth/cerrar_sesion';
+  const url_login = baseUrl + 'v1/auth/login/login';
+  const url_logout = baseUrl + 'v1/auth/login/cerrar_sesion';
   const injector = inject(Injector);
 
-  const token = sessionStorage.getItem('token');
+  const auth_service = injector.get(AuthService);
+  const token = auth_service.get_token();
   const es_api_propia = req.url.startsWith(baseUrl);
 
   if (es_api_propia && req.url !== url_login && !!token) {
@@ -39,7 +39,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
       if (debe_actualizar_actividad && evento.type === HttpEventType.Response) {
         const last_activity = evento.headers.get('x-last-activity');
         if (last_activity) {
-          injector.get(AuthService).actualizar_last_activity(last_activity);
+          auth_service.actualizar_last_activity(last_activity);
         }
       }
     }),
@@ -47,16 +47,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
       // Un token vencido o inválido es rechazado por la API con 401. Se limpia
       // la sesión local para que AppComponent redirija al usuario al login.
       if (error.status === 401 && es_api_propia && req.url !== url_login) {
-        const router = injector.get(Router);
-        const urlActual = router.url;
-
         injector.get(AuthService).expireSession();
-        sessionStorage.setItem('login_reason', 'session_expired');
-
-        if (urlActual.startsWith('/') && !urlActual.startsWith('/auth/')) {
-          sessionStorage.setItem('url_actual', urlActual);
-        }
-
         // El 401 ya fue gestionado: no debe llegar al componente que originó
         // la petición para que no muestre el mensaje técnico "Unauthenticated".
         return EMPTY;

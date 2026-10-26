@@ -80,18 +80,4 @@ export class UsuarioService {
       );
   }
 
-  get_menu(mostrar_loading = false){
-    const url=this.baseUrl+'v1/usuario/acceso_v2';
-    return this.httpClient.get<ResponseInteface<Array<any>>>(url,{context:new HttpContext().set(MOSTRAR_LOADING, mostrar_loading)})
-    .pipe(
-      map(({message,data,status})=>{
-        return data;
-      }),
-      catchError((error)=>{
-        const data_error={'data':error.error,'status':error.status}
-        return throwError( ()=>data_error);
-      })
-    );
-  }
-
 }

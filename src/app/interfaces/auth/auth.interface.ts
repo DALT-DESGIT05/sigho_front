@@ -7,13 +7,10 @@ export interface RolInterface {
 export interface AuthInteface{
   usuario:Usuario;
   token:string;
-  nsa:string;
   roles: Array<string | RolInterface>;
-  permisos:string[],
-  unidad: string;
-  nombre_unidad: string;
-  es_ipress: boolean;
-  telefono: boolean;
-  email: boolean;
-  expiracion:Date;
+  permisos: Array<string | RolInterface>;
+  last_activity: string;
+  fecha_expiracion: string;
+  ipress_sigla: string | null;
+  contrasena_cambiada: number;
 }

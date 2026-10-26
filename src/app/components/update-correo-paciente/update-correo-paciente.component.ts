@@ -65,7 +65,6 @@ export class UpdateCorreoPacienteComponent implements OnChanges, AfterViewInit {
       next: () => {
         this.isSaving.set(false);
         this.isCompleted.set(true);
-        sessionStorage.setItem('email', correo);
         Swal.fire({ title: TITLE_MODAL, text: 'El Correo se ha cambiado correctamente.', icon: 'success', timer: 1500, showConfirmButton: true })
           .then(() => {
             this.modal()?.close();

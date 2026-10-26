@@ -68,8 +68,6 @@ export class UpdateTelefonoPacienteComponent implements OnChanges, AfterViewInit
             this.modal()?.close();
             this.ouput_save.emit();
           });
-        sessionStorage.setItem('contrasena_cambiada', '0');
-        sessionStorage.setItem('telefono', telefono);
       },
       error: (error) => {
         this.isSaving.set(false);

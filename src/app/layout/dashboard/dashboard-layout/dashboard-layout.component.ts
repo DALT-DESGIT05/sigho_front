@@ -5,10 +5,10 @@ import {
   ActivatedRoute,
   Router,
   NavigationEnd,
-  NavigationStart,
   IsActiveMatchOptions,
 } from '@angular/router';
 import { AuthService } from '../../../services/auth/auth.service';
+import { LoginService } from '../../../services/auth/login.service';
 import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
 import { filter, map } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
@@ -29,6 +29,7 @@ import { ModalComponent } from '../../../components/modal/modal.component';
 })
 export class DashboardLayoutComponent implements OnInit {
   private authService = inject(AuthService);
+  private login_service = inject(LoginService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private menuService = inject(MenuService);
@@ -46,11 +47,9 @@ export class DashboardLayoutComponent implements OnInit {
   public roles_usuario = computed(() => this.authService.get_roles());
   readonly profileModal = viewChild<ModalComponent>('profileModal');
 
-  nombre_unidad = sessionStorage.getItem('nombre_unidad');
-  contrasena_cambiada = sessionStorage.getItem('contrasena_cambiada');
-  es_ipress = sessionStorage.getItem('es_ipress') === 'true';
-
-  ipress: boolean = this.es_ipress;
+  public ipress_sigla = computed(() => this.authService.b_ipress_sigla());
+  public contrasena_cambiada = computed(() => this.authService.b_contrasena_cambiada());
+  public es_ipress = computed(() => !!this.ipress_sigla());
 
   menuItems: MenuItem[] = [];
   isMenuLoading = true;
@@ -58,22 +57,6 @@ export class DashboardLayoutComponent implements OnInit {
 
   ngOnInit() {
     this.updateHeaderScrollState();
-    this.router.events
-      .pipe(filter((event): event is NavigationStart => event instanceof NavigationStart))
-      .subscribe(event => {
-        const llamadoPaciente = sessionStorage.getItem('llamado-paciente');
-
-        if (llamadoPaciente === 'true') {
-          Swal.fire({
-            title: 'Acción no permitida',
-            text: 'No puede navegar mientras un paciente está siendo atendido.',
-            icon: 'warning',
-            confirmButtonText: 'Entendido'
-          });
-          this.router.navigateByUrl(this.router.url);
-        }
-      });
-
     // 🔹 Manejo de breadcrumbs y título dinámico
     this.router.events
       .pipe(
@@ -93,7 +76,7 @@ export class DashboardLayoutComponent implements OnInit {
     this.cargarMenu();
 
     // 🔹 Redirigir a perfil si debe cambiar contraseña
-    if (this.contrasena_cambiada === '1') {
+    if (this.contrasena_cambiada() === 1) {
       this.router.navigateByUrl('perfil/perfil-usuario');
     }
 
@@ -110,7 +93,7 @@ export class DashboardLayoutComponent implements OnInit {
 
   logout(): void {
     this.closeProfileMenu();
-    this.authService.logout().subscribe({
+    this.login_service.logout().subscribe({
       next: () => {
         Swal.fire({
           title: "Logout",

@@ -10,6 +10,7 @@ Use Angular 22 Signal Forms for every new or migrated user-input form in this pr
 - Import form APIs only from `@angular/forms/signals`.
 - Define a typed plain-object form model with `signal<T>()`, create its field tree with `form()`, and bind native controls with `[formField]`.
 - Define validation in the `form()` schema with the Signal Forms validators. Read validity, errors, dirty, and touched state from the field tree.
+- Display client-side validation and API 422 field-validation errors beneath their corresponding field or component.
 - Keep the model as the single source of truth. Do not duplicate submitted values in unrelated component properties.
 - Do not introduce `FormsModule`/`ngModel`, `ReactiveFormsModule`, `FormGroup`, or `FormControl` for a form. Do not mix form systems within the same form.
 - A component that only displays data or wraps a control is not itself a form; use Signal Forms when it owns user-entered form state.
@@ -21,10 +22,9 @@ Use Angular 22 Signal Forms for every new or migrated user-input form in this pr
 General controls in `src/app/components` may be used in exactly one mode per field:
 
 - Signal Forms: bind with `[formField]="formTree.field"`. Angular 22 supports existing `ControlValueAccessor` controls through its compatibility layer; prefer native `model()` plus `touch` output when that does not break the component's established public API.
-- Reactive Forms: bind with `formControlName` or `[formControl]`.
 - Standalone state: bind the component's public value input/output pair, such as `[selectedValue]` with `(selectedValueChange)`, `[value]` with `(valueChange)`, or `[checked]` with `(checkedChange)`.
 
-Never combine modes on a single component instance. In particular, do not combine `[formField]` with `formControlName`, `ngModel`, or an individual value/output pair.
+Never combine modes on a single component instance. In particular, do not combine `[formField]` with `ngModel` or an individual value/output pair.
 
 For `app-select`, use `[options]` with one of these mode bindings. Use `[showEmptyOption]="true"` when the user must explicitly choose an option.
 

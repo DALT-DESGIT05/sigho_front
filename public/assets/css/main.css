@@ -6115,7 +6115,7 @@ File: scss
 
   .card-img {
     transform: rotate(3deg); /* Rota la imagen 3 grados a la derecha */
-    transition: transform 0.3s ease-in-out; /* DuraciÃ³n y tipo de transiciÃ³n */
+    transition: transform 0.3s ease-in-out; /* Duración y tipo de transición */
   }
 
 }
@@ -6142,14 +6142,14 @@ File: scss
   color: #3D5D96;
 }
 
-/* Estilo para aplicar un margen izquierdo de 4 unidades (ajusta segÃºn sea necesario) */
+/* Estilo para aplicar un margen izquierdo de 4 unidades (ajusta según sea necesario) */
 .ml-4 {
-  margin-left: 5px; /* Ajusta segÃºn sea necesario (1rem o 16px) */
+  margin-left: 5px; /* Ajusta según sea necesario (1rem o 16px) */
 }
 
 /* Estilos para animar la flecha cuando se pasa el mouse */
 .arrow-animate {
-  transition: transform 0.3s ease-in-out; /* TransiciÃ³n suave */
+  transition: transform 0.3s ease-in-out; /* Transición suave */
 }
 
 /* Cambios cuando se pasa el mouse sobre el elemento */
@@ -6195,7 +6195,7 @@ File: scss
 .nav .nav-item a[disabled] {
   background-color: transparent;
   color: #96AAC4 !important;
-  cursor: not-allowed; /* Cambia el cursor para indicar que estÃ¡ deshabilitado */
+  cursor: not-allowed; /* Cambia el cursor para indicar que está deshabilitado */
 }
 
 
@@ -6378,7 +6378,7 @@ File: scss
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999; /* Asegura que estÃ© sobre otros elementos */
+  z-index: 9999; /* Asegura que esté sobre otros elementos */
 }
 
 .spinner-container {
@@ -6448,19 +6448,19 @@ File: scss
 /* Estilo para la tabla con encabezado fijo */
 .table-container {
   position: relative;
-  height: 400px; /* Ajusta la altura segÃºn tus necesidades */
+  height: 400px; /* Ajusta la altura según tus necesidades */
   overflow: auto;
 }
 
 .table-container thead {
   position: sticky;
   top: 0;
-  background-color: #f8f9fa; /* Ajusta el color de fondo segÃºn el diseÃ±o */
-  z-index: 1; /* Asegura que el encabezado estÃ© por encima del contenido */
+  background-color: #f8f9fa; /* Ajusta el color de fondo según el diseño */
+  z-index: 1; /* Asegura que el encabezado esté por encima del contenido */
 }
 
 .table-container th, .table-container td {
-  padding: 8px; /* Ajusta el relleno segÃºn tus necesidades */
+  padding: 8px; /* Ajusta el relleno según tus necesidades */
 }
 
 /* Opcional: Estilos adicionales para hacer que la tabla ocupe todo el ancho disponible */
@@ -6471,7 +6471,7 @@ File: scss
 
 .bg-logo-marca{
   background-image: url('../images/Imagen3.png'); /* Cambia 'assets/images/tu-imagen.jpg' por la ruta de tu imagen */
-  background-size: auto; /* O 'cover', dependiendo de cÃ³mo quieras que se ajuste la imagen */
+  background-size: auto; /* O 'cover', dependiendo de cómo quieras que se ajuste la imagen */
   background-repeat: no-repeat;
   background-position: center;
   z-index: 1;
@@ -6521,7 +6521,7 @@ File: scss
 }
 
 .opcion-col {
-  width: 1%; /* Ajusta el ancho automÃ¡ticamente al contenido mÃ¡s pequeÃ±o */
-  white-space: nowrap; /* Evita que el contenido se divida en varias lÃ­neas */
+  width: 1%; /* Ajusta el ancho automáticamente al contenido más pequeño */
+  white-space: nowrap; /* Evita que el contenido se divida en varias líneas */
 }
 

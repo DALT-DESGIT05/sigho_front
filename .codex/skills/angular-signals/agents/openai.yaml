@@ -1,0 +1,7 @@
+interface:
+  display_name: "Angular Signals"
+  short_description: "Use Signals for Sigho Front reactive state"
+  default_prompt: "Use $angular-signals to implement reactive state with Angular Signals."
+
+policy:
+  allow_implicit_invocation: true

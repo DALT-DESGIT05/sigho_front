@@ -1,4 +1,5 @@
 export const TITLE_MODAL = 'SIGHO WEB FAP';
+export const MESSAGE_CONFIRMATION_DEFAULT = '¿Está seguro de realizar esta acción?';
 export const MESSAGE_ERROR_DEFAULT = 'Error inesperado, comuníquese con soporte';
 export const MESSAGE_ERROR_DEFAULT_403 ='No tiene permisos para realizar esta acción.';
 export const MESSAGE_DEFAULT_TABLE= 'No se encontro resultados';

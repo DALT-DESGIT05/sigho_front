@@ -1,7 +1,7 @@
 
-@if (variant() === 'stepper') {
+@if (variant() === 'stepper' || variant() === 'stepper-line') {
 
-  <nav class="app-stepper" aria-label="Pasos del proceso">
+  <nav class="app-stepper" [class.app-stepper--line]="variant() === 'stepper-line'" aria-label="Pasos del proceso">
     <ol class="app-stepper__list">
       @for (tab of tabs(); track tab.id; let i = $index) {
         <li class="app-stepper__item">

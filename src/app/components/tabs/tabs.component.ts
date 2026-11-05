@@ -18,8 +18,9 @@ export class TabsComponent {
   readonly tabSelected = output<string>();
 
   private readonly selectedTabId = signal<string | null>(null);
-  readonly variant = input<'tabs' | 'stepper'>('tabs');
+ readonly variant = input<'default' | 'stepper' | 'stepper-line'>('default');
   readonly completedTabIds = input<readonly string[]>([]);
+
 
   readonly activeId = computed(() => {
     const activeTabId = this.activeTabId();

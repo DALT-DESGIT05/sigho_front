@@ -16,7 +16,7 @@
   </div>
   <!-- Stepper horizontal -->
   <app-tabs
-    variant="stepper"
+     variant="stepper-line"
     [tabs]="pasos()"
     [activeTabId]="pasoActual().toString()"
     [completedTabIds]="pasosCompletados()"
@@ -83,10 +83,13 @@
             </div>
           </div>
 
-          @if (afiliadoSeleccionado(); as afiliado) {
-            <div class="reserva-citas__afiliado-seleccionado">
-              AFILIADO: {{ afiliado.nombreCompleto }}
-            </div>
+          @if (resumenSelecciones().length > 0) {
+            <app-breadcrumb
+              [items]="resumenSelecciones()"
+              variant="resumen"
+              size="sm"
+              ariaLabel="Resumen de selecciones">
+            </app-breadcrumb>
           }
 
             <div class="reserva-citas__modalidades">
@@ -138,19 +141,14 @@
 
           <!-- RESUMEN DE SELECCIONES ANTERIORES -->
 
-            <div class="reserva-citas__resumen-seleccion">
-
-              @if (afiliadoSeleccionado(); as afiliado) {
-                <span>AFILIADO: {{ afiliado.nombreCompleto }}</span>
-              }
-
-              <i class="fa-solid fa-chevron-right" aria-hidden="true"> </i>
-
-              @if (tipoAtencionSeleccionado(); as tipo) {
-                <span>TIPO DE ATENCIÓN: {{ tipo === 'PRESENCIAL'? 'CONSULTA PRESENCIAL': 'CONSULTA VIRTUAL' }}</span>
-              }
-
-            </div>
+            @if (resumenSelecciones().length > 0) {
+              <app-breadcrumb
+                [items]="resumenSelecciones()"
+                variant="resumen"
+                size="sm"
+                ariaLabel="Resumen de selecciones">
+              </app-breadcrumb>
+            }
 
 
           <!-- LISTADO DE IPRESS -->
@@ -180,7 +178,72 @@
 </div>
       }
       @case (4) {
-        <app-label texto="Selecciona la especialidad"></app-label>
+
+        <!-- ENCABEZADO -->
+        <div class="reserva-citas__encabezado-paso">
+
+          <app-label texto="Selecciona la especialidad"></app-label>
+
+          <div class="reserva-citas__alert-indicacion">
+            <app-alert
+              texto="BUSCA Y SELECCIONA LA ESPECIALIDAD EN LA QUE DESEAS ATENDERTE."
+              color="primary"
+              size="xs"
+              icon="fa-solid fa-stethoscope"
+              rounded="lg">
+            </app-alert>
+          </div>
+
+        </div>
+
+        <!-- RESUMEN DE SELECCIONES ANTERIORES -->
+        @if (resumenSelecciones().length > 0) {
+          <app-breadcrumb
+            [items]="resumenSelecciones()"
+            variant="resumen"
+            size="sm"
+            ariaLabel="Resumen de selecciones">
+          </app-breadcrumb>
+        }
+
+        <!-- BUSCADOR DE ESPECIALIDADES -->
+        <div class="reserva-citas__buscador-especialidad">
+
+          <app-input-filter
+            placeholder="Buscar especialidad..."
+            size="md"
+            color="primary"
+            [value]="busquedaEspecialidad()"
+            (valueChange)="busquedaEspecialidad.set($event)">
+          </app-input-filter>
+
+        </div>
+              <!-- LISTADO DE ESPECIALIDADES -->
+        <div class="reserva-citas__especialidades-lista">
+
+          @for (especialidad of especialidadesFiltradas(); track especialidad.codigo) {
+
+            <div class="reserva-citas__especialidad-item">
+              <app-card
+                [title]="especialidad.nombre"
+                [imageSrc]="especialidad.imagen"
+                [altText]="especialidad.nombre"
+                variant="especialidad"
+                [elevacion]="true"
+                [mostrarSeleccionar]="true"
+                [useClick]="true"
+                (clickEvent)="seleccionarEspecialidad(especialidad)">
+              </app-card>
+            </div>
+
+          } @empty {
+            <p class="reserva-citas__sin-especialidades">
+              No se encontraron especialidades.
+            </p>
+          }
+
+        </div>
+
       }
       @case (5) {
         <app-label texto="Selecciona el médico"></app-label>

@@ -322,3 +322,36 @@
   }
 }
 
+.reserva-citas__buscador-especialidad {
+  margin-top: 12px;
+}
+
+// ==========================================
+// PASO 4 - LISTADO DE ESPECIALIDADES
+// ==========================================
+
+.reserva-citas__especialidades-lista {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.reserva-citas__especialidad-item {
+  min-width: 0;
+}
+
+// TABLET
+@media (max-width: 991.98px) {
+  .reserva-citas__especialidades-lista {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+// MÓVIL
+@media (max-width: 575.98px) {
+  .reserva-citas__especialidades-lista {
+    grid-template-columns: 1fr;
+  }
+}
+

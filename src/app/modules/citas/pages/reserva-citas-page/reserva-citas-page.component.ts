@@ -6,9 +6,11 @@ import { AfiliadoReserva } from '../../../../interfaces/citas/afiliado.interface
 import { CardPersonaComponent } from '../../../../components/card-persona/card-persona.component';
 import { CardComponent } from '../../../../components/card/card.component';
 import { CardIpressComponent } from '../../../../components/card-ipress/card-ipress.component';
+import { BreadcrumbComponent,BreadcrumbItem } from '../../../../components/breadcrumb/breadcrumb.component';
+import { InputFilterComponent } from '../../../../components/input-filter/input-filter.component';
 
 @Component({
-  imports: [TabsComponent, AlertComponent, LabelComponent,LabelComponent,CardPersonaComponent,CardComponent,CardIpressComponent],
+  imports: [TabsComponent, AlertComponent,LabelComponent,CardPersonaComponent,CardComponent,CardIpressComponent,BreadcrumbComponent,InputFilterComponent],
   selector: 'app-reserva-citas-page',
   styleUrl: './reserva-citas-page.component.scss',
   templateUrl: './reserva-citas-page.component.html',
@@ -68,6 +70,7 @@ export class ReservaCitasPageComponent {
   // Etapa actual
   readonly pasoActual = signal(1);
   readonly afiliadoSeleccionado = signal<AfiliadoReserva | null>(null);
+  readonly busquedaEspecialidad = signal('');
 
   // Última etapa habilitada
   readonly pasoHabilitado = signal(1);
@@ -90,7 +93,7 @@ export class ReservaCitasPageComponent {
   // Pasos completados
   readonly pasosCompletados = computed(() =>
     Array.from(
-      { length: this.pasoHabilitado() - 1 },
+      { length: this.pasoActual() - 1 },
       (_, index) => String(index + 1)
     )
   );
@@ -135,4 +138,81 @@ export class ReservaCitasPageComponent {
     this.tipoAtencionSeleccionado.set(tipo);
     this.avanzarPaso();
   }
+
+  readonly resumenSelecciones = computed<BreadcrumbItem[]>(() => {
+    const paso = this.pasoActual();
+    const items: BreadcrumbItem[] = [];
+    const afiliado = this.afiliadoSeleccionado();
+    const tipo = this.tipoAtencionSeleccionado();
+    const sede = this.ipressSeleccionada();
+
+    if (paso >= 2 && afiliado) {
+      items.push({label: `AFILIADO: ${afiliado.nombreCompleto}`});
+    }
+
+    if (paso >= 3 && tipo) {
+      items.push({label: `TIPO DE ATENCIÓN: ${tipo === 'PRESENCIAL'? 'CONSULTA PRESENCIAL': 'CONSULTA VIRTUAL'}`
+      });
+    }
+
+    if (paso >= 4 && sede) {
+      items.push({label: `IPRESS: ${sede.nombre}`
+      });
+    }
+
+    return items;
+  });
+
+  readonly especialidades = signal([
+    { codigo: '002', nombre: 'CARDIOLOGÍA', imagen: 'assets/svg/002.png' },
+    { codigo: '003', nombre: 'CIRUGÍA GENERAL', imagen: 'assets/svg/003.png' },
+    { codigo: '004', nombre: 'CIRUGÍA PLÁSTICA', imagen: 'assets/svg/004.png' },
+    { codigo: '005', nombre: 'UROLOGÍA', imagen: 'assets/svg/005.png' },
+    { codigo: '006', nombre: 'OTORRINOLARINGOLOGÍA', imagen: 'assets/svg/006.png' },
+    { codigo: '008', nombre: 'OFTALMOLOGÍA', imagen: 'assets/svg/008.png' },
+    { codigo: '009', nombre: 'GASTROENTEROLOGÍA', imagen: 'assets/svg/009.png' },
+    { codigo: '011', nombre: 'MEDICINA INTERNA', imagen: 'assets/svg/011.png' },
+    { codigo: '012', nombre: 'PSICOLOGÍA', imagen: 'assets/svg/012.png' },
+    { codigo: '013', nombre: 'PSIQUIATRÍA', imagen: 'assets/svg/013.png' },
+    { codigo: '014', nombre: 'NEUMOLOGÍA', imagen: 'assets/svg/014.png' },
+    { codigo: '015', nombre: 'NEUROLOGÍA', imagen: 'assets/svg/015.png' },
+    { codigo: '016', nombre: 'CIRUGÍA TÓRAX Y CARDIOVASCULAR', imagen: 'assets/svg/016.png' },
+    { codigo: '017', nombre: 'DERMATOLOGÍA', imagen: 'assets/svg/017.png' },
+    { codigo: '018', nombre: 'MEDICINA FÍSICA Y REHABILITACIÓN', imagen: 'assets/svg/018.png' },
+    { codigo: '020', nombre: 'REUMATOLOGÍA', imagen: 'assets/svg/020.png' },
+    { codigo: '021', nombre: 'TRAUMATOLOGÍA', imagen: 'assets/svg/021.png' },
+    { codigo: '022', nombre: 'NEFROLOGÍA', imagen: 'assets/svg/022.png' },
+    { codigo: '024', nombre: 'ENDOCRINOLOGÍA', imagen: 'assets/svg/024.png' },
+    { codigo: '046', nombre: 'ONCOLOGÍA', imagen: 'assets/svg/046.png' },
+    { codigo: '048', nombre: 'HEMATOLOGÍA', imagen: 'assets/svg/048.png' },
+    { codigo: '079', nombre: 'LABORATORIO', imagen: 'assets/svg/079.png' },
+    { codigo: '083', nombre: 'INFECTOLOGÍA', imagen: 'assets/svg/083.png' }
+  ]);
+
+
+  readonly especialidadesFiltradas = computed(() => {
+    const busqueda = this.busquedaEspecialidad().trim() .toLocaleLowerCase('es');
+
+    if (!busqueda) {
+      return this.especialidades();
+    }
+
+    return this.especialidades().filter(especialidad =>especialidad.nombre.toLocaleLowerCase('es').includes(busqueda));
+  });
+
+  readonly especialidadSeleccionada = signal<{
+    codigo: string;
+    nombre: string;
+    imagen: string;
+  } | null>(null);
+
+  seleccionarEspecialidad(especialidad: {
+    codigo: string;
+    nombre: string;
+    imagen: string;
+  }): void {
+    this.especialidadSeleccionada.set(especialidad);
+    this.avanzarPaso();
+  }
+
 }

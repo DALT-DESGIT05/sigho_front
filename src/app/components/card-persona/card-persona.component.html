@@ -24,10 +24,10 @@
 
     <app-button
       [texto]="textoBoton()"
-      icon="fa-solid fa-check"
+      [icon]="iconoBoton()"
       color="primary"
       size="xs"
-      [block]="true"
+      [block]="botonAnchoCompleto()"
       (clicked)="onSeleccionar()">
     </app-button>
   </div>

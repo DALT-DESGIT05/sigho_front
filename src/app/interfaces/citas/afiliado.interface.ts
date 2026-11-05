@@ -63,4 +63,9 @@ export interface Find_afiliado {
   estado: string | null;
   codigo_pago: string | null;
 }
-
+export interface AfiliadoReserva {
+  codigo: string;
+  nombreCompleto: string;
+  dni: string;
+  fotoUrl: string | null;
+}

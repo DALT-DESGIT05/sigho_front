@@ -1,1 +1,109 @@
-<p>menu-reservas works!</p>
+
+<div class="menu-reservas">
+
+  <!-- Encabezado -->
+  <div class="mb-3">
+    <app-alert
+      subtitulo="GESTIÓN DE CITAS"
+      titulo="¿Qué deseas realizar?"
+      texto="Selecciona una opción para continuar con la gestión de la atención."
+      color="info"
+      size="md"
+      iconDerecha="fa-regular fa-calendar-check"
+      [destacarTitulo]="true">
+    </app-alert>
+  </div>
+
+  <!-- Opciones de Gestión de Citas -->
+  <div class="row g-3">
+
+    <!-- Reserva de Citas -->
+    <div class="col-12 col-md-6 col-xl-3 menu-reservas__reserva">
+      <app-card-general [showHeader]="false" [showFooter]="false" [elevacion]="true">
+        <div class="menu-reservas__card menu-reservas__card--reserva">
+          <div class="menu-reservas__icon">
+            <img
+              src="/assets/svg/agendar cita.png"
+              alt="Reserva de Citas"
+              class="menu-reservas__icon-img"
+            />
+          </div>
+
+          <h5>Reserva de Citas</h5>
+          <p>Agenda una nueva atención según especialidad y disponibilidad.</p>
+
+          <a routerLink="/citas/reserva_citas" class="menu-reservas__link">
+            Ingresar <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </app-card-general>
+    </div>
+
+    <!-- Anulación de Citas -->
+    <div class="col-12 col-md-6 col-xl-3 menu-reservas__anulacion">
+      <app-card-general [showHeader]="false" [showFooter]="false" [elevacion]="true">
+        <div class="menu-reservas__card menu-reservas__card--anulacion">
+          <div class="menu-reservas__icon">
+            <img
+              src="/assets/svg/anular citas.png"
+              alt="Anulación de Citas"
+              class="menu-reservas__icon-img"
+            />
+          </div>
+
+          <h5>Anulación de Citas</h5>
+          <p>Consulta y anula una reserva que ya no será utilizada.</p>
+
+          <a routerLink="/citas/anulacion_citas" class="menu-reservas__link">
+            Ingresar <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </app-card-general>
+    </div>
+
+    <!-- Historial de Citas -->
+    <div class="col-12 col-md-6 col-xl-3 menu-reservas__historial">
+      <app-card-general [showHeader]="false" [showFooter]="false" [elevacion]="true">
+        <div class="menu-reservas__card menu-reservas__card--historial">
+          <div class="menu-reservas__icon">
+            <img
+              src="/assets/svg/historial.png"
+              alt="Historial de Citas"
+              class="menu-reservas__icon-img"
+            />
+          </div>
+
+          <h5>Historial de Citas</h5>
+          <p>Revisa tus citas anteriores y el detalle de cada atención.</p>
+
+          <a routerLink="/citas/historial_citas" class="menu-reservas__link">
+            Ingresar <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </app-card-general>
+    </div>
+
+    <!-- Teleconsulta -->
+    <div class="col-12 col-md-6 col-xl-3 menu-reservas__teleconsulta">
+      <app-card-general [showHeader]="false" [showFooter]="false" [elevacion]="true">
+        <div class="menu-reservas__card menu-reservas__card--teleconsulta">
+          <div class="menu-reservas__icon">
+            <img
+              src="/assets/svg/telemedicina.png"
+              alt="Telemedicina"
+              class="menu-reservas__icon-img"
+            />
+          </div>
+
+          <h5>Teleconsulta</h5>
+          <p>Accede a tus atenciones médicas mediante videollamada.</p>
+
+          <a routerLink="/citas/citas_virtuales" class="menu-reservas__link">
+            Ingresar <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </app-card-general>
+    </div>
+
+  </div>
+</div>

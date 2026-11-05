@@ -1,8 +1,92 @@
+
 $shadow-color-1: rgba(0, 0, 0, 0.02);
 $shadow-color-2: rgba(27, 31, 35, 0.15);
 
+// ==========================================
+// SOMBRA ORIGINAL
+// ==========================================
+
 .shadow-css {
-  box-shadow: $shadow-color-1 0px 1px 3px 0px, $shadow-color-2 0px 0px 0px 1px;
+  box-shadow:
+    $shadow-color-1 0px 1px 3px 0px,
+    $shadow-color-2 0px 0px 0px 1px;
+
   border-radius: 15px;
 }
 
+// ==========================================
+// VARIANTE PARA TIPO DE ATENCIÓN
+// ==========================================
+
+.card-custom--modalidad {
+  min-height: 150px;
+  height: 100%;
+
+  border: 1px solid var(--palette-gray-200, #dce5ef);
+  border-radius: 12px;
+  background: var(--palette-white, #fff);
+
+  box-shadow: 0 2px 6px rgba(16, 24, 40, 0.04);
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  .img-custom {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+  }
+
+  .span-color {
+    color: var(--palette-primary-700, #275b99);
+    font-size: .8rem;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .card-custom__seleccionar {
+    margin-top: 1.5rem;
+    color: var(--palette-primary-600, #2878d0);
+    font-size: .7rem;
+    font-weight: 500;
+  }
+}
+
+// ==========================================
+// TARJETA CLICKEABLE
+// ==========================================
+
+.card-custom--clickable {
+  cursor: pointer;
+}
+
+// ==========================================
+// ELEVACIÓN 3D + FONDO AZUL TENUE
+// ==========================================
+
+:host .card.card-custom.card-custom--elevacion {
+  position: relative;
+  top: 0;
+  transform: translateY(0) !important;
+
+  background-color: var(--palette-white, #fff);
+  border-color: var(--palette-gray-200, #dce5ef);
+
+  box-shadow: 0 0.2rem 0.6rem rgba(16, 24, 40, 0.08);
+
+  transition:
+    transform 0.25s ease,
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+:host .card.card-custom.card-custom--elevacion:hover {
+  transform: translateY(-8px) !important;
+
+  background-color: var(--palette-primary-fap-50, #f4f9ff) !important;
+  border-color: var(--palette-primary-fap-200, #c9def5);
+
+  box-shadow: 0 0.75rem 1.5rem rgba(16, 24, 40, 0.18);
+}

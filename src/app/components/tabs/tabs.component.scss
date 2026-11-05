@@ -1,0 +1,151 @@
+:host {
+  display: block;
+}
+
+.nav-tabs {
+  border-bottom: 0.3px solid var(--palette-primary-fap);
+}
+
+.nav-tabs .nav-link {
+  color: var(--palette-primary-fap);
+  font-weight: 500;
+  border-radius: 0.375rem 0.375rem 0 0;
+  transition: background-color 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover:not(.active):not(:disabled) {
+  color: var(--palette-primary-fap-hover);
+  background-color: var(--palette-primary-fap-50);
+}
+
+.nav-tabs .nav-link.active {
+  background-color: var(--palette-primary-fap);
+  border-color: var(--palette-primary-fap);
+  color: var(--palette-white);
+}
+
+.nav-tabs .nav-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+// ==========================================
+// VARIANTE STEPPER
+// ==========================================
+
+.app-stepper {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid var(--bs-border-color, #dce5ef);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.app-stepper__list {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-stepper__item {
+  min-width: 0;
+}
+
+.app-stepper__button {
+  display: flex;
+  width: 100%;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 5px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #9caaba;
+  font-size: .7rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition:
+    background-color 250ms ease,
+    color 250ms ease;
+}
+
+.app-stepper__number {
+  display: flex;
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f0f4f8;
+  color: #9caaba;
+  font-size: .65rem;
+}
+
+.app-stepper__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.app-stepper__button--active {
+  background: var(--palette-primary-fap);
+  color: #fff;
+
+  .app-stepper__number {
+    background: #fff;
+    color: var(--palette-primary-fap);
+  }
+}
+
+.app-stepper__button--completed:not(.app-stepper__button--active) {
+  color: var(--palette-primary-fap);
+
+  .app-stepper__number {
+    background: var(--palette-primary-fap-50);
+    color: var(--palette-primary-fap);
+  }
+}
+
+.app-stepper__button:hover:not(:disabled):not(.app-stepper__button--active) {
+  background: var(--palette-primary-fap-50);
+  color: var(--palette-primary-fap);
+}
+
+.app-stepper__button:disabled {
+  cursor: not-allowed;
+  opacity: .65;
+}
+
+.app-stepper__button:focus-visible {
+  outline: 2px solid var(--palette-primary-fap);
+  outline-offset: 2px;
+}
+
+// ==========================================
+// RESPONSIVE
+// ==========================================
+
+@media (max-width: 991.98px) {
+  .app-stepper {
+    overflow-x: auto;
+  }
+
+  .app-stepper__list {
+    min-width: 800px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-stepper__button {
+    transition: none;
+  }
+}

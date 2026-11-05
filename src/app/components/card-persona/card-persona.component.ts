@@ -21,6 +21,8 @@ export class CardPersonaComponent {
   readonly textoBoton = input('Seleccionar');
 
   readonly seleccionar = output<void>();
+  readonly iconoBoton = input('fa-solid fa-check');
+  readonly botonAnchoCompleto = input(true);
 
   onSeleccionar(): void {
     this.seleccionar.emit();

@@ -23,6 +23,7 @@ export class CardPersonaComponent {
   readonly seleccionar = output<void>();
   readonly iconoBoton = input('fa-solid fa-check');
   readonly botonAnchoCompleto = input(true);
+  readonly variante = input<'afiliado' | 'medico'>('afiliado');
 
   onSeleccionar(): void {
     this.seleccionar.emit();

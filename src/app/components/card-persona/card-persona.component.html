@@ -1,4 +1,4 @@
-<article class="card-persona">
+<article class="card-persona"  [class.card-persona--medico]="variante() === 'medico'">
   <div class="card-persona__photo">
     @if (tipoImagen() && (tipoImagen() === 'mi-foto' || identificador())) {
       <app-image-lazy

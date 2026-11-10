@@ -1,0 +1,21 @@
+<article class="resumen-item d-flex align-items-center gap-3 p-3 rounded h-100">
+  <div class="resumen-item__visual d-flex align-items-center justify-content-center flex-shrink-0 rounded overflow-hidden">
+    @if (tipo_imagen(); as tipo) {
+      <app-image-lazy
+        class="w-100 h-100"
+        [tipo]="tipo"
+        [identificador]="identificador()"
+        [alt]="alt() || valor()"
+        objectFit="cover" />
+    } @else if (imagen()) {
+      <img class="w-100 h-100 object-fit-cover" [src]="imagen()" [alt]="alt() || valor()" loading="lazy" />
+    } @else {
+      <i class="font-20" [class]="icono() || 'fa-solid fa-circle-info'" aria-hidden="true"></i>
+    }
+  </div>
+
+  <div class="resumen-item__contenido flex-grow-1">
+    <p class="resumen-item__titulo text-uppercase font-10 fw-semibold mb-1">{{ titulo() }}</p>
+    <p class="resumen-item__valor font-12 fw-semibold mb-0">{{ valor() }}</p>
+  </div>
+</article>

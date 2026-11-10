@@ -19,6 +19,13 @@ export const routes: Routes = [
     canActivateChild: [isAuthenticatedGuard],
     loadChildren: () =>import('./modules/citas/citas.routes').then((m) => m.citasRoutes),
   },
+   {
+    path: 'consultorios',
+    component: DashboardLayoutComponent,
+    canActivate: [isAuthenticatedGuard],
+    canActivateChild: [isAuthenticatedGuard],
+    loadChildren: () =>import('./modules/consultorios/consultorio.routes').then((m) => m.consultorioRoutes),
+  },
   {
     path: 'auth',
     component: LoginLayoutComponent,

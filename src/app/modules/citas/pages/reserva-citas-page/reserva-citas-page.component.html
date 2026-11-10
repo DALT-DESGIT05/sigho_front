@@ -245,9 +245,61 @@
         </div>
 
       }
+
       @case (5) {
-        <app-label texto="Selecciona el médico"></app-label>
+
+        <!-- ENCABEZADO -->
+        <div class="reserva-citas__encabezado-paso">
+
+          <app-label texto="Selecciona al médico"></app-label>
+
+          <div class="reserva-citas__alert-indicacion">
+            <app-alert
+              texto="REVISA LOS PROFESIONALES DISPONIBLES."
+              color="primary"
+              size="xs"
+              icon="fa-solid fa-user-doctor"
+              rounded="lg">
+            </app-alert>
+          </div>
+
+        </div>
+
+        <!-- RESUMEN DE SELECCIONES ANTERIORES -->
+         @if (resumenSelecciones().length > 0) {
+          <app-breadcrumb
+            [items]="resumenSelecciones()"
+            variant="resumen"
+            size="sm"
+            ariaLabel="Resumen de selecciones">
+          </app-breadcrumb>
+        }
+
+        <!-- LISTADO DE MÉDICOS -->
+        <div class="reserva-citas__medicos-lista">
+
+          @for (medico of medicos(); track medico.codigo) {
+
+            <app-card-persona
+              variante="medico"
+              [nombre]="medico.nombreCompleto"
+              [documento]="'CMP: ' + medico.cmp"
+              [detalle]="medico.especialidad.trim() || '-'"
+              [imagen]="medico.fotoUrl ?? ''"
+              textoBoton="Seleccionar"
+              iconoBoton="fa-solid fa-check"
+              [botonAnchoCompleto]="false"
+              (seleccionar)="seleccionarMedico(medico)">
+            </app-card-persona>
+
+          } @empty {
+            <p>No hay médicos disponibles para esta especialidad.</p>
+          }
+
+        </div>
+
       }
+
       @case (6) {
         <app-label texto="Selecciona la fecha y horario"></app-label>
       }

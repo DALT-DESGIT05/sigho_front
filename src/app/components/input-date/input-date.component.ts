@@ -19,6 +19,7 @@ export class InputDateComponent implements ControlValueAccessor {
   private readonly dateService = inject(DateService);
   private onChange: (value: string) => void = () => undefined;
   private onTouched: () => void = () => undefined;
+  readonly fechaCompacta = input(false);
 
   readonly inputValue = signal('');
 

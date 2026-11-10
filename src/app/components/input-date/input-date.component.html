@@ -1,5 +1,7 @@
-<div class="app-input-date" [class]="'app-input-date app-input-date--' + color() + ' app-input-date--' + size() + ' ' + cssClass()">
-  @if (showExternalLabel()) {
+<div
+  class="app-input-date"
+  [class]="'app-input-date app-input-date--' + color() + ' app-input-date--' + size() + ' ' + cssClass()"
+  [class.app-input-date--fecha-compacta]="fechaCompacta()">  @if (showExternalLabel()) {
     <app-label class="text-truncate" [texto]="visibleLabel()" [title]="label_title()" [forId]="id()" [required]="required()" [size]="size() === 'xs' ? 'sm' : 'md'" (click)="on_label_click($event)"></app-label>
   }
 
@@ -8,6 +10,7 @@
     #input_control
     class="form-control app-input-date__control"
     [class.is-invalid]="hasError()"
+    [class.app-input-date__control--empty]="!inputValue() && fechaCompacta()"
     [id]="id()"
     [type]="type()"
     [name]="name()"

@@ -45,3 +45,19 @@
 .app-input-date--purple { --app-input-date-color: var(--palette-purple); }
 .app-input-date--fuchsia { --app-input-date-color: var(--palette-fuchsia); }
 
+.app-input-date--fecha-compacta {
+  .app-input-date__control--empty {
+    &::-webkit-datetime-edit {
+      font-size: 0.65rem;
+      opacity: 0.45;
+    }
+
+    &::-webkit-datetime-edit-text,
+    &::-webkit-datetime-edit-day-field,
+    &::-webkit-datetime-edit-month-field,
+    &::-webkit-datetime-edit-year-field {
+      font-size: 0.65rem;
+      color: var(--palette-gray-400);
+    }
+  }
+}

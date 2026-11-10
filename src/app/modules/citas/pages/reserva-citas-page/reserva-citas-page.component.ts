@@ -18,6 +18,7 @@ import { InputFilterComponent } from '../../../../components/input-filter/input-
 export class ReservaCitasPageComponent {
 
 
+
   readonly afiliados = signal<AfiliadoReserva[]>([
     // datos temporales de prueba
     {
@@ -52,28 +53,60 @@ export class ReservaCitasPageComponent {
     },
   ]);
 
-  readonly ipressSeleccionada = signal<{
-    codigo: string;
-    nombre: string;
-    imagen: string;
-  } | null>(null);
+ // DATOS DE PRUEBA MEDICOS
 
-  seleccionarIpress(sede: {
-    codigo: string;
-    nombre: string;
-    imagen: string;
-  }): void {
-    this.ipressSeleccionada.set(sede);
-    this.avanzarPaso();
-  }
-
+  readonly medicos = signal([
+    {
+      codigo: 'MED001',
+      nombreCompleto: 'MÉDICO DE PRUEBA UNO',
+      cmp: '00001',
+      especialidad: 'TRAUMATOLOGÍA GENERAL',
+      fotoUrl: null as string | null
+    },
+    {
+      codigo: 'MED002',
+      nombreCompleto: 'MÉDICO DE PRUEBA DOS',
+      cmp: '00002',
+      especialidad: 'TRAUMATOLOGÍA GENERAL',
+      fotoUrl: null as string | null
+    },
+    {
+      codigo: 'MED003',
+      nombreCompleto: 'MÉDICO DE PRUEBA TRES',
+      cmp: '00003',
+      especialidad: 'TRAUMATOLOGÍA INFATIL',
+      fotoUrl: null as string | null
+    },
+    {
+      codigo: 'MED004',
+      nombreCompleto: 'MÉDICO DE PRUEBA CUATRO',
+      cmp: '00004',
+      especialidad: 'TRAUMATOLOGÍA GENERAL',
+      fotoUrl: null as string | null
+    }
+  ]);
+  readonly ipressSeleccionada = signal<{codigo: string; nombre: string;imagen: string;} | null>(null);
+  readonly medicoSeleccionado = signal<{ codigo: string; nombreCompleto: string; cmp: string; fotoUrl: string | null } | null>(null);
   // Etapa actual
   readonly pasoActual = signal(1);
   readonly afiliadoSeleccionado = signal<AfiliadoReserva | null>(null);
   readonly busquedaEspecialidad = signal('');
+  readonly especialidadSeleccionada = signal<{codigo: string; nombre: string;imagen: string; } | null>(null);
 
   // Última etapa habilitada
   readonly pasoHabilitado = signal(1);
+
+  seleccionarMedico(medico: {codigo: string; nombreCompleto: string;cmp: string; fotoUrl: string | null;especialidad: string | null;}): void {
+    this.medicoSeleccionado.set(medico);
+    this.avanzarPaso();
+  }
+
+  seleccionarIpress(sede: {codigo: string;nombre: string;imagen: string;}): void {
+    this.ipressSeleccionada.set(sede);
+    this.avanzarPaso();
+  }
+
+
 
   // Etapas del proceso
   readonly pasos = computed<TabItem[]>(() => {
@@ -92,10 +125,7 @@ export class ReservaCitasPageComponent {
 
   // Pasos completados
   readonly pasosCompletados = computed(() =>
-    Array.from(
-      { length: this.pasoActual() - 1 },
-      (_, index) => String(index + 1)
-    )
+    Array.from({ length: this.pasoActual() - 1 },(_, index) => String(index + 1))
   );
 
   // Cambiar de etapa
@@ -145,6 +175,7 @@ export class ReservaCitasPageComponent {
     const afiliado = this.afiliadoSeleccionado();
     const tipo = this.tipoAtencionSeleccionado();
     const sede = this.ipressSeleccionada();
+    const especialidad = this.especialidadSeleccionada();
 
     if (paso >= 2 && afiliado) {
       items.push({label: `AFILIADO: ${afiliado.nombreCompleto}`});
@@ -157,6 +188,14 @@ export class ReservaCitasPageComponent {
 
     if (paso >= 4 && sede) {
       items.push({label: `IPRESS: ${sede.nombre}`
+      });
+    }
+    if (paso >= 5 && especialidad) {
+      items.push({label: `ESPECIALIDAD: ${especialidad.nombre}`
+      });
+    }
+    if (paso >= 6 && especialidad) {
+      items.push({label: `ESPECIALIDAD: ${especialidad.nombre}`
       });
     }
 
@@ -200,17 +239,9 @@ export class ReservaCitasPageComponent {
     return this.especialidades().filter(especialidad =>especialidad.nombre.toLocaleLowerCase('es').includes(busqueda));
   });
 
-  readonly especialidadSeleccionada = signal<{
-    codigo: string;
-    nombre: string;
-    imagen: string;
-  } | null>(null);
 
-  seleccionarEspecialidad(especialidad: {
-    codigo: string;
-    nombre: string;
-    imagen: string;
-  }): void {
+
+  seleccionarEspecialidad(especialidad: {codigo: string;nombre: string;imagen: string; }): void {
     this.especialidadSeleccionada.set(especialidad);
     this.avanzarPaso();
   }

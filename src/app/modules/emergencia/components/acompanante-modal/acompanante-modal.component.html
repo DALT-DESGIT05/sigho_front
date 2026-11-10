@@ -1,0 +1,191 @@
+<app-modal
+  #acompananteModal
+  title="HCE - EMERGENCIA: Acompañante"
+  icon="fa-solid fa-user"
+  size="xl"
+  [scrollable]="true"
+  [keyboard]="false"
+  [ignoreBackdropClick]="true"
+  [separateFromParent]="separateFromParent()"
+  [showCloseButton]="!guardando()"
+  [showFooter]="true"
+>
+  <form class="companion-form">
+    <app-card-general title="Registro del Acompañante" headerClass="companion-panel-header">
+      <div card-header-actions class="companion-header-actions">
+        <app-check
+          label="FAP"
+          color="secondary"
+          size="sm"
+          [checked]="acompanante_model().fap"
+          (checkedChange)="cambiar_fap($event)"
+        />
+        <app-check
+          label="EXTRAFAP"
+          color="secondary"
+          size="sm"
+          [checked]="acompanante_model().extrafap"
+          (checkedChange)="cambiar_extrafap($event)"
+        />
+      </div>
+
+      <div class="row align-items-end g-2 companion-search">
+        <div class="col-12 col-md-6">
+          <app-input-group
+            label="DNI, NSA, Pasaporte"
+            size="sm"
+            color="primary"
+            [projectedControl]="true"
+          >
+            <app-auto-complete
+              input-group-control
+              [showLabel]="false"
+              size="sm"
+              color="primary"
+              placeholder="Buscar por documento, apellidos o nombres"
+              [dataSource]="buscar_acompanantes"
+              valueKey="id"
+              labelKey="label"
+              [minLength]="3"
+              (optionSelected)="seleccionar_acompanante($event)"
+              (cleared)="limpiar_acompanante()"
+            />
+          </app-input-group>
+        </div>
+      </div>
+
+      <div class="companion-grid">
+          <app-select
+          size="sm"
+          class="field-document"
+          label="Documento"
+          placeholder="-- Seleccione --"
+          [options]="tipoDocumentoOptions()"
+          [showEmptyOption]="true"
+          emptyOptionLabel="-- Seleccione --"
+          [selectedValue]="acompanante_model().tipoDocumentoId"
+          (selectedValueChange)="actualizar_documento($event)"
+          [required]="true"
+          [invalid]="
+            acompanante_form.tipoDocumentoId().touched() &&
+            acompanante_form.tipoDocumentoId().invalid()
+          "
+        />
+        <app-input-text
+          size="sm"
+          class="field-number"
+          label="Nº"
+          [value]="acompanante_model().numero"
+          (valueChange)="actualizar_texto('numero', $event)"
+          [maxlength]="45"
+          [required]="true"
+          [invalid]="acompanante_form.numero().touched() && acompanante_form.numero().invalid()"
+        />
+
+        <app-input-text
+          size="sm"
+          label="Apellido Paterno"
+          [value]="acompanante_model().apellidoPaterno"
+          (valueChange)="actualizar_texto('apellidoPaterno', $event)"
+          [maxlength]="60"
+          [required]="true"
+          [invalid]="
+            acompanante_form.apellidoPaterno().touched() &&
+            acompanante_form.apellidoPaterno().invalid()
+          "
+        />
+        <app-input-text
+          size="sm"
+          label="Apellido Materno"
+          [value]="acompanante_model().apellidoMaterno"
+          (valueChange)="actualizar_texto('apellidoMaterno', $event)"
+          [maxlength]="60"
+          [required]="true"
+          [invalid]="
+            acompanante_form.apellidoMaterno().touched() &&
+            acompanante_form.apellidoMaterno().invalid()
+          "
+        />
+        <app-input-text
+          size="sm"
+          label="Nombres"
+          [value]="acompanante_model().nombres"
+          (valueChange)="actualizar_texto('nombres', $event)"
+          [maxlength]="80"
+          [required]="true"
+          [invalid]="acompanante_form.nombres().touched() && acompanante_form.nombres().invalid()"
+        />
+        <app-select
+          size="sm"
+          label="Sexo"
+          placeholder="-- Seleccione --"
+          [options]="sexoOptions()"
+          [showEmptyOption]="true"
+          emptyOptionLabel="-- Seleccione --"
+          [selectedValue]="acompanante_model().sexoCodigo"
+          (selectedValueChange)="actualizar_sexo($event)"
+          [required]="true"
+          [invalid]="
+            acompanante_form.sexoCodigo().touched() && acompanante_form.sexoCodigo().invalid()
+          "
+        />
+        <app-input-text
+           size="sm"
+           label="Fecha de nacimiento"
+           type="date"
+           [value]="acompanante_model().fechaNacimiento"
+           (valueChange)="actualizar_texto('fechaNacimiento', $event)"
+         />
+        <app-select
+          size="sm"
+          label="Parentesco"
+          placeholder="-- Seleccione --"
+          [options]="parentescoOptions()"
+          [showEmptyOption]="true"
+          emptyOptionLabel="-- Seleccione --"
+          [selectedValue]="acompanante_model().parentescoId"
+          (selectedValueChange)="actualizar_parentesco($event)"
+          [required]="true"
+          [invalid]="
+            acompanante_form.parentescoId().touched() && acompanante_form.parentescoId().invalid()
+          "
+        />
+
+        <app-input-text
+          size="sm"
+          label="Celular"
+          [value]="acompanante_model().celular"
+          (valueChange)="actualizar_texto('celular', $event)"
+          [maxlength]="20"
+        />
+        <app-input-text
+          size="sm"
+          class="field-email"
+          label="Correo Electrónico"
+          type="email"
+          [value]="acompanante_model().correoElectronico"
+          (valueChange)="actualizar_texto('correoElectronico', $event)"
+          [invalid]="
+            acompanante_form.correoElectronico().touched() &&
+            acompanante_form.correoElectronico().invalid()
+          "
+        />
+      </div>
+    </app-card-general>
+  </form>
+
+  <div modal-footer>
+    <app-button
+      action="save"
+      size="sm"
+      [loading]="guardando()"
+      (clicked)="guardar()"
+    />
+    <app-button
+      action="close"
+      size="sm"
+      [disabled]="guardando()"
+      (clicked)="cerrar_modal()"
+    />
+  </div>
+</app-modal>

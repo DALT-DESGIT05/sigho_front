@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, OnChanges, SimpleChanges, input, inject, output, signal, viewChild } from '@angular/core';
-import { disabled, form, FormField, required } from '@angular/forms/signals';
-import { UsuarioService } from '../../services/auth/usuario.service';
+import { Component, inject, output, signal, viewChild } from '@angular/core';
+import { disabled, form, FormField, pattern, required } from '@angular/forms/signals';
+import { PacienteService } from '../../services/emergencia/paciente.service';
 import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
 import { MESSAGE_ERROR_DEFAULT, TITLE_MODAL } from '../../config/constants';
 import { ButtonComponent } from '../button/button.component';
@@ -11,38 +11,31 @@ import { ModalComponent } from '../modal/modal.component';
   imports: [FormField, ButtonComponent, ModalComponent],
   templateUrl: './update-telefono-paciente.component.html', styleUrl: './update-telefono-paciente.component.scss',
 })
-export class UpdateTelefonoPacienteComponent implements OnChanges, AfterViewInit {
-  readonly input_telefono = input.required<string>();
-  readonly input_dni = input.required<string>();
+export class UpdateTelefonoPacienteComponent {
   readonly ouput_close = output<void>();
-  readonly ouput_save = output<void>();
+  readonly ouput_save = output<string>();
   readonly modal = viewChild<ModalComponent>('modal');
-  private readonly usuario_service = inject(UsuarioService);
-  private pendingOpen = false;
+  private readonly paciente_service = inject(PacienteService);
 
   readonly telefono_model = signal({ telefono: '' });
   readonly telefono_form = form(this.telefono_model, (schema) => {
     required(schema.telefono);
+    pattern(schema.telefono, /^[0-9]{7,15}$/);
     disabled(schema.telefono, { when: () => this.isCompleted() || this.isSaving() });
   });
   readonly isSaving = signal(false);
   readonly isCompleted = signal(false);
-  formulario = { modal: false, dni: '' };
+  formulario = { persona_id: 0, correo_actual: null as string | null };
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (!changes['input_telefono'] && !changes['input_dni']) return;
-    const telefono = this.input_telefono();
-    const dni = this.input_dni();
-    if (!dni.trim()) { this.pendingOpen = false; return; }
+  /** Abre el modal con los datos de contacto actuales del paciente. */
+  abrir(telefono_actual: string, persona_id: number, correo_actual: string | null): void {
     this.isSaving.set(false);
     this.isCompleted.set(false);
-    this.telefono_model.set({ telefono });
-    this.formulario.dni = dni;
-    this.pendingOpen = true;
-    this.openModalIfReady();
+    this.telefono_model.set({ telefono: telefono_actual });
+    this.formulario = { persona_id, correo_actual };
+    this.modal()?.open();
   }
 
-  ngAfterViewInit(): void { this.openModalIfReady(); }
   close_modal = (): void => { this.modal()?.close(); this.ouput_close.emit(); };
 
   btn_save(): void {
@@ -59,14 +52,18 @@ export class UpdateTelefonoPacienteComponent implements OnChanges, AfterViewInit
     this.isSaving.set(true);
     this.isCompleted.set(false);
     const telefono = this.telefono_model().telefono;
-    this.usuario_service.change_telefono_paciente(this.formulario.dni, telefono).subscribe({
+    this.paciente_service.actualizarContacto({
+      persona_id: this.formulario.persona_id,
+      celular: telefono,
+      correo_electronico: this.formulario.correo_actual,
+    }).subscribe({
       next: () => {
         this.isSaving.set(false);
         this.isCompleted.set(true);
         Swal.fire({ title: TITLE_MODAL, text: 'El teléfono se ha cambiado correctamente.', icon: 'success', timer: 1500, showConfirmButton: true })
           .then(() => {
             this.modal()?.close();
-            this.ouput_save.emit();
+            this.ouput_save.emit(telefono);
           });
       },
       error: (error) => {
@@ -77,11 +74,5 @@ export class UpdateTelefonoPacienteComponent implements OnChanges, AfterViewInit
         else if (error.status === 429) Swal.fire({ title: TITLE_MODAL, text: 'Cantidad de Intentos Superado. Espere 1 minuto', icon: 'error' });
       },
     });
-  }
-
-  private openModalIfReady(): void {
-    if (!this.pendingOpen || !this.modal()) return;
-    this.pendingOpen = false;
-    this.modal()!.open();
   }
 }

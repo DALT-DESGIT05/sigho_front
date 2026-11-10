@@ -1,0 +1,70 @@
+@if (visible()) {
+  <aside
+    class="menu-flotante"
+    [class.menu-flotante--cerrado]="!estaAbierto()"
+    [class.menu-flotante--sidebar-oculto]="sidebarOculto()"
+    [style.--menu-flotante-top]="topOffset()"
+    [style.--menu-flotante-width]="sidebarWidth()"
+    [style.--menu-flotante-bottom]="bottomOffset()"
+    [attr.aria-label]="titulo()">
+    @if (estaAbierto()) {
+      <div class="menu-flotante__panel">
+        <div class="sidebar-brand">
+          <a class="sidebar-brand-link" routerLink="/" aria-label="Ir al inicio">
+            <img src="assets/images/escudo_fap.png" alt="FAP" />
+            <span class="sidebar-brand-copy">
+              <strong>SIGHO WEB FAP</strong>
+              <small>Sistema de Gestión Hospitalaria</small>
+            </span>
+          </a>
+          @if (mostrarBotonColapsar()) {
+            <button
+              class="menu-flotante__toggle"
+              type="button"
+              (click)="alternar()"
+              aria-label="Minimizar menú"
+              title="Minimizar menú"
+            >
+              <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+            </button>
+          }
+        </div>
+
+        @if (codigo() || etiqueta()) {
+          <div class="menu-flotante__single-header">
+            @if (codigo()) {
+              <span class="menu-flotante__single-title">{{ codigo() }}</span>
+            }
+            @if (etiqueta()) {
+              <span class="menu-flotante__single-subtitle">{{ etiqueta() }}</span>
+            }
+          </div>
+        }
+
+        <nav class="menu-flotante__options" [attr.aria-label]="'Opciones de ' + titulo()">
+          @for (opcion of opciones(); track opcion.id) {
+            @if (opcion.visible !== false) {
+              <button
+                class="menu-flotante__option"
+                [class.menu-flotante__option--destacada]="opcion.variant === 'destacada'"
+                [class.menu-flotante__option--advertencia]="opcion.variant === 'advertencia'"
+                [class.menu-flotante__option--inferior]="opcion.posicion === 'inferior'"
+                type="button"
+                [disabled]="opcion.disabled === true"
+                [attr.title]="opcion.tooltip || null"
+                (click)="seleccionarOpcion(opcion)">
+                <i class="menu-flotante__option-icon" [class]="opcion.icon" aria-hidden="true"></i>
+                <span>{{ opcion.label }}</span>
+              </button>
+            }
+          }
+        </nav>
+      </div>
+    } @else {
+      <button class="menu-flotante__reopen" type="button" (click)="alternar()" [attr.aria-label]="'Desplegar ' + titulo()" title="Desplegar menú">
+        <i class="fa-solid fa-bars" aria-hidden="true"></i>
+        <span class="menu-flotante__reopen-label">{{ codigo() || titulo() }}</span>
+      </button>
+    }
+  </aside>
+}

@@ -1,0 +1,14 @@
+:host { display: block; }
+
+.app-stepper { align-items: center; background: var(--palette-white); border: 1px solid var(--palette-gray-200); border-radius: .5rem; display: flex; gap: .35rem; justify-content: center; padding: .4rem .75rem; }
+.app-stepper__step { align-items: center; color: var(--palette-gray-600); display: flex; font-size: .82rem; font-weight: 600; gap: .4rem; }
+.app-stepper__number { align-items: center; background: var(--palette-gray-200); border-radius: 50%; color: var(--palette-gray-700); display: flex; font-size: .78rem; font-weight: 600; height: 1.5rem; justify-content: center; width: 1.5rem; }
+.app-stepper__step--active, .app-stepper__step--completed { color: var(--palette-primary-fap-text); }
+.app-stepper__step--active .app-stepper__number, .app-stepper__step--completed .app-stepper__number { background: var(--palette-primary-fap); color: var(--palette-white); }
+.app-stepper__connector { background: var(--palette-gray-200); height: 2px; margin: 0 .55rem; max-width: 5rem; width: 100%; }
+.app-stepper__connector--done { background: var(--palette-primary-fap-300); }
+
+@media (max-width: 600px) {
+  .app-stepper { align-items: flex-start; flex-direction: column; gap: .35rem; padding: .5rem .65rem; }
+  .app-stepper__connector { height: .75rem; margin: -.2rem 0 -.2rem .75rem; width: 2px; }
+}

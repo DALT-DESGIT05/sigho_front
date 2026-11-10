@@ -1,0 +1,247 @@
+<div class="tab-pane-content apoyo-diagnostico-pane">
+  <div class="apoyo-imagen-categorias row g-2 mb-3">
+    @for (categoria of categorias_apoyo_imagen; track categoria.id) {
+      <div class="col-12 col-sm-6 col-lg">
+        <button
+          type="button"
+          class="apoyo-imagen-cat-btn"
+          [class.is-selected]="categoria_apoyo_imagen() === categoria.id"
+          (click)="seleccionar_categoria_apoyo_imagen(categoria.id)"
+        >
+          <span class="apoyo-imagen-cat-label">{{ categoria.nombre }}</span>
+          <i [class]="categoria.icono" aria-hidden="true"></i>
+        </button>
+      </div>
+    }
+  </div>
+  <section class="clinical-section-card">
+    <div class="clinical-list-header">
+      <div class="clinical-title-actions">
+        <h3>
+          {{ categoria_apoyo_imagen_actual()?.nombre || 'Solicitudes de imágenes' }}
+        </h3>
+        <app-button
+          action="create"
+          color="primary"
+          size="sm"
+          [soloIcono]="true"
+          title="Agregar solicitud de imágenes"
+          [disabled]="!habilitado() || !categoria_apoyo_imagen()"
+          (clicked)="abrir_modal()"
+        />
+      </div>
+      <div class="clinical-list-header-actions">
+        @if (ordenes_imagen().length > 0) {
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm"
+            title="Generar orden de apoyo diagnóstico"
+            aria-label="Generar orden de apoyo diagnóstico"
+            (click)="imprimir_orden()"
+          >
+            Generar orden <i class="fa fa-print" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ÁREA</th>
+            <th>ESTUDIO</th>
+            <th>DIAGNÓSTICO</th>
+            <th>PRIORIDAD</th>
+            <th>ESTADO</th>
+            <th>CONTRASTE</th>
+            <th>FECHA</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (cargando()) {
+            <tr>
+              <td colspan="7" class="text-center text-muted">Consultando solicitudes...</td>
+            </tr>
+          } @else if (ordenes_imagen().length === 0) {
+            <tr>
+              <td colspan="7" class="legacy-empty-state">
+                No se han registrado solicitudes de imágenes.
+              </td>
+            </tr>
+          } @else {
+            @for (orden of ordenes_imagen(); track orden.imagen_id) {
+              <tr>
+                <td>{{ orden.area_nombre || '-' }}</td>
+                <td>{{ orden.servicio_nombre || orden.servicio_codigo }}</td>
+                <td>{{ orden.diagnostico_codigo }}</td>
+                <td>{{ orden.prioridad_nombre }}</td>
+                <td>{{ orden.estado_imagen_nombre }}</td>
+                <td>{{ orden.requiere_contraste ? 'Sí' : 'No' }}</td>
+                <td>{{ orden.fecha_hora_orden }}</td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Área de impresión oculta -->
+  <div class="apoyo-print-area" aria-hidden="true">
+    <div #orden_impresion_apoyo class="laboratory-print-document">
+      <header class="laboratory-print-header">
+        <h4>Orden de apoyo diagnóstico</h4>
+        <p>Paciente: {{ pacienteNombre() }}</p>
+        <p>Historia clínica: {{ pacienteHistoria() }}</p>
+        @if (ordenes_imagen().length > 0) {
+          <p>Fecha de solicitud: {{ ordenes_imagen()[0].fecha_hora_orden }}</p>
+        }
+      </header>
+      <table>
+        <thead>
+          <tr>
+            <th>Área</th>
+            <th>Estudio</th>
+            <th>Diagnóstico</th>
+            <th>Prioridad</th>
+            <th>Contraste</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (orden of ordenes_imagen(); track orden.imagen_id) {
+            <tr>
+              <td>{{ orden.area_nombre || '-' }}</td>
+              <td>{{ orden.servicio_nombre || orden.servicio_codigo }}</td>
+              <td>{{ orden.diagnostico_codigo }}</td>
+              <td>{{ orden.prioridad_nombre }}</td>
+              <td>{{ orden.requiere_contraste ? 'Sí' : 'No' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<app-modal
+  #modal
+  title="Solicitud de imágenes"
+  icon="fa-solid fa-x-ray"
+  size="lg"
+  [showFooter]="true"
+>
+  <div class="row g-3">
+    <div class="col-12 position-relative">
+      @if (servicio_imagen_seleccionado()) {
+        <app-label texto="Estudio de imágenes" [required]="true" color="primary" />
+        <div class="selected-diagnostico">
+          <strong>{{ servicio_imagen_seleccionado()!.codigo }}</strong>
+          <span>{{ servicio_imagen_seleccionado()!.nombre }}</span>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Quitar estudio seleccionado"
+            [disabled]="!habilitado() || guardando()"
+            (click)="limpiar_formulario()"
+          ></button>
+        </div>
+      } @else {
+        <app-auto-complete
+          label="Estudio de imágenes"
+          [required]="true"
+          [placeholder]="
+            'Buscar dentro de ' + (categoria_apoyo_imagen_actual()?.nombre || 'imágenes') + '...'
+          "
+          [dataSource]="buscar_servicio_imagen_datasource"
+          [displayWith]="mostrar_servicio_imagen"
+          [minLength]="2"
+          [debounceTime]="400"
+          size="md"
+          (optionSelected)="seleccionar_servicio_imagen($event)"
+        />
+      }
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Diagnóstico relacionado</label>
+      <select
+        class="form-select"
+        [value]="diagnostico_apoyo_id() ?? ''"
+        [disabled]="!habilitado() || guardando()"
+        (change)="actualizar_diagnostico($event)"
+      >
+        <option value="">-- Seleccione diagnóstico --</option>
+        @for (diagnostico of diagnosticos(); track diagnostico.diagnostico_id) {
+          <option [value]="diagnostico.diagnostico_id">
+            {{ diagnostico.codigo }} - {{ diagnostico.descripcion }}
+          </option>
+        }
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Prioridad</label>
+      <select
+        class="form-select"
+        [value]="prioridad_apoyo_id() ?? ''"
+        [disabled]="!habilitado() || guardando()"
+        (change)="actualizar_prioridad($event)"
+      >
+        <option value="">-- Seleccione prioridad --</option>
+        @for (prioridad of prioridades_orden(); track prioridad.prioridad_id) {
+          <option [value]="prioridad.prioridad_id">{{ prioridad.nombre }}</option>
+        }
+      </select>
+    </div>
+    <div class="col-12">
+      <app-label texto="Datos clínicos" color="primary" />
+      <input
+        type="text"
+        class="form-control"
+        maxlength="2000"
+        placeholder="Indicación clínica del estudio..."
+        [value]="datos_clinicos_apoyo()"
+        [disabled]="!habilitado() || guardando()"
+        (input)="actualizar_datos_clinicos($event)"
+      />
+    </div>
+    <div class="col-md-8">
+      <app-label texto="Observación" color="primary" />
+      <input
+        type="text"
+        class="form-control"
+        maxlength="2000"
+        placeholder="Observación opcional..."
+        [value]="observacion_apoyo()"
+        [disabled]="!habilitado() || guardando()"
+        (input)="actualizar_observacion($event)"
+      />
+    </div>
+    <div class="col-md-4 d-flex align-items-end">
+      <label class="legacy-choice w-100">
+        <input
+          type="checkbox"
+          [checked]="requiere_contraste()"
+          [disabled]="!habilitado() || guardando()"
+          (change)="actualizar_contraste($event)"
+        />
+        Requiere contraste
+      </label>
+    </div>
+  </div>
+  <div modal-footer>
+    <app-button
+      texto="Agregar"
+      action="save"
+      color="primary"
+      size="sm"
+      [loading]="guardando()"
+      [disabled]="
+        !habilitado() ||
+        !servicio_imagen_seleccionado() ||
+        prioridad_apoyo_id() === null ||
+        diagnostico_apoyo_id() === null
+      "
+      (clicked)="guardar()"
+    />
+    <app-button action="close" size="sm" (clicked)="cerrar_modal()" />
+  </div>
+</app-modal>

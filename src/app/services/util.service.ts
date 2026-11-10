@@ -2,6 +2,7 @@
 import { AbstractControl, FormGroup } from '@angular/forms';
 import { PaletteColor } from '../interfaces/util.interface';
 import { Paginado } from '../interfaces/response.interface';
+import { CatalogoParametroClinico } from '../interfaces/emergencia/catalogo-emergencia.interface';
 import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
 import { MESSAGE_ERROR_DEFAULT, TITLE_MODAL } from '../config/constants';
 
@@ -407,50 +408,129 @@ export class UtilService {
     }
   }
 
-  temperature_status(valor: any): PaletteColor {
+  temperature_status(valor: any, edad?: number): PaletteColor {
     const numero = Number(this.clear_number(valor).toFixed(2));
 
     if (numero === 0) return 'secondary';
-    if (numero < 35 || numero >= 38.5) return 'danger';
-    if (numero >= 36 && numero <= 37.5) return 'success';
+
+    if (edad !== undefined && edad < 1 && numero >= 38.0) {
+      return 'danger';
+    }
+
+    if (numero < 35.0 || numero > 39.0) return 'danger';
+    if (numero >= 36.0 && numero <= 37.9) return 'success';
 
     return 'warning';
   }
 
-  heart_rate_status(valor: any): PaletteColor {
-    const numero = Number(this.clear_number(valor).toFixed(2));
+  heart_rate_status(valor: any, edad?: number): PaletteColor {
+    const numero = Number(this.clear_number(valor).toFixed(0));
 
     if (numero === 0) return 'secondary';
-    if (numero < 50 || numero > 120) return 'danger';
+
+    if (edad !== undefined) {
+      if (edad < 1) {
+        if (numero < 90 || numero > 180) return 'danger';
+        if (numero >= 110 && numero <= 160) return 'success';
+        return 'warning';
+      }
+      if (edad >= 1 && edad <= 2) {
+        if (numero < 85 || numero > 165) return 'danger';
+        if (numero >= 100 && numero <= 150) return 'success';
+        return 'warning';
+      }
+      if (edad >= 3 && edad <= 5) {
+        if (numero < 80 || numero > 155) return 'danger';
+        if (numero >= 95 && numero <= 140) return 'success';
+        return 'warning';
+      }
+      if (edad >= 6 && edad <= 12) {
+        if (numero < 70 || numero > 135) return 'danger';
+        if (numero >= 80 && numero <= 120) return 'success';
+        return 'warning';
+      }
+      if (edad >= 13 && edad <= 17) {
+        if (numero < 50 || numero > 120) return 'danger';
+        if (numero >= 60 && numero <= 100) return 'success';
+        return 'warning';
+      }
+    }
+
+    if (numero <= 40 || numero >= 130) return 'danger';
     if (numero >= 60 && numero <= 100) return 'success';
 
     return 'warning';
   }
 
-  respiratory_rate_status(valor: any): PaletteColor {
+  respiratory_rate_status(valor: any, edad?: number): PaletteColor {
     const numero = Number(this.clear_number(valor).toFixed(0));
 
     if (numero === 0) return 'secondary';
-    if (numero < 10 || numero >= 25) return 'danger';
+
+    if (edad !== undefined) {
+      if (edad < 1) {
+        if (numero < 25 || numero > 50) return 'danger';
+        if (numero >= 30 && numero <= 40) return 'success';
+        return 'warning';
+      }
+      if (edad >= 1 && edad <= 2) {
+        if (numero < 20 || numero > 45) return 'danger';
+        if (numero >= 25 && numero <= 35) return 'success';
+        return 'warning';
+      }
+      if (edad >= 3 && edad <= 5) {
+        if (numero < 20 || numero > 40) return 'danger';
+        if (numero >= 25 && numero <= 30) return 'success';
+        return 'warning';
+      }
+      if (edad >= 6 && edad <= 12) {
+        if (numero < 15 || numero > 35) return 'danger';
+        if (numero >= 20 && numero <= 25) return 'success';
+        return 'warning';
+      }
+      if (edad >= 13 && edad <= 17) {
+        if (numero < 12 || numero > 28) return 'danger';
+        if (numero >= 15 && numero <= 20) return 'success';
+        return 'warning';
+      }
+    }
+
+    if (numero <= 8 || numero >= 30) return 'danger';
     if (numero >= 12 && numero <= 20) return 'success';
 
     return 'warning';
   }
-  systolic_status(valor: any): PaletteColor {
+
+  systolic_status(valor: any, edad?: number): PaletteColor {
     const numero = Number(this.clear_number(valor).toFixed(0));
 
     if (numero === 0) return 'secondary';
+
+    if (edad !== undefined && edad < 18) {
+      const pasMinima = Math.max(60, 70 + 2 * Math.min(edad, 10));
+      if (numero < pasMinima || numero >= 140) return 'danger';
+      if (numero >= pasMinima + 10 && numero <= 120) return 'success';
+      return 'warning';
+    }
+
     if (numero < 90 || numero >= 180) return 'danger';
     if (numero >= 100 && numero <= 139) return 'success';
 
     return 'warning';
   }
 
-  diastolic_status(valor: any): PaletteColor {
+  diastolic_status(valor: any, edad?: number): PaletteColor {
     const numero = Number(this.clear_number(valor).toFixed(0));
 
     if (numero === 0) return 'secondary';
-    if (numero < 60 || numero >= 110) return 'danger';
+
+    if (edad !== undefined && edad < 18) {
+      if (numero < 40 || numero >= 90) return 'danger';
+      if (numero >= 50 && numero <= 80) return 'success';
+      return 'warning';
+    }
+
+    if (numero < 50 || numero >= 120) return 'danger';
     if (numero >= 60 && numero <= 89) return 'success';
 
     return 'warning';
@@ -460,18 +540,8 @@ export class UtilService {
     const numero = Number(this.clear_number(valor).toFixed(0));
 
     if (numero === 0) return 'secondary';
-    if (numero < 90) return 'danger';
+    if (numero < 92) return 'danger';
     if (numero >= 95) return 'success';
-
-    return 'warning';
-  }
-
-  glasgow_status(valor: any): PaletteColor {
-    const numero = Number(this.clear_number(valor).toFixed(0));
-
-    if (numero === 0) return 'secondary';
-    if (numero <= 12) return 'danger';
-    if (numero === 15) return 'success';
 
     return 'warning';
   }
@@ -521,13 +591,97 @@ export class UtilService {
     return 'Obesidad grado III';
   }
 
+  /** `talla` llega en centímetros desde los formularios de signos vitales. */
   calculate_imc(peso: any, talla: any): number {
     const pesoNumero = Number(this.clear_number(peso).toFixed(2));
     const tallaNumero = Number(this.clear_number(talla).toFixed(2));
 
     if (!pesoNumero || !tallaNumero) {return 0;}
 
-    return Number((pesoNumero / (tallaNumero * tallaNumero)).toFixed(2));
+    const tallaEnMetros = tallaNumero / 100;
+
+    return Number((pesoNumero / (tallaEnMetros * tallaEnMetros)).toFixed(2));
+  }
+
+  /** Color de badge/estado (PaletteColor) para un nombre de color de catálogo
+   *  (ROJO/NARANJA/AMARILLO/VERDE/AZUL). AZUL usa 'primary' porque, en la paleta
+   *  del proyecto, --palette-primary (#0d6efd) es el azul real; --palette-info
+   *  (#0dcaf0) es celeste/cian, no azul. Devuelve null si el nombre no coincide
+   *  con ningún color conocido. */
+  color_alerta(nombreColor: string): PaletteColor | null {
+    const color = this.to_upper(nombreColor);
+    if (color === 'ROJO') return 'danger';
+    if (color === 'VERDE') return 'success';
+    if (color === 'AMARILLO' || color === 'NARANJA') return 'warning';
+    if (color === 'AZUL') return 'primary';
+    return null;
+  }
+
+  /** Color literal (para los indicadores de prioridad de triaje) a partir del
+   *  nombre de color de catálogo. No es un PaletteColor: estos indicadores usan
+   *  su propia paleta de clases CSS (priority-option--red, etc.). */
+  color_prioridad(nombreColor: string): string {
+    const color = this.to_upper(nombreColor);
+    if (color === 'ROJO') return 'red';
+    if (color === 'NARANJA') return 'orange';
+    if (color === 'AMARILLO') return 'yellow';
+    if (color === 'VERDE') return 'green';
+    if (color === 'AZUL') return 'blue';
+    return 'gray';
+  }
+
+  /**
+   * Resuelve el color de un signo vital usando el catálogo maestro: rangos normales por edad
+   * (m_rango_param_clin) y niveles de alerta (m_param_niv_alerta). Ambos ya vienen graduados
+   * por edad/severidad desde la base de datos. Devuelve null cuando el catálogo maestro no
+   * tiene información aplicable, para que el llamador recurra a un cálculo de respaldo
+   * (ver *_status de esta clase).
+   */
+  estado_desde_maestro(
+    codigo: string,
+    rawValue: string,
+    edad: number,
+    parametrosClinicos: readonly CatalogoParametroClinico[],
+  ): PaletteColor | null {
+    if (rawValue.trim() === '') return 'secondary';
+
+    const value = Number(rawValue);
+    if (!Number.isFinite(value)) return 'secondary';
+
+    const parametro = parametrosClinicos.find((item) => item.codigo === codigo);
+
+    const rangoNormal = parametro?.rangos_normales?.find(
+      (rango) =>
+        (rango.edad_minima === null || edad >= rango.edad_minima) &&
+        (rango.edad_maxima === null || edad <= rango.edad_maxima) &&
+        (rango.valor_minimo === null || value >= rango.valor_minimo) &&
+        (rango.valor_maximo === null || value <= rango.valor_maximo),
+    );
+    if (rangoNormal) {
+      return 'success';
     }
+
+    const alerta = parametro?.niveles_alerta.find(
+      (item) =>
+        (item.valor_minimo === null || value >= item.valor_minimo) &&
+        (item.valor_maximo === null || value <= item.valor_maximo),
+    );
+    if (!alerta) return null;
+
+    const colorAlerta = this.color_alerta(alerta.color ?? '');
+    if (colorAlerta) return colorAlerta;
+
+    const severidad = this.to_upper(alerta.severidad ?? '');
+    if (severidad === 'ALTA') return 'danger';
+    if (severidad === 'MEDIA') return 'warning';
+    if (severidad === 'BAJA') return 'success';
+
+    return alerta.genera_alerta ? 'warning' : 'success';
+  }
+
+  /** Clases para una app-progress-bars usada como indicador de alerta de un signo vital. */
+  progress_bar_classes(color: PaletteColor): string {
+    return `progress app-progress-bars app-progress-bars--${color} app-progress-bars--sm mt-1`;
+  }
 
 }

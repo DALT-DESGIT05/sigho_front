@@ -62,6 +62,11 @@ export class TableComponent<T extends object = object> {
 
   readonly tableRows = computed(() => this.page()?.data ?? this.rows());
 
+  rowTrack(index: number, row: T): unknown {
+    const key = this.rowSelectionKey(row);
+    return key ? key : index;
+  }
+
   readonly resolvedColumns = computed<TableColumn<T>[]>(() => {
     if (this.columns().length > 0) {
       return this.columns();
@@ -243,7 +248,33 @@ progressWidth(column: TableColumn<T>, row: T): string | number {
   }
 
   rowSelectionKey(row: T): string {
-    return String(this.valueFor(row, this.selectionKey()) ?? '');
+    const specified = this.valueFor(row, this.selectionKey());
+    if (specified !== undefined && specified !== null && specified !== '') {
+      return String(specified);
+    }
+    const fallbackKeys = [
+      'atencion_id',
+      'id_aten',
+      'id',
+      'codigo_episodio',
+      'imagen_id',
+      'id_orden_imag',
+      'laboratorio_id',
+      'orden_id',
+      'id_orden_medica',
+      'diagnostico_id',
+      'id_diagnostico',
+      'personal_id',
+      'id_persona',
+    ];
+    const record = row as Record<string, unknown>;
+    for (const key of fallbackKeys) {
+      const val = record[key];
+      if (val !== undefined && val !== null && val !== '') {
+        return String(val);
+      }
+    }
+    return '';
   }
 
   isSelected(row: T): boolean {

@@ -1,0 +1,226 @@
+:host {
+  display: block;
+}
+
+.triage-page,
+.triage-form {
+  display: grid;
+  gap: 1rem;
+}
+.triage-page--embedded {
+  gap: 0.75rem;
+}
+.triage-page h1 {
+  color: var(--palette-primary-fap-text);
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin: 0;
+}
+.triage-attention-grid {
+  align-items: flex-start;
+}
+.vital-sign-card {
+  min-width: 0;
+}
+.triage-critical-alert {
+  width: calc(100% - 0.5rem);
+}
+.imc-control {
+  align-items: end;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(10rem, 1fr) minmax(10rem, 0.75fr);
+}
+.imc-classification {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.imc-classification__label {
+  color: var(--palette-secondary-700);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.imc-classification__value {
+  align-items: center;
+  background: var(--palette-secondary);
+  border-radius: 0.375rem;
+  color: var(--palette-white);
+  display: flex;
+  font-size: 0.875rem;
+  justify-content: center;
+  min-height: 2.4rem;
+  padding: 0.375rem 0.75rem;
+  text-align: center;
+}
+.imc-classification__value--success {
+  background: var(--palette-success);
+}
+.imc-classification__value--warning {
+  background: var(--palette-warning);
+  color: var(--palette-gray-900);
+}
+.imc-classification__value--danger {
+  background: var(--palette-danger);
+}
+.imc-classification__value--info {
+  background: var(--palette-info);
+}
+
+.eva-control {
+  display: grid;
+  gap: 0.1rem;
+}
+.eva-control > label,
+.priority-fieldset legend {
+  color: var(--palette-secondary-700);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0;
+}
+.eva-layout {
+  align-items: start;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1fr) 4.25rem;
+}
+.eva-scale-track {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+}
+.eva-slider {
+  accent-color: var(--palette-primary-fap);
+  cursor: pointer;
+  display: block;
+  height: 2rem;
+  margin: 0;
+  width: 100%;
+}
+.eva-input-box {
+  width: 4.25rem;
+}
+:host ::ng-deep .eva-input-box .app-input-text__control {
+  font-weight: 600;
+  text-align: center;
+}
+.priority-fieldset {
+  border: 0;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+.priority-options {
+  display: flex;
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+}
+.priority-option {
+  cursor: pointer;
+  margin: 0;
+  position: relative;
+}
+.priority-option input {
+  height: 1px;
+  opacity: 0;
+  position: absolute;
+  width: 1px;
+}
+.priority-option span {
+  align-items: center;
+  background: var(--palette-gray-300);
+  border: 3px solid transparent;
+  border-radius: 50%;
+  color: var(--palette-gray-700);
+  display: flex;
+  font-size: 0.75rem;
+  font-weight: 700;
+  height: 2.45rem;
+  justify-content: center;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+  width: 2.45rem;
+}
+.priority-option:hover input:not(:checked) + span {
+  background: var(--palette-gray-400);
+  color: var(--palette-gray-900);
+}
+.priority-fieldset--invalid .priority-option span {
+  border-color: var(--palette-danger);
+}
+.priority-option input:checked + span {
+  box-shadow:
+    0 0 0 3px var(--palette-white),
+    0 0 0 5px currentColor;
+  transform: scale(0.92);
+}
+.priority-option input:focus-visible + span {
+  outline: 3px solid var(--palette-primary-200);
+  outline-offset: 2px;
+}
+.priority-option--red {
+  color: var(--palette-danger);
+}
+.priority-option--red input:checked + span {
+  background: var(--palette-danger);
+  color: var(--palette-white);
+}
+.priority-option--orange {
+  color: var(--palette-orange);
+}
+.priority-option--orange input:checked + span {
+  background: var(--palette-orange);
+  color: var(--palette-white);
+}
+.priority-option--yellow {
+  color: var(--palette-gold);
+}
+.priority-option--yellow input:checked + span {
+  background: var(--palette-warning);
+  color: var(--palette-gray-900);
+}
+.priority-option--green {
+  color: var(--palette-success);
+}
+.priority-option--green input:checked + span {
+  background: var(--palette-success);
+  color: var(--palette-white);
+}
+.priority-option--blue {
+  color: var(--palette-primary);
+}
+.priority-option--blue input:checked + span {
+  background: var(--palette-primary);
+  color: var(--palette-white);
+}
+.triage-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+@media (max-width: 600px) {
+  .triage-critical-alert {
+    width: 100%;
+  }
+
+  .imc-control {
+    grid-template-columns: 1fr;
+  }
+  .triage-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .triage-actions app-button {
+    width: 100%;
+  }
+  :host ::ng-deep .triage-actions .app-button {
+    width: 100%;
+  }
+}

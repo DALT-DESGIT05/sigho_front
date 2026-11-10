@@ -13,11 +13,23 @@
   gap: 0.85rem;
   max-width: 100%;
   padding: 0.85rem;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
   width: 100%;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .card-persona:hover {
+  // Fondo azul muy tenue de nuestra paleta
+  background-color: var(--palette-primary-fap-50);
+
+  // Borde azul suave
+  border-color: var(--palette-primary-fap-200, #c9def5);
+
+  // Elevación 3D original
   box-shadow: 0 0.65rem 1.35rem rgba(16, 24, 40, 0.14);
   transform: translateY(-0.2rem);
 }

@@ -1,0 +1,380 @@
+<div class="tab-pane-content laboratorio-pane">
+  <div class="clinical-list-header">
+    <div class="clinical-title-actions">
+      <h3 class="clinical-list-title">Exámenes de laboratorio</h3>
+      <app-button
+        action="create"
+        color="primary"
+        size="sm"
+        [soloIcono]="true"
+        title="Registrar examen de laboratorio"
+        (clicked)="abrir_modal_laboratorio()"
+      />
+    </div>
+    @if (ordenes_laboratorio().length > 0) {
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm"
+        title="Imprimir orden de laboratorio"
+        aria-label="Imprimir orden de laboratorio"
+        (click)="imprimir_orden_laboratorio()"
+      >
+        Imprimir orden <i class="fa fa-print" aria-hidden="true"></i>
+      </button>
+    }
+  </div>
+  <div class="laboratory-view-tabs" role="tablist" aria-label="Vistas de laboratorio">
+    <button
+      type="button"
+      class="laboratory-view-tab"
+      [class.active]="laboratorio_vista() === 'solicitudes'"
+      (click)="seleccionar_vista_laboratorio('solicitudes')"
+    >
+      Solicitudes
+    </button>
+    <button
+      type="button"
+      class="laboratory-view-tab"
+      [class.active]="laboratorio_vista() === 'historial'"
+      (click)="seleccionar_vista_laboratorio('historial')"
+    >
+      Historial
+    </button>
+    <button
+      type="button"
+      class="laboratory-view-tab"
+      [class.active]="laboratorio_vista() === 'resultados'"
+      (click)="seleccionar_vista_laboratorio('resultados')"
+    >
+      Resultados
+    </button>
+  </div>
+  @switch (laboratorio_vista()) {
+    @case ('solicitudes') {
+      <section class="clinical-section-card mt-3">
+        <legend>Laboratorio</legend>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>FECHA SOLICITUD</th>
+                <th>ÁREA</th>
+                <th>EXAMEN</th>
+                <th>PRIORIDAD</th>
+                <th>ESTADO</th>
+                <th class="text-center">ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (cargando_laboratorio()) {
+                <tr>
+                  <td colspan="6" class="text-center text-muted">
+                    Consultando órdenes de laboratorio...
+                  </td>
+                </tr>
+              } @else if (ordenes_laboratorio().length === 0) {
+                <tr>
+                  <td colspan="6" class="text-center text-muted">
+                    No se registran órdenes de laboratorio
+                  </td>
+                </tr>
+              } @else {
+                @for (orden of ordenes_laboratorio(); track orden.laboratorio_id) {
+                  <tr>
+                    <td>{{ orden.fecha_hora_orden || '-' }}</td>
+                    <td>{{ orden.area_nombre || '-' }}</td>
+                    <td>{{ orden.servicio_nombre || orden.servicio_codigo }}</td>
+                    <td>{{ orden.prioridad_nombre }}</td>
+                    <td>{{ orden.estado_laboratorio_nombre || orden.estado_nombre }}</td>
+                    <td class="text-center">
+                      <app-button
+                        action="delete"
+                        size="sm"
+                        [soloIcono]="true"
+                        title="Eliminar orden de laboratorio"
+                        [disabled]="!detalle().fecha_hora_llamada_med"
+                        (clicked)="eliminarLaboratorio.emit(orden.laboratorio_id)"
+                      />
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+    @case ('historial') {
+      <div class="row mt-3 laboratory-list-section">
+        <div class="col-12 table-responsive">
+          <table class="table table-sm table-bordered table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>FECHA SOLICITUD</th>
+                <th>N° ATENCIÓN</th>
+                <th>PRIORIDAD</th>
+                <th>EXAMEN</th>
+                <th>ÁREA</th>
+                <th>ESTADO</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (cargando_historial_laboratorio()) {
+                <tr>
+                  <td colspan="6" class="text-center text-muted">
+                    Consultando historial de laboratorio...
+                  </td>
+                </tr>
+              } @else if (historial_laboratorio().length === 0) {
+                <tr>
+                  <td colspan="6" class="text-center text-muted">
+                    No se registra historial de laboratorio para el paciente.
+                  </td>
+                </tr>
+              } @else {
+                @for (item of historial_laboratorio(); track item.orden_id) {
+                  @for (ex of item.examenes; track ex.laboratorio_id) {
+                    <tr>
+                      <td>{{ item.fecha_hora_orden || '-' }}</td>
+                      <td>{{ item.atencion_id }}</td>
+                      <td>{{ item.prioridad_nombre }}</td>
+                      <td>{{ ex.servicio_nombre || ex.servicio_codigo }}</td>
+                      <td>{{ ex.area_nombre || '-' }}</td>
+                      <td>{{ ex.estado_nombre || item.estado_nombre }}</td>
+                    </tr>
+                  }
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+    @case ('resultados') {
+      <div class="row mt-3 laboratory-list-section">
+        <div class="col-12 table-responsive">
+          <table class="table table-sm table-bordered table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>FECHA RESULTADO</th>
+                <th>N° REGISTRO</th>
+                <th>EXAMEN</th>
+                <th>SUB-EXAMEN</th>
+                <th>RESULTADO</th>
+                <th>UNIDADES</th>
+                <th>VALOR REFERENCIAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (cargando_resultados_laboratorio()) {
+                <tr>
+                  <td colspan="7" class="text-center text-muted">
+                    Consultando resultados de laboratorio...
+                  </td>
+                </tr>
+              } @else if (resultados_laboratorio().length === 0) {
+                <tr>
+                  <td colspan="7" class="text-center text-muted">
+                    No se registran resultados de laboratorio para la atención.
+                  </td>
+                </tr>
+              } @else {
+                @for (resultado of resultados_laboratorio(); track resultado.nro_registro) {
+                  @for (ex of resultado.examenes; track (ex.codigo_examen + ex.sub_examen)) {
+                    <tr>
+                      <td>{{ resultado.fecha_resultado || '-' }}</td>
+                      <td>{{ resultado.nro_registro }}</td>
+                      <td>{{ ex.examen }}</td>
+                      <td>{{ ex.sub_examen || '-' }}</td>
+                      <td><strong>{{ ex.resultado }}</strong></td>
+                      <td>{{ ex.unidades || '-' }}</td>
+                      <td>{{ ex.referencia || '-' }}</td>
+                    </tr>
+                  }
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
+
+  <div class="laboratory-print-area" aria-hidden="true">
+    <div #orden_impresion class="laboratory-print-document">
+      <header class="laboratory-print-header">
+        <h4>Orden de laboratorio</h4>
+        <p>Paciente: {{ detalle().paciente.nombre_completo }}</p>
+        <p>H.C.: {{ detalle().paciente.numero_historia || '-' }}</p>
+        <p>Atención: {{ detalle().atencion_id }}</p>
+      </header>
+      <div class="laboratory-print-content">
+        @for (area of areas_orden_laboratorio(); track area.nombre) {
+          <h5>{{ area.nombre }}</h5>
+          <table class="table table-sm table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>CÓDIGO</th>
+                <th>EXAMEN</th>
+                <th>PRIORIDAD</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (orden of area.ordenes; track orden.laboratorio_id) {
+                <tr>
+                  <td>{{ orden.servicio_codigo }}</td>
+                  <td>{{ orden.servicio_nombre || orden.servicio_codigo }}</td>
+                  <td>{{ orden.prioridad_nombre }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (laboratorio_modal_abierto()) {
+    <div class="laboratory-modal-backdrop" role="presentation">
+      <div
+        class="laboratory-catalog-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="laboratory-modal-title"
+      >
+        <div class="modal-header">
+          <h5 id="laboratory-modal-title" class="modal-title">Exámenes de Laboratorio</h5>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Cerrar"
+            (click)="cerrar_modal_laboratorio()"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="laboratory-catalog-layout">
+            <fieldset class="laboratory-fieldset laboratory-fieldset--areas">
+              <legend><i class="fa-solid fa-list-check" aria-hidden="true"></i>Áreas</legend>
+              <nav class="laboratory-area-nav" aria-label="Áreas de laboratorio">
+                <div class="laboratory-area-list">
+                  <button
+                    type="button"
+                    class="laboratory-area-item"
+                    [class.active]="laboratorio_area_activa() === null"
+                    (click)="seleccionar_area_laboratorio(null)"
+                  >
+                    <span class="laboratory-area-info">
+                      <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                      <span>Todas las áreas</span>
+                    </span>
+                    <span class="laboratory-area-count">{{ total_servicios_laboratorio() }}</span>
+                  </button>
+                  @for (area of areas_laboratorio(); track area.codigo) {
+                    <button
+                      type="button"
+                      class="laboratory-area-item"
+                      [class.active]="laboratorio_area_activa() === area.codigo"
+                      (click)="seleccionar_area_laboratorio(area.codigo)"
+                    >
+                      <span class="laboratory-area-info">
+                        <i class="fa-solid fa-vial" aria-hidden="true"></i>
+                        <span>{{ area.nombre }}</span>
+                      </span>
+                      <span class="laboratory-area-count">{{ area.servicios.length }}</span>
+                    </button>
+                  }
+                </div>
+              </nav>
+            </fieldset>
+
+            <fieldset class="laboratory-fieldset laboratory-fieldset--exams">
+              <legend><i class="fa-solid fa-vials" aria-hidden="true"></i>Exámenes Disponibles</legend>
+              <div class="laboratory-tab-content">
+                <div class="laboratory-search mb-3">
+                  <span class="laboratory-search-icon">
+                    <i class="fa fa-search" aria-hidden="true"></i>
+                  </span>
+                  <input
+                    type="search"
+                    class="form-control"
+                    placeholder="Buscar examen por código o descripción..."
+                    [value]="laboratorio_filtro()"
+                    (input)="actualizar_filtro_laboratorio($event)"
+                  />
+                </div>
+                <div class="row g-3 laboratory-service-columns">
+                  @for (columna of columnas_laboratorio(); track $index; let columna_index = $index) {
+                    <div class="col-12 col-xl-6">
+                      <ul class="list-group">
+                        @for (servicio of columna; let servicio_index = $index; track servicio.codigo) {
+                          <li class="list-group-item d-flex align-items-center">
+                            <span class="me-2">{{ indice_laboratorio(columna_index, servicio_index) + 1 }}.</span>
+                            <input
+                              type="checkbox"
+                              class="form-check-input me-2 mt-0"
+                              [checked]="servicio_laboratorio_marcado(servicio.codigo)"
+                              (change)="alternar_servicio_laboratorio($event, servicio.codigo)"
+                            />
+                            <span class="form-check-label">{{ servicio.codigo + ' - ' + servicio.nombre }}</span>
+                          </li>
+                        }
+                      </ul>
+                    </div>
+                  }
+                </div>
+              </div>
+            </fieldset>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="laboratory-footer-controls">
+            <div class="laboratory-control-group">
+              <label for="prioridad-laboratorio">Prioridad</label>
+              <select
+                id="prioridad-laboratorio"
+                class="form-select form-select-sm"
+                [value]="prioridad_laboratorio_id() ?? ''"
+                (change)="actualizar_prioridad_laboratorio($event)"
+              >
+                <option value="">-- Seleccione --</option>
+                @for (prioridad of prioridades_orden(); track prioridad.prioridad_id) {
+                  <option [value]="prioridad.prioridad_id">{{ prioridad.nombre }}</option>
+                }
+              </select>
+            </div>
+            <div class="laboratory-control-group laboratory-control-group--diagnostico">
+              <label for="diagnostico-laboratorio">Diagnóstico</label>
+              <select
+                id="diagnostico-laboratorio"
+                class="form-select form-select-sm"
+                [value]="diagnostico_laboratorio_id() ?? ''"
+                (change)="actualizar_diagnostico_laboratorio($event)"
+              >
+                <option value="">-- Seleccione diagnóstico --</option>
+                @for (diagnostico of diagnosticos(); track diagnostico.diagnostico_id) {
+                  <option [value]="diagnostico.diagnostico_id">
+                    {{ diagnostico.codigo }} - {{ diagnostico.descripcion }}
+                  </option>
+                }
+              </select>
+            </div>
+          </div>
+          <app-button
+            texto="Grabar"
+            action="save"
+            color="primary"
+            size="sm"
+            [disabled]="
+              guardando_laboratorio() ||
+              servicios_laboratorio_seleccionados().size === 0 ||
+              prioridad_laboratorio_id() === null ||
+              diagnostico_laboratorio_id() === null
+            "
+            (clicked)="guardar_laboratorio()"
+          />
+          <app-button texto="Cerrar" action="close" size="sm" (clicked)="cerrar_modal_laboratorio()" />
+        </div>
+      </div>
+    </div>
+  }
+</div>

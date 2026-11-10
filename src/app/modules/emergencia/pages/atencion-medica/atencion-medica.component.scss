@@ -1,0 +1,67 @@
+:host {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.medical-attention-page {
+  display: grid;
+  gap: 1rem;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.medical-attention-page app-card-general,
+.medical-attention-table-region,
+.medical-attention-table-region app-table {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.medical-attention-table-region {
+  overflow: hidden;
+}
+
+:host ::ng-deep .medical-attention-page .app-card-general,
+:host ::ng-deep .medical-attention-page .app-card-general__body {
+  max-width: 100%;
+  min-width: 0;
+}
+
+:host ::ng-deep .medical-attention-table-region .table-container,
+:host ::ng-deep .medical-attention-table-region .app-table {
+  max-width: 100%;
+  width: 100%;
+}
+
+:host ::ng-deep .medical-attention-table-region .priority-badge-solid {
+  border-color: transparent !important;
+  color: var(--palette-white) !important;
+  font-weight: 700;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+}
+:host ::ng-deep .medical-attention-table-region .priority-badge-solid.danger {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+:host ::ng-deep .medical-attention-table-region .priority-badge-solid.orange {
+  background-color: #f97316 !important;
+  color: #ffffff !important;
+}
+:host ::ng-deep .medical-attention-table-region .priority-badge-solid.warning {
+  background-color: #facc15 !important;
+  color: #1e293b !important;
+  text-shadow: none;
+}
+:host ::ng-deep .medical-attention-table-region .priority-badge-solid.success {
+  background-color: #16a34a !important;
+  color: #ffffff !important;
+}
+:host ::ng-deep .medical-attention-table-region .priority-badge-solid.primary {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+:host ::ng-deep .medical-attention-table-region .priority-badge-solid.secondary {
+  background-color: var(--palette-secondary) !important;
+}

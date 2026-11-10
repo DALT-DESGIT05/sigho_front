@@ -1,0 +1,289 @@
+<div class="tab-pane-content interconsulta-pane">
+  <div class="clinical-list-header interconsultation-header">
+    <div>
+      <h3 class="clinical-list-title">Solicitud de interconsulta</h3>
+      <p class="interconsultation-subtitle">
+        Registre el destino y los datos clínicos de la solicitud.
+      </p>
+    </div>
+    @if (ordenes_interconsulta().length > 0) {
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm interconsultation-action-button"
+        title="Generar orden de interconsulta"
+        aria-label="Generar orden de interconsulta"
+        (click)="imprimir_orden_interconsulta()"
+      >
+        Generar orden <i class="fa fa-print" aria-hidden="true"></i>
+      </button>
+    }
+  </div>
+  <div class="interconsultation-form">
+    <fieldset class="interconsultation-section">
+      <legend>Destino de la interconsulta</legend>
+      <div class="interconsultation-destination-grid">
+        <div class="interconsultation-field">
+          <label class="form-label" for="interconsulta-area">Área destino</label>
+          <select
+            id="interconsulta-area"
+            class="form-select"
+            [value]="area_interconsulta_id() ?? ''"
+            [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta()"
+            (change)="actualizar_area_interconsulta($event)"
+          >
+            <option value="">-- Seleccione área --</option>
+            @for (area of areas_interconsulta(); track area.area_id) {
+              <option [value]="area.area_id">{{ area.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div class="interconsultation-field">
+          <label class="form-label" for="interconsulta-especialidad"
+            >Especialidad destino</label
+          >
+          <select
+            id="interconsulta-especialidad"
+            class="form-select"
+            [value]="especialidad_interconsulta_id() ?? ''"
+            [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta() || area_interconsulta_id() === null"
+            (change)="actualizar_especialidad_interconsulta($event)"
+          >
+            <option value="">-- Seleccione especialidad --</option>
+            @for (
+              especialidad of especialidades_filtradas();
+              track especialidad.especialidad_id
+            ) {
+              <option [value]="especialidad.especialidad_id">
+                {{ especialidad.nombre }}
+              </option>
+            }
+          </select>
+        </div>
+        <div class="interconsultation-field">
+          <label class="form-label" for="interconsulta-personal">Médico destino</label>
+          <select
+            id="interconsulta-personal"
+            class="form-select"
+            [value]="programacion_personal_interconsulta_id() ?? ''"
+            [disabled]="
+              !detalle().fecha_hora_llamada_med ||
+              guardando_interconsulta() ||
+              especialidad_interconsulta_id() === null
+            "
+            (change)="actualizar_personal_interconsulta($event)"
+          >
+            <option value="">-- Seleccione médico --</option>
+            @for (
+              personal of personal_interconsulta_filtrado();
+              track personal.programacion_personal_id
+            ) {
+              <option [value]="personal.programacion_personal_id">
+                {{ personal.nombre_completo }} · {{ personal.turno }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="interconsultation-options-grid">
+      <fieldset class="interconsultation-section">
+        <legend>Diagnóstico relacionado</legend>
+        <select
+          id="interconsulta-diagnostico"
+          class="form-select"
+          [value]="diagnostico_interconsulta_id() ?? ''"
+          [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta()"
+          (change)="actualizar_diagnostico_interconsulta($event)"
+        >
+          <option value="">-- Seleccione diagnóstico --</option>
+          @for (diagnostico of diagnosticos(); track diagnostico.diagnostico_id) {
+            <option [value]="diagnostico.diagnostico_id">
+              {{ diagnostico.codigo }} - {{ diagnostico.descripcion }}
+            </option>
+          }
+        </select>
+      </fieldset>
+
+      <fieldset class="interconsultation-section">
+        <legend>Prioridad</legend>
+        <div class="interconsultation-choices interconsultation-choices--two-columns">
+          @for (prioridad of prioridades_orden(); track prioridad.prioridad_id) {
+            <label
+              class="interconsultation-choice"
+              [class.interconsultation-choice--selected]="
+                prioridad_interconsulta_id() === prioridad.prioridad_id
+              "
+            >
+              <input
+                type="checkbox"
+                class="form-check-input"
+                [checked]="prioridad_interconsulta_id() === prioridad.prioridad_id"
+                [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta()"
+                (change)="seleccionar_prioridad_interconsulta(prioridad.prioridad_id)"
+              />
+              <span>{{ prioridad.nombre }}</span>
+              <i class="fa fa-check" aria-hidden="true"></i>
+            </label>
+          }
+        </div>
+      </fieldset>
+    </div>
+
+    <fieldset class="interconsultation-section">
+      <legend>Información clínica</legend>
+      <div class="interconsultation-field mb-3">
+        <label class="form-label" for="interconsulta-solicita">Qué solicita</label>
+        <input
+          type="text"
+          id="interconsulta-solicita"
+          class="form-control"
+          maxlength="500"
+          placeholder="Describa el motivo de la interconsulta..."
+          [value]="que_solicita_interconsulta()"
+          [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta()"
+          (input)="actualizar_que_solicita_interconsulta($event)"
+        />
+      </div>
+      <div class="interconsultation-field">
+        <label class="form-label" for="interconsulta-observaciones">Observaciones</label>
+        <input
+          type="text"
+          id="interconsulta-observaciones"
+          class="form-control"
+          maxlength="500"
+          placeholder="Observaciones adicionales..."
+          [value]="observaciones_interconsulta()"
+          [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta()"
+          (input)="actualizar_observaciones_interconsulta($event)"
+        />
+      </div>
+    </fieldset>
+
+    <div class="interconsultation-actions">
+      <small class="diagnostico-form-status">
+        @if (!detalle().fecha_hora_llamada_med) {
+          Inicie la atención médica para registrar.
+        }
+      </small>
+      <app-button
+        texto="Agregar"
+        action="save"
+        color="primary"
+        size="sm"
+        [loading]="guardando_interconsulta()"
+        [disabled]="
+          !detalle().fecha_hora_llamada_med ||
+          prioridad_interconsulta_id() === null ||
+          diagnostico_interconsulta_id() === null ||
+          area_interconsulta_id() === null ||
+          especialidad_interconsulta_id() === null ||
+          programacion_personal_interconsulta_id() === null ||
+          !que_solicita_interconsulta().trim()
+        "
+        (clicked)="guardar()"
+      />
+    </div>
+  </div>
+
+  <section class="clinical-section-card">
+    <div class="clinical-list-header">
+      <h3>Interconsultas registradas</h3>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>DESTINO</th>
+            <th>ESPECIALIDAD</th>
+            <th>DIAGNÓSTICO</th>
+            <th>QUÉ SOLICITA</th>
+            <th>OBSERVACIONES</th>
+            <th>ESTADO</th>
+            <th>FECHA</th>
+            <th class="text-center">ACCIÓN</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (cargando_interconsultas()) {
+            <tr>
+              <td colspan="8" class="text-center text-muted">
+                Consultando interconsultas...
+              </td>
+            </tr>
+          } @else if (ordenes_interconsulta().length === 0) {
+            <tr>
+              <td colspan="8" class="legacy-empty-state">
+                No se han registrado interconsultas.
+              </td>
+            </tr>
+          } @else {
+            @for (orden of ordenes_interconsulta(); track orden.interconsulta_id) {
+              <tr>
+                <td>{{ orden.area_nombre }}</td>
+                <td>
+                  <span class="interconsultation-specialty-name">{{
+                    orden.especialidad_nombre
+                  }}</span>
+                  <span class="interconsultation-doctor">
+                    <i class="fa-solid fa-user-doctor" aria-hidden="true"></i>
+                    {{ orden.personal_nombre }}
+                  </span>
+                </td>
+                <td>{{ orden.diagnostico_codigo }} - {{ orden.diagnostico_nombre }}</td>
+                <td>{{ orden.que_solicita }}</td>
+                <td>{{ orden.observaciones || '-' }}</td>
+                <td>{{ orden.estado_nombre }}</td>
+                <td>{{ orden.fecha_hora_orden }}</td>
+                <td class="text-center">
+                  <app-button
+                    action="delete"
+                    size="sm"
+                    [soloIcono]="true"
+                    title="Eliminar interconsulta"
+                    [disabled]="guardando_interconsulta()"
+                    (clicked)="eliminarInterconsulta.emit(orden.interconsulta_id)"
+                  />
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <div class="interconsulta-print-area" aria-hidden="true">
+    <div #orden_impresion_interconsulta class="laboratory-print-document">
+      <header class="laboratory-print-header">
+        <h4>Orden de interconsulta</h4>
+        <p>Paciente: {{ detalle().paciente.nombre_completo }}</p>
+        <p>Historia clínica: {{ detalle().paciente.numero_historia || '-' }}</p>
+        @if (ordenes_interconsulta().length > 0) {
+          <p>Fecha de solicitud: {{ ordenes_interconsulta()[0].fecha_hora_orden }}</p>
+        }
+      </header>
+      <table>
+        <thead>
+          <tr>
+            <th>Destino</th>
+            <th>Especialidad / Médico</th>
+            <th>Diagnóstico</th>
+            <th>Qué solicita</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (orden of ordenes_interconsulta(); track orden.interconsulta_id) {
+            <tr>
+              <td>{{ orden.area_nombre }}</td>
+              <td>{{ orden.especialidad_nombre }} · {{ orden.personal_nombre }}</td>
+              <td>{{ orden.diagnostico_codigo }} - {{ orden.diagnostico_nombre }}</td>
+              <td>{{ orden.que_solicita }}</td>
+              <td>{{ orden.estado_nombre }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

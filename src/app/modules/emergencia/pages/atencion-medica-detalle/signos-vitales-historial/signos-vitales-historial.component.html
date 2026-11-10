@@ -1,0 +1,254 @@
+<div class="vitales-header">
+  <h3>Signos vitales</h3>
+  <app-button
+    texto="Añadir"
+    action="create"
+    color="primary"
+    size="sm"
+    [disabled]="!habilitado()"
+    (clicked)="abrir_modal()"
+  />
+</div>
+
+<app-table
+  size="sm"
+  [scrollHeight]="null"
+  [columns]="columnas"
+  [cellTemplates]="plantillasCelda()"
+  [rows]="historialAscendente()"
+  [loading]="cargando()"
+  emptyMessage="Aún no se han registrado signos vitales en esta atención."
+/>
+
+<ng-template #tempTpl let-fila>
+  <span class="vital-celda" [ngClass]="'vital-celda--' + colorAlerta(fila.detalles, 'TEMP')">
+    {{ valor(fila.detalles, 'TEMP') ?? '-' }}
+  </span>
+</ng-template>
+
+<ng-template #paTpl let-fila>
+  <span class="vital-celda" [ngClass]="'vital-celda--' + colorAlerta(fila.detalles, 'PA', 'PAS')">
+    {{ valor(fila.detalles, 'PA', 'PAS') ?? '-' }} / {{ valor(fila.detalles, 'PA', 'PAD') ?? '-' }}
+  </span>
+</ng-template>
+
+<ng-template #satTpl let-fila>
+  <span class="vital-celda" [ngClass]="'vital-celda--' + colorAlerta(fila.detalles, 'SATO2')">
+    {{ valor(fila.detalles, 'SATO2') ?? '-' }}
+  </span>
+</ng-template>
+
+<ng-template #fcTpl let-fila>
+  <span class="vital-celda" [ngClass]="'vital-celda--' + colorAlerta(fila.detalles, 'FC')">
+    {{ valor(fila.detalles, 'FC') ?? '-' }}
+  </span>
+</ng-template>
+
+<ng-template #frTpl let-fila>
+  <span class="vital-celda" [ngClass]="'vital-celda--' + colorAlerta(fila.detalles, 'FR')">
+    {{ valor(fila.detalles, 'FR') ?? '-' }}
+  </span>
+</ng-template>
+
+<ng-template #imcTpl let-fila>
+  <span class="vital-celda" [ngClass]="'vital-celda--' + imcColorFila(fila.detalles)">
+    {{ imcFila(fila.detalles) }}
+  </span>
+</ng-template>
+
+<app-modal
+  #modal
+  title="Registrar signos vitales"
+  icon="fa-solid fa-heart-pulse"
+  size="lg"
+  [showFooter]="true"
+>
+  <div class="row g-2">
+    <div class="col-6 col-lg-3">
+      <app-input-group
+        label="Temperatura (°C)"
+        type="number"
+        suffix="°C"
+        [value]="temperatura"
+        (valueChange)="actualizar_campo('temperatura', $event)"
+      />
+      <app-progress-bars
+        [clases]="progressBarClasses(estado('TEMP'))"
+        size="sm"
+        [porcentaje]="100"
+        [color]="estado('TEMP')"
+        ariaLabel="Estado de la temperatura"
+      />
+      @if (fueraDeRango('TEMP', temperatura)) {
+        <small class="text-danger">{{ mensajeRango('TEMP') }}</small>
+      }
+    </div>
+    <div class="col-6 col-lg-3">
+      <app-input-group
+        label="PAS (mmHg)"
+        type="number"
+        suffix="mmHg"
+        [value]="paSistolica"
+        (valueChange)="actualizar_campo('paSistolica', $event)"
+      />
+      <app-progress-bars
+        [clases]="progressBarClasses(estadoPresion())"
+        size="sm"
+        [porcentaje]="100"
+        [color]="estadoPresion()"
+        ariaLabel="Estado de la presión sistólica"
+      />
+      @if (fueraDeRango('PA', paSistolica, 'PAS')) {
+        <small class="text-danger">{{ mensajeRango('PA', 'PAS') }}</small>
+      }
+    </div>
+    <div class="col-6 col-lg-3">
+      <app-input-group
+        label="PAD (mmHg)"
+        type="number"
+        suffix="mmHg"
+        [value]="paDiastolica"
+        (valueChange)="actualizar_campo('paDiastolica', $event)"
+      />
+      <app-progress-bars
+        [clases]="progressBarClasses(estadoPresionDiastolica())"
+        size="sm"
+        [porcentaje]="100"
+        [color]="estadoPresionDiastolica()"
+        ariaLabel="Estado de la presión diastólica"
+      />
+      @if (fueraDeRango('PA', paDiastolica, 'PAD')) {
+        <small class="text-danger">{{ mensajeRango('PA', 'PAD') }}</small>
+      }
+    </div>
+    <div class="col-6 col-lg-3">
+      <app-input-group
+        label="Sat. O₂ (%)"
+        type="number"
+        suffix="%"
+        [value]="saturacion"
+        (valueChange)="actualizar_campo('saturacion', $event)"
+      />
+      <app-progress-bars
+        [clases]="progressBarClasses(estado('SATO2'))"
+        size="sm"
+        [porcentaje]="100"
+        [color]="estado('SATO2')"
+        ariaLabel="Estado de la saturación de oxígeno"
+      />
+      @if (fueraDeRango('SATO2', saturacion)) {
+        <small class="text-danger">{{ mensajeRango('SATO2') }}</small>
+      }
+    </div>
+    <div class="col-6 col-lg-3">
+      <app-input-group
+        label="Fr. cardíaca (lpm)"
+        type="number"
+        suffix="lpm"
+        [value]="fc"
+        (valueChange)="actualizar_campo('fc', $event)"
+      />
+      <app-progress-bars
+        [clases]="progressBarClasses(estado('FC'))"
+        size="sm"
+        [porcentaje]="100"
+        [color]="estado('FC')"
+        ariaLabel="Estado de la frecuencia cardíaca"
+      />
+      @if (fueraDeRango('FC', fc)) {
+        <small class="text-danger">{{ mensajeRango('FC') }}</small>
+      }
+    </div>
+    <div class="col-6 col-lg-3">
+      <app-input-group
+        label="Fr. respiratoria (rpm)"
+        type="number"
+        suffix="rpm"
+        [value]="fr"
+        (valueChange)="actualizar_campo('fr', $event)"
+      />
+      <app-progress-bars
+        [clases]="progressBarClasses(estado('FR'))"
+        size="sm"
+        [porcentaje]="100"
+        [color]="estado('FR')"
+        ariaLabel="Estado de la frecuencia respiratoria"
+      />
+      @if (fueraDeRango('FR', fr)) {
+        <small class="text-danger">{{ mensajeRango('FR') }}</small>
+      }
+    </div>
+    <div class="col-6 col-lg-3">
+      <app-input-group
+        label="Peso (kg)"
+        type="number"
+        suffix="kg"
+        [value]="peso"
+        (valueChange)="actualizar_campo('peso', $event)"
+      />
+      @if (fueraDeRango('PESO', peso)) {
+        <small class="text-danger">{{ mensajeRango('PESO') }}</small>
+      }
+    </div>
+    <div class="col-6 col-lg-3">
+      <app-input-group
+        label="Talla (cm)"
+        type="number"
+        suffix="cm"
+        [value]="talla"
+        (valueChange)="actualizar_campo('talla', $event)"
+      />
+      @if (fueraDeRango('TALLA', talla)) {
+        <small class="text-danger">{{ mensajeRango('TALLA') }}</small>
+      }
+    </div>
+    <div class="col-12 col-lg-6">
+      <div class="imc-control">
+        <app-input-group
+          label="IMC"
+          suffix="kg/m²"
+          [value]="imc()"
+          [readonly]="true"
+        >
+          <i prefix class="fa-solid fa-weight-scale" aria-hidden="true"></i>
+        </app-input-group>
+        <div class="imc-classification">
+          <span class="imc-classification__label">Clasificación IMC</span>
+          <output
+            [class]="'imc-classification__value imc-classification__value--' + imcStatus()"
+            aria-live="polite"
+          >
+            {{ imcDescripcion() }}
+          </output>
+        </div>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <label class="form-label mb-1" for="sv-observaciones">Observaciones</label>
+        <small class="text-muted" style="font-size: 0.72rem;">{{ observaciones.length }} / 200</small>
+      </div>
+      <input
+        type="text"
+        id="sv-observaciones"
+        class="form-control"
+        maxlength="200"
+        placeholder="Observaciones adicionales opcionales..."
+        [value]="observaciones"
+        (input)="actualizar_observaciones($event)"
+      />
+    </div>
+  </div>
+  <div modal-footer>
+    <app-button
+      texto="Registrar"
+      action="save"
+      color="primary"
+      size="sm"
+      [loading]="guardando()"
+      [disabled]="hayCamposFueraDeRango()"
+      (clicked)="agregar()"
+    />
+    <app-button action="close" size="sm" (clicked)="cerrar_modal()" />
+  </div>
+</app-modal>

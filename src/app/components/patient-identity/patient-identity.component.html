@@ -18,6 +18,9 @@
     <span class="app-patient-identity__label">{{ etiqueta() }}</span>
     <div class="app-patient-identity__data">
       <strong class="app-patient-identity__name" [title]="nombre()">{{ nombre() }}</strong>
+      @if (parentesco()) {
+        <span class="app-patient-identity__kinship" [title]="'Parentesco ' + parentesco()">{{ parentesco() }}</span>
+      }
       <span class="app-patient-identity__identifiers">
       @if (historia() !== null && historia() !== '') {
         <span class="app-patient-identity__history" [title]="'Historia Clinica ' + historia()">HC {{ historia() }}</span>

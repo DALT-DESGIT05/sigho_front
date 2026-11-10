@@ -1,0 +1,69 @@
+:host {
+  display: block;
+}
+
+.rep-sex-history {
+  display: grid;
+  gap: 1rem;
+}
+
+.rep-sex-history__header h4 {
+  color: var(--palette-primary-fap-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.rep-sex-history__header p {
+  color: var(--palette-gray-600);
+  font-size: 0.75rem;
+  margin: 0.2rem 0 0;
+}
+
+.rep-sex-history__loading {
+  color: var(--palette-gray-600);
+  font-size: 0.85rem;
+}
+
+.rep-sex-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.rep-sex-form__fieldset {
+  border: 1px solid var(--palette-primary-fap-100);
+  border-radius: 0.5rem;
+  margin: 0;
+  padding: 0.8rem;
+}
+
+.rep-sex-form__fieldset legend {
+  color: var(--palette-primary-fap-text);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0 0.3rem;
+}
+
+.rep-sex-form__grid {
+  align-items: end;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.rep-sex-form__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 991.98px) {
+  .rep-sex-form__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 575.98px) {
+  .rep-sex-form__grid {
+    grid-template-columns: 1fr;
+  }
+}

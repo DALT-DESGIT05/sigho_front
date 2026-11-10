@@ -1,0 +1,216 @@
+<div class="tab-pane-content proced-enf-pane">
+  <section class="clinical-section-card">
+    <div class="clinical-list-header">
+      <h3>Indicaciones médicas registradas</h3>
+      <app-button
+        texto="Agregar"
+        action="create"
+        color="primary"
+        size="sm"
+        title="Registrar indicación médica"
+        [disabled]="!detalle().fecha_hora_llamada_med"
+        (clicked)="abrir_modal_proced_enf()"
+      />
+    </div>
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>CÓDIGO</th>
+            <th>INDICACIÓN / ACTIVIDAD</th>
+            <th>PRIORIDAD</th>
+            <th>INDICACIONES</th>
+            <th>ESTADO</th>
+            <th>FECHA</th>
+            <th class="text-center">ACCIÓN</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (cargando_proced_enf()) {
+            <tr>
+              <td colspan="7" class="text-center text-muted">Consultando indicaciones...</td>
+            </tr>
+          } @else if (ordenes_proced_enf().length === 0) {
+            <tr>
+              <td colspan="7" class="legacy-empty-state">
+                No se han registrado indicaciones médicas.
+              </td>
+            </tr>
+          } @else {
+            @for (orden of ordenes_proced_enf(); track orden.procedimiento_id) {
+              <tr>
+                <td>{{ orden.servicio_codigo }}</td>
+                <td>{{ orden.servicio_nombre || orden.servicio_codigo }}</td>
+                <td>{{ orden.prioridad_nombre }}</td>
+                <td>{{ orden.indicaciones || '-' }}</td>
+                <td>{{ orden.estado_nombre }}</td>
+                <td>{{ orden.fecha_hora_orden }}</td>
+                <td class="text-center">
+                  <app-button
+                    action="delete"
+                    size="sm"
+                    [soloIcono]="true"
+                    title="Eliminar indicación"
+                    [disabled]="guardando_proced_enf()"
+                    (clicked)="eliminarProcedEnf.emit(orden.procedimiento_id)"
+                  />
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+@if (proced_enf_modal_abierto()) {
+  <div class="laboratory-modal-backdrop" role="presentation">
+    <div
+      class="laboratory-catalog-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="proced-enf-modal-title"
+    >
+      <div class="modal-header">
+        <h5 id="proced-enf-modal-title" class="modal-title">Indicaciones Médicas / Servicios de Enfermería</h5>
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="Cerrar"
+          (click)="cerrar_modal_proced_enf()"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="laboratory-catalog-layout">
+          <fieldset class="laboratory-fieldset laboratory-fieldset--areas">
+            <legend><i class="fa-solid fa-list-check" aria-hidden="true"></i>Categorías</legend>
+            <nav class="laboratory-area-nav" aria-label="Categorías de indicaciones médicas">
+              <div class="laboratory-area-list">
+                <button
+                  type="button"
+                  class="laboratory-area-item"
+                  [class.active]="proced_enf_area_activa() === null"
+                  (click)="seleccionar_area_proced_enf(null)"
+                >
+                  <span class="laboratory-area-info">
+                    <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                    <span>Todos los servicios</span>
+                  </span>
+                  <span class="laboratory-area-count">{{ total_servicios_proced_enf() }}</span>
+                </button>
+                @for (area of areas_proced_enf(); track area.codigo) {
+                  <button
+                    type="button"
+                    class="laboratory-area-item"
+                    [class.active]="proced_enf_area_activa() === area.codigo"
+                    (click)="seleccionar_area_proced_enf(area.codigo)"
+                  >
+                    <span class="laboratory-area-info">
+                      <i [class]="icono_area_proced_enf(area.codigo)" aria-hidden="true"></i>
+                      <span>{{ etiqueta_area_proced_enf(area.codigo, area.nombre) }}</span>
+                    </span>
+                    <span class="laboratory-area-count">{{ area.servicios.length }}</span>
+                  </button>
+                }
+              </div>
+            </nav>
+          </fieldset>
+          <fieldset class="laboratory-fieldset laboratory-fieldset--exams">
+            <legend><i class="fa-solid fa-notes-medical" aria-hidden="true"></i>Servicios Disponibles</legend>
+            <div class="laboratory-tab-content">
+              <div class="laboratory-search mb-3">
+                <span class="laboratory-search-icon"
+                  ><i class="fa fa-search" aria-hidden="true"></i
+                ></span>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Filtrar indicaciones..."
+                  [value]="proced_enf_filtro()"
+                  (input)="actualizar_filtro_proced_enf($event)"
+                />
+              </div>
+              <div class="row g-3 laboratory-service-columns">
+                @for (columna of columnas_proced_enf(); track $index; let columna_index = $index) {
+                  <div class="col-12 col-xl-6">
+                    <ul class="list-group">
+                      @for (servicio of columna; let servicio_index = $index; track servicio.codigo) {
+                        <li class="list-group-item d-flex flex-column align-items-stretch gap-1">
+                          <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center flex-grow-1 me-2">
+                              <span class="me-2"
+                                >{{ indice_proced_enf(columna_index, servicio_index) + 1 }}.</span
+                              >
+                              <input
+                                type="checkbox"
+                                class="form-check-input me-2 mt-0"
+                                [checked]="servicio_proced_enf_marcado(servicio.codigo)"
+                                (change)="alternar_servicio_proced_enf($event, servicio.codigo, servicio.nombre)"
+                              />
+                              <span class="form-check-label">{{
+                                servicio.codigo + ' - ' + servicio.nombre
+                              }}</span>
+                            </div>
+                            @if (servicio_proced_enf_marcado(servicio.codigo)) {
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-outline-primary py-0 px-2 flex-shrink-0"
+                                title="Agregar / editar indicación"
+                                (click)="abrir_modal_indicacion_servicio(servicio.codigo, servicio.nombre)"
+                              >
+                                <i class="fa-solid fa-pen-to-square me-1"></i>Indicación
+                              </button>
+                            }
+                          </div>
+                          @if (servicio_proced_enf_marcado(servicio.codigo) && obtener_indicacion_servicio(servicio.codigo)) {
+                            <div class="ms-4 p-1 px-2 rounded bg-light border border-info-subtle small text-muted">
+                              <i class="fa-solid fa-notes-medical text-primary me-1"></i>
+                              <span>{{ obtener_indicacion_servicio(servicio.codigo) }}</span>
+                            </div>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="laboratory-footer-controls">
+          <div class="laboratory-control-group">
+            <label for="proced-enf-priority">Prioridad</label>
+            <select
+              id="proced-enf-priority"
+              class="form-select form-select-sm"
+              [value]="prioridad_proced_enf_id() ?? ''"
+              (change)="actualizar_prioridad_proced_enf($event)"
+            >
+              <option value="">-- Seleccione --</option>
+              @for (prioridad of prioridades_orden(); track prioridad.prioridad_id) {
+                <option [value]="prioridad.prioridad_id">{{ prioridad.nombre }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <app-button
+          texto="Agregar"
+          action="save"
+          color="primary"
+          size="sm"
+          [loading]="guardando_proced_enf()"
+          [disabled]="
+            guardando_proced_enf() ||
+            servicios_proced_enf_seleccionados().size === 0 ||
+            prioridad_proced_enf_id() === null
+          "
+          (clicked)="guardar_proced_enf()"
+        />
+        <app-button texto="Cerrar" action="close" size="sm" (clicked)="cerrar_modal_proced_enf()" />
+      </div>
+    </div>
+  </div>
+}

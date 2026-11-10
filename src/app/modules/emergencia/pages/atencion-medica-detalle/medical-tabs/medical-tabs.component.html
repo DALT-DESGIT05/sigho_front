@@ -1,0 +1,138 @@
+<div class="medical-tabs">
+  <ul class="nav nav-pills border-bottom border-2">
+    @for (pestana of pestanas; track pestana[0]) {
+      <li class="nav-item">
+        <button
+          type="button"
+          class="nav-link text-primary fw-semibold position-relative"
+          [class.active]="pestana_activa() === pestana[0]"
+          (click)="seleccionar_pestana(pestana[0])"
+        >
+          {{ pestana[1] }}
+        </button>
+      </li>
+    }
+  </ul>
+
+  @if (cargando()) {
+    <p class="text-muted">Consultando el formulario...</p>
+  } @else {
+    @switch (pestana_activa()) {
+      @case ('enfermedad') {
+        <app-tab-enfermedad
+          [detalle]="detalle()"
+          [formulario]="formulario()"
+          [funciones_biologicas]="funciones_biologicas()"
+          [cargando_funciones_biologicas]="cargando_funciones_biologicas()"
+          [guardando]="guardando()"
+          [validacion_solicitada]="validacion_enfermedad_solicitada()"
+          (actualizarCampo)="actualizar($event.campo, $event.event)"
+          (solicitarGuardado)="solicitar_guardado_enfermedad($event)"
+        />
+      }
+      @case ('evaluacion') {
+        <app-tab-evaluacion
+          [detalle]="detalle()"
+          [formulario]="formulario()"
+          [examenes_regionales]="examenes_regionales()"
+          [estados_examen_regional]="estados_examen_regional()"
+          [cargando_examenes_regionales]="cargando_examenes_regionales()"
+          [guardando]="guardando()"
+          [validacion_solicitada]="validacion_evaluacion_solicitada()"
+          [evaluacion_registrada]="evaluacion_registrada()"
+          (actualizarCampo)="actualizar($event.campo, $event.event)"
+          (tipoRegionalActualizado)="tipoRegionalActualizado.emit($event)"
+          (solicitarGuardado)="solicitar_guardado_evaluacion($event)"
+        />
+      }
+      @case ('diagnosticos') {
+        <app-tab-diagnosticos
+          [diagnosticos]="diagnosticos()"
+          [tipos_diagnostico]="tipos_diagnostico()"
+          [habilitado]="!!detalle().fecha_hora_llamada_med"
+          [cargando]="cargando_diagnosticos()"
+          [guardando]="guardando_diagnostico()"
+          (eliminar)="eliminarDiagnostico.emit($event)"
+          (guardarDiagnosticos)="guardarDiagnostico.emit($event)"
+        />
+      }
+      @case ('apoyo') {
+        <app-tab-apoyo-imagen
+          [ordenes_imagen]="ordenes_imagen()"
+          [diagnosticos]="diagnosticos()"
+          [prioridades_orden]="prioridades_orden()"
+          [habilitado]="!!detalle().fecha_hora_llamada_med"
+          [cargando]="cargando_apoyos_diagnosticos()"
+          [guardando]="guardando_apoyo_diagnostico()"
+          [pacienteNombre]="detalle().paciente.nombre_completo"
+          [pacienteHistoria]="detalle().paciente.numero_historia || '-'"
+          (guardarSolicitud)="guardarApoyoImagen.emit($event)"
+        />
+      }
+      @case ('laboratorio') {
+        <app-tab-laboratorio
+          [detalle]="detalle()"
+          [ordenes_laboratorio]="ordenes_laboratorio()"
+          [catalogo_laboratorio]="catalogo_laboratorio()"
+          [prioridades_orden]="prioridades_orden()"
+          [diagnosticos]="diagnosticos()"
+          [cargando_laboratorio]="cargando_laboratorio()"
+          [guardando_laboratorio]="guardando_laboratorio()"
+          [historial_laboratorio]="historial_laboratorio()"
+          [resultados_laboratorio]="resultados_laboratorio()"
+          [cargando_historial_laboratorio]="cargando_historial_laboratorio()"
+          [cargando_resultados_laboratorio]="cargando_resultados_laboratorio()"
+          (guardarLaboratorio)="guardarLaboratorio.emit($event)"
+          (eliminarLaboratorio)="eliminarLaboratorio.emit($event)"
+          (cargarHistorialLaboratorio)="cargarHistorialLaboratorio.emit()"
+          (cargarResultadosLaboratorio)="cargarResultadosLaboratorio.emit()"
+        />
+      }
+      @case ('proced_enf') {
+        <app-tab-proced-enf
+          [detalle]="detalle()"
+          [ordenes_proced_enf]="ordenes_proced_enf()"
+          [catalogo_proced_enf]="catalogo_proced_enf()"
+          [prioridades_orden]="prioridades_orden()"
+          [cargando_proced_enf]="cargando_proced_enf()"
+          [guardando_proced_enf]="guardando_proced_enf()"
+          (guardarProcedEnf)="guardarProcedEnf.emit($event)"
+          (eliminarProcedEnf)="eliminarProcedEnf.emit($event)"
+        />
+      }
+      @case ('interconsulta') {
+        <app-tab-interconsulta
+          [detalle]="detalle()"
+          [ordenes_interconsulta]="ordenes_interconsulta()"
+          [areas_interconsulta]="areas_interconsulta()"
+          [especialidades_interconsulta]="especialidades_interconsulta()"
+          [personal_interconsulta]="personal_interconsulta()"
+          [diagnosticos]="diagnosticos()"
+          [prioridades_orden]="prioridades_orden()"
+          [cargando_interconsultas]="cargando_interconsultas()"
+          [guardando_interconsulta]="guardando_interconsulta()"
+          (guardarInterconsulta)="guardarInterconsulta.emit($event)"
+          (eliminarInterconsulta)="eliminarInterconsulta.emit($event)"
+        />
+      }
+      @case ('hospitalizacion') {
+        <app-tab-hospitalizacion
+          [detalle]="detalle()"
+          [ordenes_hospitalizacion]="ordenes_hospitalizacion()"
+          [motivos_hospitalizacion]="motivos_hospitalizacion()"
+          [diagnosticos]="diagnosticos()"
+          [cargando_hospitalizacion]="cargando_hospitalizacion()"
+          [guardando_hospitalizacion]="guardando_hospitalizacion()"
+          (guardarHospitalizacion)="guardarHospitalizacion.emit($event)"
+          (eliminarHospitalizacion)="eliminarHospitalizacion.emit($event)"
+        />
+      }
+      @case ('receta') {
+        <app-tab-receta
+          [detalle]="detalle()"
+          [diagnosticos]="diagnosticos()"
+        />
+      }
+    }
+  }
+</div>

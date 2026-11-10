@@ -1,0 +1,32 @@
+:host {
+  display: block;
+}
+
+.antecedentes {
+  display: grid;
+  gap: 1rem;
+}
+
+.antecedentes__contenido {
+  padding-top: 0.5rem;
+}
+
+.antecedentes .nav-link {
+  border-radius: 0.4rem 0.4rem 0 0;
+  color: var(--palette-primary-fap-text) !important;
+  font-size: 12px;
+  min-height: 2.4rem;
+  padding: 0.55rem 0.85rem;
+  white-space: nowrap;
+}
+
+.antecedentes .nav-link:hover:not(.active),
+.antecedentes .nav-link:focus-visible {
+  background: var(--palette-primary-fap-50);
+  color: var(--palette-primary-fap) !important;
+}
+
+.antecedentes .nav-link.active {
+  background: var(--palette-primary-fap) !important;
+  color: var(--palette-white) !important;
+}

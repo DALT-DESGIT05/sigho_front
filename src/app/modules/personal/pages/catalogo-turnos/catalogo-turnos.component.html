@@ -1,0 +1,61 @@
+<section class="shifts-page">
+  <header class="page-heading">
+    <div>
+      <span class="eyebrow">Configuración visual</span>
+      <h1>Catálogo de turnos</h1>
+      <p>Define las franjas que se mostrarán en la programación del personal.</p>
+    </div>
+    <app-button action="create" text="Nuevo turno" (clicked)="nuevoTurno()" />
+  </header>
+
+  <div class="demo-notice">
+    <i class="fa-solid fa-flask" aria-hidden="true"></i>
+    <span>Catálogo temporal de interfaz: {{ turnosActivos() }} turnos activos, sin persistencia en base de datos.</span>
+  </div>
+
+  @if (aviso()) { <div class="success-notice" role="status">{{ aviso() }}</div> }
+
+  <div class="shift-grid">
+    @for (turno of horarioService.turnos(); track turno.id) {
+      <article class="shift-card" [class]="'shift-card tone-' + turno.tono">
+        <header>
+          <span class="shift-code"><span>{{ turno.codigo }}</span></span>
+          <span class="status"><i class="fa-solid fa-circle" aria-hidden="true"></i> Activo</span>
+        </header>
+        <div class="shift-body">
+          <h2>{{ turno.nombre }}</h2>
+          <div class="time-range">
+            <span><small>Inicio</small><strong>{{ turno.horaInicio }}</strong></span>
+            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            <span><small>Fin</small><strong>{{ turno.horaFin }}</strong></span>
+          </div>
+        </div>
+        <footer>
+          <span><i class="fa-regular fa-clock" aria-hidden="true"></i> {{ turno.horas }} horas</span>
+          <app-button action="edit" size="sm" variant="outline" (clicked)="editarTurno(turno)" />
+        </footer>
+      </article>
+    }
+  </div>
+
+  <app-modal #turnoModal [title]="turnoEditado() ? 'Editar turno' : 'Nuevo turno'" icon="fa-solid fa-clock" [showFooter]="true">
+    <form class="shift-form" (ngSubmit)="guardarTurno()">
+      <div class="form-row">
+        <app-input-text label="Código" [maxlength]="3" placeholder="Ej. M" [value]="turno_model().codigo" (valueChange)="actualizarTexto('codigo', $event)" [required]="true" [invalid]="turno_form.codigo().touched() && turno_form.codigo().invalid()" />
+        <app-input-text label="Nombre" placeholder="Ej. Mañana" [value]="turno_model().nombre" (valueChange)="actualizarTexto('nombre', $event)" [required]="true" [invalid]="turno_form.nombre().touched() && turno_form.nombre().invalid()" />
+      </div>
+      <div class="form-row">
+        <app-input-date label="Hora de inicio" type="time" [value]="turno_model().horaInicio" (valueChange)="actualizarHora('horaInicio', $event)" [required]="true" [invalid]="turno_form.horaInicio().touched() && turno_form.horaInicio().invalid()" />
+        <app-input-date label="Hora de fin" type="time" [value]="turno_model().horaFin" (valueChange)="actualizarHora('horaFin', $event)" [required]="true" [invalid]="turno_form.horaFin().touched() && turno_form.horaFin().invalid()" />
+      </div>
+      <div class="form-row">
+        <app-input-text label="Total de horas" type="number" [value]="turno_model().horas" (valueChange)="actualizarHoras($event)" [required]="true" [invalid]="turno_form.horas().touched() && turno_form.horas().invalid()" />
+        <app-select label="Color identificador" [options]="tonoOptions" [selectedValue]="turno_model().tono" (selectedValueChange)="actualizarTono($event)" [required]="true" [invalid]="turno_form.tono().touched() && turno_form.tono().invalid()" />
+      </div>
+    </form>
+    <div modal-footer class="modal-actions">
+      <app-button action="cancel" variant="outline" (clicked)="turnoModal.close()" />
+      <app-button action="save" (clicked)="guardarTurno()" />
+    </div>
+  </app-modal>
+</section>

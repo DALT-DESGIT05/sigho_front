@@ -1,0 +1,261 @@
+<section class="rep-sex-history">
+  <header class="rep-sex-history__header">
+    <h4>Antecedentes gineco-obstétricos y sexuales</h4>
+    <p>
+      Este perfil pertenece al paciente y se actualiza en cada registro; no se conservan versiones
+      anteriores.
+    </p>
+  </header>
+
+  @if (cargando()) {
+    <p class="rep-sex-history__loading">Consultando información...</p>
+  } @else {
+    <form class="rep-sex-form" (submit)="$event.preventDefault(); guardar()">
+      <fieldset class="rep-sex-form__fieldset">
+        <legend>Ciclo y antecedentes gineco-obstétricos</legend>
+        <div class="rep-sex-form__grid">
+          <app-select
+            label="Ciclo menstrual"
+            size="sm"
+            [required]="true"
+            [apiItems]="contexto().ciclos"
+            valueField="ciclo_id"
+            labelField="nombre"
+            [disabled]="contexto().ciclos.length === 0"
+            [selectedValue]="formulario().ciclo_id"
+            (selectedValueChange)="actualizarSeleccion('ciclo_id', $event)"
+          />
+
+          <app-input-group
+            label="Fecha de última regla (FUR)"
+            type="date"
+            size="sm"
+            [value]="formulario().fur"
+            (input)="actualizarTexto('fur', $event)"
+          />
+
+          <app-input-group
+            label="Duración del ciclo (días)"
+            type="number"
+            size="sm"
+            [min]="0"
+            [value]="formulario().dur_ciclo"
+            (input)="actualizarTexto('dur_ciclo', $event)"
+          />
+
+          <app-input-group
+            label="Duración de la menstruación (días)"
+            type="number"
+            size="sm"
+            [min]="0"
+            [value]="formulario().dur_mes"
+            (input)="actualizarTexto('dur_mes', $event)"
+          />
+
+          <app-input-group
+            label="Gestas"
+            type="number"
+            size="sm"
+            [min]="0"
+            [value]="formulario().gestas"
+            (input)="actualizarTexto('gestas', $event)"
+          />
+
+          <app-input-group
+            label="Partos"
+            type="number"
+            size="sm"
+            [min]="0"
+            [value]="formulario().partos"
+            (input)="actualizarTexto('partos', $event)"
+          />
+
+          <app-input-group
+            label="Abortos"
+            type="number"
+            size="sm"
+            [min]="0"
+            [value]="formulario().abortos"
+            (input)="actualizarTexto('abortos', $event)"
+          />
+
+          <app-input-group
+            label="Hijos vivos"
+            type="number"
+            size="sm"
+            [min]="0"
+            [value]="formulario().hijos_vivos"
+            (input)="actualizarTexto('hijos_vivos', $event)"
+          />
+
+          <app-input-group
+            label="Fecha de último parto/aborto"
+            type="date"
+            size="sm"
+            [value]="formulario().ult_par_abor"
+            (input)="actualizarTexto('ult_par_abor', $event)"
+          />
+
+          <app-check
+            label="Desea embarazo"
+            size="sm"
+            [checked]="formulario().desea_embarazo"
+            (checkedChange)="actualizarIndicador('desea_embarazo', $event)"
+          />
+
+          <app-input-group
+            label="Observación ginecológica"
+            size="sm"
+            [maxlength]="200"
+            [value]="formulario().obs_ginecologica"
+            (input)="actualizarTexto('obs_ginecologica', $event)"
+          />
+        </div>
+      </fieldset>
+
+      <fieldset class="rep-sex-form__fieldset">
+        <legend>Anticoncepción y tamizaje</legend>
+        <div class="rep-sex-form__grid">
+          <app-select
+            label="Método anticonceptivo"
+            size="sm"
+            [apiItems]="contexto().metodos_anticonceptivos"
+            valueField="met_anticon_id"
+            labelField="nombre"
+            [disabled]="contexto().metodos_anticonceptivos.length === 0"
+            [selectedValue]="formulario().met_anticon_id"
+            (selectedValueChange)="actualizarSeleccion('met_anticon_id', $event)"
+          />
+
+          <app-input-group
+            label="Tiempo de uso del método (meses)"
+            type="number"
+            size="sm"
+            [min]="0"
+            [value]="formulario().tiempo_uso_met"
+            (input)="actualizarTexto('tiempo_uso_met', $event)"
+          />
+
+          <app-select
+            label="Resultado de PAP"
+            size="sm"
+            [apiItems]="contexto().resultados_pap"
+            valueField="resul_pap_id"
+            labelField="nombre"
+            [disabled]="contexto().resultados_pap.length === 0"
+            [selectedValue]="formulario().resul_pap_id"
+            (selectedValueChange)="actualizarSeleccion('resul_pap_id', $event)"
+          />
+
+          <app-input-group
+            label="Fecha de último PAP"
+            type="date"
+            size="sm"
+            [value]="formulario().fecha_ult_pap"
+            (input)="actualizarTexto('fecha_ult_pap', $event)"
+          />
+
+          <app-select
+            label="Resultado de mamografía"
+            size="sm"
+            [apiItems]="contexto().resultados_mamografia"
+            valueField="resul_mamograf_id"
+            labelField="nombre"
+            [disabled]="contexto().resultados_mamografia.length === 0"
+            [selectedValue]="formulario().resul_mamograf_id"
+            (selectedValueChange)="actualizarSeleccion('resul_mamograf_id', $event)"
+          />
+
+          <app-input-group
+            label="Comentario"
+            size="sm"
+            [maxlength]="100"
+            [value]="formulario().comentario"
+            (input)="actualizarTexto('comentario', $event)"
+          />
+        </div>
+      </fieldset>
+
+      <fieldset class="rep-sex-form__fieldset">
+        <legend>Antecedentes sexuales</legend>
+        <div class="rep-sex-form__grid">
+          <app-select
+            label="Orientación sexual"
+            size="sm"
+            [required]="true"
+            [apiItems]="contexto().orientaciones_sexuales"
+            valueField="orientacion_sex_id"
+            labelField="nombre"
+            [disabled]="contexto().orientaciones_sexuales.length === 0"
+            [selectedValue]="formulario().orientacion_sex_id"
+            (selectedValueChange)="actualizarSeleccion('orientacion_sex_id', $event)"
+          />
+
+          <app-input-group
+            label="Inicio de vida sexual (edad)"
+            type="number"
+            size="sm"
+            [min]="0"
+            [value]="formulario().ini_vida_sex"
+            (input)="actualizarTexto('ini_vida_sex', $event)"
+          />
+
+          <app-input-group
+            label="N.º de parejas sexuales"
+            type="number"
+            size="sm"
+            [min]="0"
+            [value]="formulario().parejas_sex"
+            (input)="actualizarTexto('parejas_sex', $event)"
+          />
+
+          <app-check
+            label="Actividad sexual actual"
+            size="sm"
+            [checked]="formulario().acti_sex_actual"
+            (checkedChange)="actualizarIndicador('acti_sex_actual', $event)"
+          />
+
+          <app-check
+            label="Uso de preservativo"
+            size="sm"
+            [checked]="formulario().uso_preservativo"
+            (checkedChange)="actualizarIndicador('uso_preservativo', $event)"
+          />
+
+          <app-check
+            label="Antecedente de ETS"
+            size="sm"
+            [checked]="formulario().ets"
+            (checkedChange)="actualizarIndicador('ets', $event)"
+          />
+
+          <app-input-group
+            label="Observación sexual"
+            size="sm"
+            [maxlength]="200"
+            [value]="formulario().obs_sexuales"
+            (input)="actualizarTexto('obs_sexuales', $event)"
+          />
+        </div>
+      </fieldset>
+
+      <div class="rep-sex-form__actions">
+        <app-button
+          texto="Guardar"
+          action="save"
+          color="primary"
+          size="sm"
+          [disabled]="
+            !habilitado() ||
+            formulario().ciclo_id === null ||
+            formulario().orientacion_sex_id === null ||
+            guardando()
+          "
+          [loading]="guardando()"
+          (clicked)="guardar()"
+        />
+      </div>
+    </form>
+  }
+</section>

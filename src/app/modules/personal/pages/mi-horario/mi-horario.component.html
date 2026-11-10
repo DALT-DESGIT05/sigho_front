@@ -1,0 +1,71 @@
+<section class="my-schedule-page">
+  <header class="profile-header">
+    <div class="profile-copy">
+      <span class="avatar">{{ inicialesPersona() }}</span>
+      <div>
+        <span class="eyebrow">Agenda personal</span>
+        <h1>{{ nombrePersona() }}</h1>
+        <p>{{ descripcionPersona() }}</p>
+      </div>
+    </div>
+    <div class="period-badge"><i class="fa-regular fa-calendar" aria-hidden="true"></i> {{ mesActual() }}</div>
+  </header>
+
+  <div class="live-data-notice">
+    <i class="fa-solid fa-cloud-arrow-down" aria-hidden="true"></i>
+    Horario cargado desde la programación real del personal autenticado (no es una vista de demostración).
+  </div>
+
+  @if (error()) {
+    <div class="error-notice" role="alert">{{ error() }}</div>
+  }
+
+  <div class="summary-grid">
+    <article><span>Turnos asignados</span><strong>{{ programaciones().length }}</strong></article>
+    <article><span>Horas del período</span><strong>{{ horas() }}</strong></article>
+    <article><span>Especialidad</span><strong class="text-value">{{ especialidadPersona() }}</strong></article>
+  </div>
+
+  <div class="schedule-layout">
+    <section class="agenda-panel">
+      <header>
+        <div><span class="eyebrow">Cronología</span><h2>Mis turnos</h2></div>
+        <span class="published-label"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Programación vigente</span>
+      </header>
+      <div class="agenda-list">
+        @for (programacion of programaciones(); track programacion.id_prog_per) {
+          <article class="agenda-item">
+            <div class="date-block">
+              <span>{{ dia(programacion.hor_fecha) }}</span>
+              <strong>{{ numero(programacion.hor_fecha) }}</strong>
+            </div>
+            <div class="timeline-marker tone-manana"></div>
+            <div class="shift-copy">
+              <strong>{{ programacion.turno_desc || 'Turno programado' }}</strong>
+              <span>{{ hora(programacion.turno_hora_inicio) }} - {{ hora(programacion.turno_hora_fin) }}</span>
+            </div>
+            <span class="state">Programado</span>
+          </article>
+        } @empty {
+          @if (!cargando()) {
+            <p class="empty">No tienes turnos programados en este período.</p>
+          }
+        }
+      </div>
+    </section>
+
+    <aside class="legend-panel">
+      <h2>Leyenda</h2>
+      @for (turnoItem of programaciones(); track turnoItem.id_horario_turno) {
+        <div class="legend-row">
+          <span class="legend-dot tone-manana"></span>
+          <span><strong>{{ turnoItem.turno_desc || 'Turno programado' }}</strong><small>{{ hora(turnoItem.turno_hora_inicio) }} - {{ hora(turnoItem.turno_hora_fin) }}</small></span>
+        </div>
+      }
+      <div class="help-box">
+        <i class="fa-regular fa-circle-question" aria-hidden="true"></i>
+        <span>Esta vista será de consulta. Los cambios de turno se gestionarán desde Programación.</span>
+      </div>
+    </aside>
+  </div>
+</section>

@@ -1,4 +1,4 @@
-import { Component, inject, ViewChild, CUSTOM_ELEMENTS_SCHEMA, signal, computed, OnDestroy, OnInit, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, inject, ViewChild, CUSTOM_ELEMENTS_SCHEMA, signal, OnDestroy, OnInit, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { FormField, email, form, minLength, required } from '@angular/forms/signals';
 import { LoginService } from '../../../../services/auth/login.service';
 import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
@@ -11,6 +11,7 @@ import { QRCodeComponent } from 'angularx-qrcode';
 import { MenuService } from '../../../../services/menu.service';
 import { Modal } from 'bootstrap';
 import { ButtonComponent } from '../../../../components/button/button.component';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-login-page',
@@ -78,7 +79,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   isLoading: boolean = false;
 
-  readonly canSendPasswordReset = computed(() => this.reset_form.usuario_rest().valid() && this.reset_form.email_rest().valid() && !this.estado && !this.resetRequestInFlight);
+  canSendPasswordReset(): boolean {
+    return this.reset_form.usuario_rest().valid()
+      && this.reset_form.email_rest().valid()
+      && !this.estado
+      && !this.resetRequestInFlight;
+  }
 
 
   ngOnInit(): void {
@@ -372,6 +378,10 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   }
 
   restablecer_by_correo() {
+    if (this.estado) {
+      return;
+    }
+
     const passwordFields = [
       this.reset_form.codigo_rest(),
       this.reset_form.psw_rest(),
@@ -392,9 +402,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     const dominio = Number(data.dominio_rest) || 0;
     const ip_usuario = '127.0.0.1';
 
-    this.mail_service.restablecer_by_correo(nuevaclave, repetirclave, codigoverificacion, usuario, correo, dominio, ip_usuario).subscribe({
-      next: (response) => {
+    this.mail_service.restablecer_by_correo(nuevaclave, repetirclave, codigoverificacion, usuario, correo, dominio, ip_usuario).pipe(
+      finalize(() => {
         this.estado = false;
+      }),
+    ).subscribe({
+      next: (response) => {
         Swal.fire({
           title: "Restablecimiento",
           text: "Su clave se cambió con éxito",
@@ -404,7 +417,6 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         this.reset_psw = false;
       },
       error: (error) => {
-        this.estado = false;
         if (error.status === 422 && error.data.errors) {
           // Recoger todos los errores en un solo mensaje
           let errorMessage = '<ul>';
@@ -551,8 +563,16 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   }
 
   validateOtp(otpCode: string) {
+    if (this.isLoadingOtp) {
+      return;
+    }
 
-    this.login_service.validate_2fa(otpCode).subscribe({
+    this.isLoadingOtp = true;
+    this.login_service.validate_2fa(otpCode).pipe(
+      finalize(() => {
+        this.isLoadingOtp = false;
+      }),
+    ).subscribe({
       next: (resp) => {
         Swal.fire({
           title: 'Autenticación',

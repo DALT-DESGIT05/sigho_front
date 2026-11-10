@@ -25,6 +25,11 @@ export class AlertComponent {
   readonly estaVisible = computed(() => this.visible() && !this.descartada());
   readonly iconoResuelto = computed(() => this.icon() || this.iconoPorColor(this.color()));
   readonly clases = computed(() => `app-alert--${this.color()} app-alert--${this.size()}`);
+  readonly titulo = input('');
+  readonly iconDerecha = input('');
+  readonly destacarTitulo = input(false);
+  readonly subtitulo = input<string>('');
+  readonly rounded = input<'sm' | 'md' | 'lg' | 'xl'>('md');
 
   constructor() {
     effect(() => {

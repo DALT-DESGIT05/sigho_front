@@ -1,0 +1,181 @@
+<div class="tab-pane-content">
+  <div class="clinical-list-header prescription-header">
+    <div class="clinical-title-actions">
+      <h3 class="clinical-list-title">Receta médica</h3>
+      @if (codigo_farmacia() && !existe_receta_imprimir()) {
+        <button
+          type="button"
+          class="clinical-add-button"
+          (click)="abrir_nueva_receta()"
+          title="Agregar medicamento"
+          [disabled]="!detalle().fecha_hora_llamada_med"
+        >
+          <i class="fas fa-plus"></i>
+        </button>
+        <button
+          type="button"
+          class="prescription-history-button"
+          (click)="abrir_modal_historial_recetas()"
+          title="Historial de recetas"
+        >
+          <i class="fas fa-clock-rotate-left"></i>
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="row prescription-toolbar">
+    <div class="col-12 col-md-6 col-lg-4 mt-2 mb-4">
+      <label class="form-label">Farmacia</label>
+      <select
+        class="form-control"
+        [value]="codigo_farmacia()"
+        (change)="actualizar_farmacia($event)"
+      >
+        <option value=""> -seleccione -- </option>
+        @for (item of farmacias(); track item.idfarm) {
+          <option [value]="item.idfarm">{{ item.nomfarm }}</option>
+        }
+      </select>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 mt-2 mb-4">
+      <br>
+      @if (existe_receta_imprimir()) {
+        <button
+          class="btn btn-primary"
+          style="margin-right: 20px;"
+          (click)="imprimir_receta_medica()"
+          [disabled]="imprimiendo_receta()"
+        >
+          <i class="fas fa-print"></i> Imprimir Receta
+        </button>
+        <button
+          class="btn btn-warning"
+          (click)="habilitar_edicion_receta()"
+          [disabled]="imprimiendo_receta()"
+        >
+          <i class="fas fa-print"></i> Habilitar edición
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="row prescription-indications">
+    <div class="col-12 mt-1 mb-1">
+      <label class="form-label">Indicaciones Generales</label>
+      <textarea
+        class="form-control"
+        rows="3"
+        maxlength="1000"
+        [disabled]="existe_receta_imprimir() || !codigo_farmacia()"
+        [value]="indicaciones_generales()"
+        (input)="indicaciones_generales.set($any($event.target).value)"
+        (blur)="guardar_indicacion_general()"
+      ></textarea>
+    </div>
+  </div>
+
+  <div class="row prescription-table-section">
+    <div class="col-12 table-responsive prescription-table-card">
+      <table class="table table-sm table-bordered table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>CIE-10</th>
+            <th>ITEM</th>
+            <th>VÍA</th>
+            <th>FRECUENCIA</th>
+            <th>CANTIDAD</th>
+            <th>DOSIS</th>
+            <th>DURACIÓN (DÍAS)</th>
+            <th>INDICACIÓN</th>
+            <th>ULT. DISP.</th>
+            <th colspan="2" class="text-center">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (cargando_receta()) {
+            <tr>
+              <td colspan="11" class="text-center text-muted py-3">
+                Consultando medicamentos de la receta...
+              </td>
+            </tr>
+          } @else {
+            @for (item of data_receta(); track item.idtemrec) {
+              <tr>
+                <td>{{ item.codcie10 }}</td>
+                <td>{{ item.item }}</td>
+                <td>{{ item.via }}</td>
+                <td>{{ item.frecuencia }}</td>
+                <td>{{ item.cantidad }}</td>
+                <td>{{ item.dosis }}</td>
+                <td>{{ item.duracion }}</td>
+                <td>{{ item.indicacion }}</td>
+                <td>{{ item.ult_disp }}</td>
+                <td>
+                  @if (!existe_receta_imprimir()) {
+                    <a
+                      href="#"
+                      class="text-primary"
+                      (click)="abrir_edicion_receta(+item.idtemrec, $event)"
+                    >
+                      <i class="fas fa-edit"></i>
+                    </a>
+                  }
+                </td>
+                <td style="text-align: center;">
+                  @if (!existe_receta_imprimir()) {
+                    <a
+                      href="#"
+                      class="text-danger"
+                      (click)="eliminar_medicamento_receta(+item.idtemrec, $event)"
+                    >
+                      <i class="fas fa-trash-alt"></i>
+                    </a>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="11" class="prescription-empty-state">
+                  <i class="fa fa-prescription-bottle-medical" aria-hidden="true"></i>
+                  <span>No se han agregado medicamentos a la receta.</span>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="row mt-3 mb-4 prescription-actions">
+    <div class="col-12">
+      @if (data_receta().length > 0 && !existe_receta_imprimir()) {
+        <button
+          class="btn btn-primary"
+          [disabled]="generando_receta()"
+          (click)="generar_receta()"
+        >
+          Generar receta
+        </button>
+      }
+    </div>
+  </div>
+
+  <app-formulario-receta-medicamento
+    #formularioReceta
+    [atencion_id]="detalle().atencion_id"
+    [codigo_farmacia]="codigo_farmacia()"
+    [diagnosticos]="diagnosticos()"
+    (recetaGuardada)="listar_receta()"
+  />
+
+  @if (codigo_farmacia()) {
+    <app-historial-recetas-modal
+      #modalHistorialRecetas
+      [atencion_id]="detalle().atencion_id"
+      [codigo_farmacia]="+codigo_farmacia()"
+      (recetaImportada)="listar_receta()"
+    />
+  }
+</div>

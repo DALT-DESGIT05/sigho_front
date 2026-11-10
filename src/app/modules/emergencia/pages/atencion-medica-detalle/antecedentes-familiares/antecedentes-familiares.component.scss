@@ -1,0 +1,123 @@
+:host {
+  display: block;
+}
+
+.family-history {
+  display: grid;
+  gap: 1rem;
+}
+
+.family-history__header h4,
+.family-form h4 {
+  color: var(--palette-primary-fap-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.family-history__header p {
+  color: var(--palette-gray-600);
+  font-size: 0.75rem;
+  margin: 0.2rem 0 0;
+}
+
+.family-form {
+  border-bottom: 1px solid var(--palette-primary-fap-100);
+  display: grid;
+  gap: 0.8rem;
+  padding-bottom: 1rem;
+}
+
+.family-form__grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.family-form__diagnostico {
+  grid-column: span 2;
+}
+
+.family-form__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.family-diagnostico-results {
+  background: var(--palette-white);
+  border: 1px solid var(--palette-primary-fap-100);
+  border-radius: 0.45rem;
+  box-shadow: 0 0.35rem 0.8rem rgba(0, 0, 0, 0.08);
+  display: grid;
+  left: 0.75rem;
+  max-height: 16rem;
+  overflow-y: auto;
+  position: absolute;
+  right: 0.75rem;
+  top: 100%;
+  z-index: 10;
+}
+
+.family-diagnostico-status {
+  color: var(--palette-gray-600);
+  display: block;
+  font-size: 0.75rem;
+  margin-top: 0.35rem;
+}
+
+.family-diagnostico-result {
+  background: var(--palette-white);
+  border: 0;
+  border-bottom: 1px solid var(--palette-primary-fap-10);
+  color: var(--palette-gray-800);
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.6rem 0.7rem;
+  text-align: left;
+  width: 100%;
+}
+
+.family-diagnostico-result:hover,
+.family-diagnostico-result:focus-visible {
+  background: var(--palette-primary-fap-10);
+}
+
+.family-diagnostico-result strong {
+  color: var(--palette-primary-fap);
+  flex: 0 0 5rem;
+}
+
+.family-diagnostico-selected {
+  align-items: center;
+  background: var(--palette-primary-fap-10);
+  border: 1px solid var(--palette-primary-fap-100);
+  border-radius: 0.45rem;
+  color: var(--palette-gray-800);
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.55rem 0.7rem;
+}
+
+.family-diagnostico-selected strong {
+  color: var(--palette-primary-fap);
+}
+
+@media (max-width: 991.98px) {
+  .family-form__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .family-form__diagnostico {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .family-form__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .family-form__diagnostico {
+    grid-column: span 1;
+  }
+}

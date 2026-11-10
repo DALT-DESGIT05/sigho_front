@@ -1,0 +1,127 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.app-input-filter {
+  --filter-height: 42px;
+  --filter-font-size: .875rem;
+  --filter-padding: .875rem;
+  --filter-color: var(--palette-primary-fap);
+
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+
+  width: 100%;
+  height: var(--filter-height);
+  padding: 0 var(--filter-padding);
+
+  background-color: var(--palette-white);
+  border: 1px solid var(--palette-gray-300);
+  border-radius: .5rem;
+
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease;
+
+  &:focus-within {
+    border-color: var(--filter-color);
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--filter-color) 12%, transparent);
+  }
+}
+
+// ÍCONO
+.app-input-filter__icon {
+  color: var(--filter-color);
+  font-size: var(--filter-font-size);
+  flex-shrink: 0;
+}
+
+// INPUT
+.app-input-filter__input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+
+  border: none;
+  outline: none;
+  background: transparent;
+
+  color: var(--palette-gray-800);
+  font-size: var(--filter-font-size);
+
+  &::placeholder {
+    color: var(--palette-gray-500);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+// TAMAÑOS
+.app-input-filter--xs {
+  --filter-height: 30px;
+  --filter-font-size: .7rem;
+  --filter-padding: .5rem;
+}
+
+.app-input-filter--sm {
+  --filter-height: 36px;
+  --filter-font-size: .75rem;
+  --filter-padding: .75rem;
+}
+
+.app-input-filter--md {
+  --filter-height: 42px;
+  --filter-font-size: .875rem;
+  --filter-padding: .875rem;
+}
+
+.app-input-filter--lg {
+  --filter-height: 48px;
+  --filter-font-size: 1rem;
+  --filter-padding: 1rem;
+}
+
+// COLORES
+.app-input-filter--primary {
+  --filter-color: var(--palette-primary-fap);
+}
+
+.app-input-filter--secondary {
+  --filter-color: var(--palette-secondary);
+}
+
+.app-input-filter--success {
+  --filter-color: var(--palette-success);
+}
+
+.app-input-filter--danger {
+  --filter-color: var(--palette-danger);
+}
+
+.app-input-filter--warning {
+  --filter-color: var(--palette-warning-600);
+}
+
+.app-input-filter--info {
+  --filter-color: var(--palette-info-600);
+}
+
+.app-input-filter--purple {
+  --filter-color: var(--palette-purple);
+}
+
+.app-input-filter--fuchsia {
+  --filter-color: var(--palette-fuchsia);
+}
+
+// DESHABILITADO
+.app-input-filter--disabled {
+  opacity: .6;
+  background-color: var(--palette-gray-100);
+  cursor: not-allowed;
+}

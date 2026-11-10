@@ -1,0 +1,99 @@
+<section class="habit-history">
+  <form class="habit-form" (submit)="$event.preventDefault(); guardar()">
+    <h4>Registrar hábito</h4>
+
+    <div class="habit-form__grid">
+      <app-select
+        label="Hábito"
+        size="sm"
+        [required]="true"
+        [apiItems]="catalogoDisponible()"
+        valueField="habito_id"
+        labelField="nombre"
+        [disabled]="contexto().catalogo.length === 0"
+        [selectedValue]="formulario().habito_id"
+        (selectedValueChange)="actualizarSeleccion('habito_id', $event)"
+      />
+
+      <app-select
+        label="Estado"
+        size="sm"
+        [required]="true"
+        [apiItems]="contexto().estados"
+        valueField="estado_id"
+        labelField="nombre"
+        [disabled]="contexto().estados.length === 0"
+        [selectedValue]="formulario().estado_id"
+        (selectedValueChange)="actualizarSeleccion('estado_id', $event)"
+      />
+
+      <app-input-group
+        label="Tiempo de consumo"
+        type="number"
+        size="sm"
+        [min]="0"
+        [value]="formulario().tiempo_consumo"
+        (input)="actualizarTexto('tiempo_consumo', $event)"
+      />
+
+      <app-input-group
+        label="Fecha de inicio"
+        type="date"
+        size="sm"
+        [value]="formulario().fecha_inicio_consu"
+        (input)="actualizarTexto('fecha_inicio_consu', $event)"
+      />
+
+      <app-input-group
+        label="Fecha de término"
+        type="date"
+        size="sm"
+        [value]="formulario().fecha_termino_cons"
+        (input)="actualizarTexto('fecha_termino_cons', $event)"
+      />
+
+      <app-input-group
+        label="Observación"
+        size="sm"
+        [maxlength]="100"
+        [value]="formulario().observacion"
+        (input)="actualizarTexto('observacion', $event)"
+      />
+
+      <app-check
+        label="¿Lo realiza actualmente?"
+        size="sm"
+        [checked]="formulario().ind_act_realiza"
+        (checkedChange)="actualizarIndicador($event)"
+      />
+    </div>
+
+    <div class="habit-form__actions">
+      <app-button
+        texto="Registrar hábito"
+        action="save"
+        color="primary"
+        size="sm"
+        [disabled]="!habilitado() || !formularioValido() || guardando()"
+        [loading]="guardando()"
+        (clicked)="guardar()"
+      />
+    </div>
+  </form>
+
+  <header class="habit-history__header">
+    <div>
+      <h4>Hábitos registrados</h4>
+      <p>Estos antecedentes pertenecen al paciente y estarán disponibles en futuras atenciones.</p>
+    </div>
+  </header>
+
+  <app-table
+    size="xs"
+    [scrollHeight]="null"
+    [columns]="columnas"
+    [rows]="habitos()"
+    [loading]="cargando()"
+    emptyMessage="No hay hábitos registrados para este paciente."
+  />
+</section>

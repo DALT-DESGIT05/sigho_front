@@ -1,0 +1,88 @@
+<app-modal
+  #modalHistorial
+  title="Historial de Recetas"
+  icon="fa-solid fa-clock-rotate-left"
+  size="lg"
+  [centered]="true"
+  [scrollable]="true"
+  [keyboard]="false"
+  [ignoreBackdropClick]="true"
+  [showFooter]="false"
+  (closed)="cerrar()">
+
+  <div class="historial-recetas-body">
+    <div class="row g-2 mb-3">
+      <div class="col-12 col-md-6">
+        <label class="form-label">Recetas previas (Fecha)</label>
+        <select class="form-select" (change)="seleccionar_receta($event)">
+          <option value="">-- Seleccione receta --</option>
+          @for (item of data_historial_receta(); track item.idrec) {
+            <option [value]="item.idrec">
+              {{ item.fecaten | date: 'dd/MM/yyyy' }} (Reg: {{ item.numregis }})
+            </option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="table-responsive" style="max-height: 320px;">
+      <table class="table table-bordered table-sm table-striped table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>ITEM</th>
+            <th>INDICACIONES</th>
+            <th>FORMA</th>
+            <th>CANT.</th>
+            <th>DOSIS</th>
+            <th>VÍA</th>
+            <th>FRECUENCIA</th>
+            <th>DURACIÓN</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of data_historial_receta_detalle(); track item.iditem; let i = $index) {
+            <tr>
+              <td>{{ i + 1 }}</td>
+              <td>{{ item.item }}</td>
+              <td>{{ item.indicaciones }}</td>
+              <td>{{ item.forma }}</td>
+              <td>{{ item.cantidad }}</td>
+              <td>{{ item.dosis }}</td>
+              <td>{{ item.via }}</td>
+              <td>{{ item.frecuencia }}</td>
+              <td>{{ item.duracion }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="9" class="text-center text-muted py-3">
+                Seleccione una receta previa para visualizar sus medicamentos.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div modal-footer class="d-flex justify-content-between align-items-center w-100 mt-3">
+      <app-button
+        color="danger"
+        size="sm"
+        icon="fa-solid fa-xmark"
+        texto="Cerrar"
+        (clicked)="cerrar()">
+      </app-button>
+
+      <app-button
+        class="ms-auto"
+        color="primary"
+        size="sm"
+        icon="fa-solid fa-file-import"
+        texto="Importar receta"
+        [loading]="cargando()"
+        [disabled]="codigo_receta_seleccionada === 0 || cargando()"
+        (clicked)="importar_receta()">
+      </app-button>
+    </div>
+  </div>
+</app-modal>

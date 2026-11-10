@@ -16,6 +16,8 @@ export class PatientIdentityComponent {
   readonly nombre = input.required<string>();
   readonly historia = input<string | number | null>(null);
   readonly codigoAfiliado = input<string | null>(null);
+  readonly parentesco = input<string | null>(null);
+  readonly situacion = input<string | null>(null);
   readonly tipoImagen = input<TipoImagenLazy>('afiliado');
   readonly etiqueta = input('Paciente');
   readonly vertical = input(false);

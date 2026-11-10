@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, OnChanges, SimpleChanges, input, inject, output, signal, viewChild } from '@angular/core';
+import { Component, inject, output, signal, viewChild } from '@angular/core';
 import { disabled, email, form, FormField, required } from '@angular/forms/signals';
-import { UsuarioService } from '../../services/auth/usuario.service';
+import { PacienteService } from '../../services/emergencia/paciente.service';
 import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
 import { MESSAGE_ERROR_DEFAULT, TITLE_MODAL } from '../../config/constants';
 import { ButtonComponent } from '../button/button.component';
@@ -11,14 +11,11 @@ import { ModalComponent } from '../modal/modal.component';
   imports: [FormField, ButtonComponent, ModalComponent],
   templateUrl: './update-correo-paciente.component.html', styleUrl: './update-correo-paciente.component.scss',
 })
-export class UpdateCorreoPacienteComponent implements OnChanges, AfterViewInit {
-  readonly input_correo = input.required<string>();
-  readonly input_dni = input.required<string>();
+export class UpdateCorreoPacienteComponent {
   readonly ouput_close = output<void>();
-  readonly ouput_save = output<void>();
+  readonly ouput_save = output<string>();
   readonly modal = viewChild<ModalComponent>('modal');
-  private readonly usuario_service = inject(UsuarioService);
-  private pendingOpen = false;
+  private readonly paciente_service = inject(PacienteService);
 
   readonly correo_model = signal({ correo: '' });
   readonly correo_form = form(this.correo_model, (schema) => {
@@ -28,22 +25,16 @@ export class UpdateCorreoPacienteComponent implements OnChanges, AfterViewInit {
   });
   readonly isSaving = signal(false);
   readonly isCompleted = signal(false);
-  formulario = { modal: false, dni: '' };
+  formulario = { persona_id: 0, celular_actual: null as string | null };
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (!changes['input_correo'] && !changes['input_dni']) return;
-    const correo = this.input_correo();
-    const dni = this.input_dni();
-    if (!dni.trim()) { this.pendingOpen = false; return; }
+  /** Abre el modal con los datos de contacto actuales del paciente. */
+  abrir(correo_actual: string, persona_id: number, celular_actual: string | null): void {
     this.isSaving.set(false);
     this.isCompleted.set(false);
-    this.correo_model.set({ correo });
-    this.formulario.dni = dni;
-    this.pendingOpen = true;
-    this.openModalIfReady();
+    this.correo_model.set({ correo: correo_actual });
+    this.formulario = { persona_id, celular_actual };
+    this.modal()?.open();
   }
-
-  ngAfterViewInit(): void { this.openModalIfReady(); }
 
   close_modal = (): void => { this.modal()?.close(); this.ouput_close.emit(); };
 
@@ -61,14 +52,18 @@ export class UpdateCorreoPacienteComponent implements OnChanges, AfterViewInit {
     this.isSaving.set(true);
     this.isCompleted.set(false);
     const correo = this.correo_model().correo;
-    this.usuario_service.change_correo_paciente(this.formulario.dni, correo).subscribe({
+    this.paciente_service.actualizarContacto({
+      persona_id: this.formulario.persona_id,
+      celular: this.formulario.celular_actual,
+      correo_electronico: correo,
+    }).subscribe({
       next: () => {
         this.isSaving.set(false);
         this.isCompleted.set(true);
         Swal.fire({ title: TITLE_MODAL, text: 'El Correo se ha cambiado correctamente.', icon: 'success', timer: 1500, showConfirmButton: true })
           .then(() => {
             this.modal()?.close();
-            this.ouput_save.emit();
+            this.ouput_save.emit(correo);
           });
       },
       error: (error) => {
@@ -79,11 +74,5 @@ export class UpdateCorreoPacienteComponent implements OnChanges, AfterViewInit {
         else if (error.status === 429) Swal.fire({ title: TITLE_MODAL, text: 'Cantidad de Intentos Superado. Espere 1 minuto', icon: 'error' });
       },
     });
-  }
-
-  private openModalIfReady(): void {
-    if (!this.pendingOpen || !this.modal()) return;
-    this.pendingOpen = false;
-    this.modal()!.open();
   }
 }

@@ -1,0 +1,218 @@
+<div class="tab-pane-content diagnosticos-pane">
+  <section class="clinical-section-card">
+    <div class="clinical-list-header">
+      <div class="clinical-title-actions">
+        <h3>Diagnósticos registrados</h3>
+        <app-button
+          action="create"
+          color="primary"
+          size="sm"
+          [soloIcono]="true"
+          title="Registrar diagnóstico"
+          [disabled]="!habilitado()"
+          (clicked)="abrir_modal()"
+        />
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>CIE-10</th>
+            <th>DIAGNÓSTICO</th>
+            <th>TIPO</th>
+            <th>OBSERVACIÓN</th>
+            <th class="text-center">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (cargando()) {
+            <tr>
+              <td colspan="5" class="text-center text-muted">
+                Consultando diagnósticos...
+              </td>
+            </tr>
+          } @else if (diagnosticos().length === 0) {
+            <tr>
+              <td colspan="5" class="legacy-empty-state">
+                No se han registrado diagnósticos.
+              </td>
+            </tr>
+          } @else {
+            @for (diagnostico of diagnosticos(); track diagnostico.diagnostico_id) {
+              <tr>
+                <td>{{ diagnostico.codigo }}</td>
+                <td>{{ diagnostico.descripcion }}</td>
+                <td>{{ diagnostico.tipo_nombre }}</td>
+                <td>{{ diagnostico.observacion || '-' }}</td>
+                <td class="text-center">
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger btn-sm"
+                    title="Eliminar diagnóstico"
+                    [disabled]="!habilitado() || guardando()"
+                    (click)="eliminar.emit(diagnostico.diagnostico_id)"
+                  >
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<app-modal
+  #modal
+  title="Registrar diagnóstico"
+  icon="fa-solid fa-notes-medical"
+  size="lg"
+  [showFooter]="true"
+>
+  <div class="row g-3">
+    <div class="col-12 position-relative">
+      @if (diagnostico_seleccionado()) {
+        <app-label texto="Diagnóstico CIE-10" [required]="true" color="primary" />
+        <div class="selected-diagnostico">
+          <strong>{{ diagnostico_seleccionado()!.codigo }}</strong>
+          <span>{{ diagnostico_seleccionado()!.descripcion }}</span>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Quitar diagnóstico seleccionado"
+            [disabled]="!habilitado() || guardando()"
+            (click)="limpiar_formulario()"
+          ></button>
+        </div>
+      } @else {
+        <app-auto-complete
+          label="Diagnóstico CIE-10"
+          [required]="true"
+          placeholder="Escriba código o descripción..."
+          [dataSource]="buscar_diagnostico_datasource"
+          [displayWith]="mostrar_diagnostico"
+          [minLength]="2"
+          [debounceTime]="400"
+          size="md"
+          (optionSelected)="seleccionar_diagnostico($event)"
+        />
+      }
+    </div>
+    <div class="col-md-5">
+      <app-label texto="Tipo de diagnóstico" [required]="true" color="primary" />
+      <select
+        class="form-select"
+        [value]="tipo_diagnostico_id() ?? ''"
+        [disabled]="!habilitado() || guardando()"
+        (change)="actualizar_tipo_diagnostico($event)"
+      >
+        <option value="">-- Seleccione --</option>
+        @for (tipo of tipos_diagnostico(); track tipo.tipo_id) {
+          <option [value]="tipo.tipo_id">{{ tipo.nombre }}</option>
+        }
+      </select>
+    </div>
+    <div class="col-md-7">
+      <app-label texto="Observación" color="primary" />
+      <input
+        type="text"
+        class="form-control"
+        maxlength="200"
+        placeholder="Ingrese una observación opcional..."
+        [value]="observacion_diagnostico()"
+        [disabled]="!habilitado() || guardando()"
+        (input)="actualizar_observacion($event)"
+        (keydown.enter)="agregar_temporal()"
+      />
+    </div>
+    <div class="col-12 d-flex justify-content-end">
+      <app-button
+        action="create"
+        color="primary"
+        size="sm"
+        [soloIcono]="true"
+        title="Añadir a la lista"
+        [disabled]="
+          !habilitado() ||
+          !diagnostico_seleccionado() ||
+          tipo_diagnostico_id() === null ||
+          guardando()
+        "
+        (clicked)="agregar_temporal()"
+      />
+    </div>
+
+    <!-- Tabla de diagnósticos por registrar en el modal -->
+    <div class="col-12 mt-2">
+      <section class="clinical-section-card mb-0">
+        <div class="clinical-list-header">
+          <div class="clinical-title-actions">
+            <h3>Diagnósticos a registrar ({{ diagnosticos_temporales().length }})</h3>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>CIE-10</th>
+                <th>DIAGNÓSTICO</th>
+                <th>TIPO</th>
+                <th>OBSERVACIÓN</th>
+                <th class="text-center">ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (diagnosticos_temporales().length === 0) {
+                <tr>
+                  <td colspan="5" class="legacy-empty-state">
+                    No se han registrado diagnósticos.
+                  </td>
+                </tr>
+              } @else {
+                @for (item of diagnosticos_temporales(); track item.cie10_id) {
+                  <tr>
+                    <td>{{ item.codigo }}</td>
+                    <td>{{ item.descripcion }}</td>
+                    <td>{{ item.tipo_nombre }}</td>
+                    <td>{{ item.observacion || '-' }}</td>
+                    <td class="text-center">
+                      <button
+                        type="button"
+                        class="btn btn-outline-danger btn-sm"
+                        title="Eliminar de la lista"
+                        (click)="quitar_temporal(item.cie10_id)"
+                      >
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+  <div modal-footer>
+    <small class="diagnostico-form-status">
+      @if (!habilitado()) {
+        Inicie la atención médica para registrar.
+      }
+    </small>
+    <app-button
+      texto="Guardar"
+      action="save"
+      color="primary"
+      size="sm"
+      clases="diagnostico-save-button"
+      [loading]="guardando()"
+      [disabled]="!habilitado() || diagnosticos_temporales().length === 0"
+      (clicked)="guardar()"
+    />
+    <app-button action="close" size="sm" (clicked)="cerrar_modal()" />
+  </div>
+</app-modal>

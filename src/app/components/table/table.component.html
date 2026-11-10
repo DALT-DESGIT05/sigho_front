@@ -40,7 +40,7 @@
           </td>
         </tr>
       } @else {
-        @for (row of tableRows(); track $index; let rowIndex = $index) {
+        @for (row of tableRows(); track rowTrack($index, row); let rowIndex = $index) {
           <tr
             [class.table-row-selected]="isSelected(row)"
             [class.table-row-action-highlighted]="isActionHighlighted(row)">

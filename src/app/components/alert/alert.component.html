@@ -1,12 +1,41 @@
 ﻿@if (estaVisible()) {
   <section
-    class="app-alert"
-    [class]="clases()"
-    role="alert" aria-live="polite">
+  [class]="'app-alert ' + clases()"
+  [class.app-alert--rounded-sm]="rounded() === 'sm'"
+  [class.app-alert--rounded-md]="rounded() === 'md'"
+  [class.app-alert--rounded-lg]="rounded() === 'lg'"
+  [class.app-alert--rounded-xl]="rounded() === 'xl'"
+  class="app-alert"
+  [class]="clases()"
+  role="alert" aria-live="polite">
 
     <i class="app-alert__icon" [class]="iconoResuelto()" aria-hidden="true"></i>
 
-    <div class="app-alert__content">{{ texto() }}</div>
+    <div class="app-alert__content">
+      @if (subtitulo()) {
+        <span class="app-alert__subtitle">
+          {{ subtitulo() }}
+        </span>
+      }
+      @if (titulo()) {
+        <div
+          class="app-alert__title"
+          [class.app-alert__title--large]="destacarTitulo()">
+          {{ titulo() }}
+        </div>
+      }
+
+      <div class="app-alert__description">
+        {{ texto() }}
+      </div>
+    </div>
+
+    @if (iconDerecha()) {
+      <div class="app-alert__right-icon">
+        <i [class]="iconDerecha()" aria-hidden="true"></i>
+      </div>
+    }
+
     @if (dismissible()) {
       <app-button
         class="app-alert__close"

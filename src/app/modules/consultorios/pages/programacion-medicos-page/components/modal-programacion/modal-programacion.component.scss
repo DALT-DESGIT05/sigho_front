@@ -1,0 +1,22 @@
+:host {
+  display: contents;
+}
+
+.programacion-medicos__cupos {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0.35rem 0.55rem;
+
+  background-color: var(--palette-primary-900);
+  color: var(--palette-white);
+
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+
+  border-radius: 0.375rem;
+}

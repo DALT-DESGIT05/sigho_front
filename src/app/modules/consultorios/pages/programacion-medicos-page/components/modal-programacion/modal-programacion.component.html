@@ -1,0 +1,149 @@
+
+<app-modal
+  #modalProgramacion
+  titulo="Registrar Programación"
+  icon="fa-solid fa-calendar-plus"
+  size="md"
+  [centered]="true"
+  [fitContent]="true"
+  [ignoreBackdropClick]="true"
+  [showFooter]="true">
+
+  <div class="programacion-medicos__modal">
+
+    <form
+      [formGroup]="registroForm"
+      class="programacion-medicos__modal">
+
+      <div class="row g-3">
+
+        <!-- INFORMACIÓN DEL MÉDICO -->
+        <div class="col-12">
+          <div class="programacion-medicos__info">
+            <div class="row g-2">
+
+              <div class="col-6">
+                <app-label texto="Especialidad"></app-label>
+                <div>{{ obtenerNombreEspecialidad() }}</div>
+              </div>
+
+              <div class="col-6">
+                <app-label texto="Médico"></app-label>
+                <div>{{ obtenerNombreMedico() }}</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- FECHA INICIO -->
+        <div class="col-12 col-md-6">
+          <app-input-date
+            label="Fecha Inicio"
+            [required]="true"
+            type="date"
+            [fechaCompacta]="true"
+            formControlName="fecha_inicio"
+          />
+        </div>
+
+        <!-- FECHA TÉRMINO -->
+        <div class="col-12 col-md-6">
+          <app-input-date
+            label="Fecha Término"
+            [required]="true"
+            type="date"
+            [fechaCompacta]="true"
+            formControlName="fecha_termino"
+          />
+        </div>
+
+        <!-- ACTIVIDAD MÉDICA -->
+        <div class="col-12">
+          <app-select
+            label="Actividad Médica"
+            [required]="true"
+            placeholder="-- Seleccione actividad médica --"
+            [options]="actividadesMedicas()"
+            formControlName="actividad_medica"
+          />
+        </div>
+
+        <!-- PROGRAMA -->
+        <div class="col-12 col-md-6">
+          <app-select
+            label="Programa"
+            [required]="true"
+            placeholder="-- Seleccione programa --"
+            [options]="programas()"
+            formControlName="programa"
+          />
+        </div>
+
+        <!-- TURNO -->
+        <div class="col-12 col-md-6">
+          <app-select
+            label="Turno"
+            [required]="true"
+            placeholder="-- Seleccione turno --"
+            [options]="turnos()"
+            formControlName="turno"
+          />
+        </div>
+
+        <!-- HORARIOS Y CUPOS -->
+        <div class="col-12">
+          <div class="row g-3">
+
+            <div class="col-12 col-md-4">
+              <app-input-text
+                label="Hora Inicio"
+                type="time"
+                formControlName="hora_inicio">
+              </app-input-text>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <app-input-text
+                label="Hora Término"
+                type="time"
+                formControlName="hora_termino">
+              </app-input-text>
+            </div>
+
+            <div class="col-12 col-md-4">
+              <app-label texto="Cupos"></app-label>
+
+              <div class="mt-2">
+                <span class="badge programacion-medicos__cupos">
+                  {{ registroForm.controls.cupos.value }}
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+  <div modal-footer class="d-flex justify-content-between w-100">
+
+    <app-button
+      accion="cancel"
+      (clicked)="cerrarModalProgramacion()">
+    </app-button>
+
+    <app-button
+      accion="save"
+      [disabled]="!puedeGuardarProgramacion()"
+      (clicked)="guardarProgramacion()">
+    </app-button>
+
+  </div>
+
+</app-modal>
+
+<app-alert-dialog #alertaProgramacion />
+

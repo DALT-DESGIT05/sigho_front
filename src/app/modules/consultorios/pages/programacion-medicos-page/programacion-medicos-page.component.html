@@ -10,11 +10,11 @@
 
     <div class="row g-2">
 
-      <!-- CONSULTORIOS -->
+      <!-- ESPECIALIDADES -->
       <div class="col-12 col-md-6 col-xl-3">
         <app-select
           label="ESPECIALIDADES"
-          placeholder="-- Seleccione consultorio --"
+          placeholder="-- Seleccione especialidad --"
           [options]="especialidades()"
           formControlName="especialidad"
         />
@@ -51,7 +51,7 @@
       </div>
 
       <!-- BOTÓN CONSULTAR -->
-      <div class=" d-flex justify-content-end mt-2">
+      <div class="d-flex justify-content-end mt-2">
         <app-button
           accion="search"
           type="submit"
@@ -59,7 +59,6 @@
       </div>
 
     </div>
-
   </form>
 
 </app-card-general>
@@ -70,7 +69,7 @@
     bodyClass="p-2">
 
     <div card-header-actions>
-     @if (consultaRealizada()){
+      @if (consultaRealizada()) {
         <app-button
           icon="fa-solid fa-plus"
           color="primary"
@@ -99,148 +98,7 @@
   </app-card-general>
 </div>
 
-<app-modal
-  #modalProgramacion
-  titulo="Registrar Programación"
-  icon="fa-solid fa-calendar-plus"
-  size="md"
-  [centered]="true"
-  [fitContent]="true"
-  [ignoreBackdropClick]="true"
-  [showFooter]="true">
-
-  <div class="programacion-medicos__modal">
-
-    <form [formGroup]="registroForm" class="programacion-medicos__modal">
-
-      <div class="row g-3">
-
-        <!-- INFORMACIÓN DEL MÉDICO -->
-        <div class="col-12">
-          <div class="programacion-medicos__info">
-            <div class="row g-2">
-              <div class="col-6">
-                  <app-label texto="especialidad"></app-label>
-                <div>{{ obtenerNombreEspecialidad() }}</div>
-              </div>
-
-              <div class="col-6">
-                <app-label texto ="Médico"> </app-label>
-                <div>{{ obtenerNombreMedico() }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- FECHAS -->
-        <div class="col-12 col-md-6">
-          <app-input-date
-            label="Fecha Incio"
-            [required]="true"
-            type="date"
-            [fechaCompacta]="true"
-            formControlName="fecha_inicio"
-          />
-        </div>
-
-        <div class="col-12 col-md-6">
-          <app-input-date
-            label="Fecha Termino"
-            [required]="true"
-            type="date"
-            [fechaCompacta]="true"
-            formControlName="fecha_termino"
-          />
-        </div>
-
-        <!-- ACTIVIDAD MÉDICA -->
-          <div class="col-12">
-            <app-select
-              label="Actividad Medica"
-              [required]="true"
-              placeholder="-- Seleccione actividad médica --"
-              [options]="actividadesMedicas()"
-              formControlName="actividad_medica"
-            />
-          </div>
-
-          <!-- PROGRAMA -->
-          <div class="col-12 col-md-6">
-            <app-select
-              label="Programa"
-              [required]="true"
-              placeholder="-- Seleccione programa --"
-              [options]="programas()"
-              formControlName="programa"
-            />
-          </div>
-
-          <!-- TURNO -->
-          <div class="col-12 col-md-6">
-            <app-select
-              label="Turno"
-              [required]="true"
-              placeholder="-- Seleccione turno --"
-              [options]="turnos()"
-              formControlName="turno"
-            />
-          </div>
-          <!-- HORARIO Y CUPOS -->
-              <div class="col-12">
-                <div class="row g-3">
-
-                  <!-- HORA INICIO -->
-                  <div class="col-12 col-md-4">
-                    <app-input-text
-                      label="Hora Inicio"
-                      type="time"
-                      formControlName="hora_inicio">
-                    </app-input-text>
-                  </div>
-
-                  <!-- HORA TÉRMINO -->
-                  <div class="col-12 col-md-4">
-                    <app-input-text
-                      label="Hora Término"
-                      type="time"
-                      formControlName="hora_termino">
-                    </app-input-text>
-                  </div>
-
-                  <!-- CUPOS -->
-                    <div class="col-12 col-md-4">
-                      <app-label texto="Cupos"></app-label>
-
-                      <div class="mt-2">
-                        <span class="badge programacion-medicos__cupos">
-                          {{ registroForm.controls.cupos.value }}
-                        </span>
-                      </div>
-                    </div>
-
-                </div>
-              </div>
-
-      </div>
-
-    </form>
-
-  </div>
-
-  <div modal-footer class="d-flex justify-content-between w-100">
-    <app-button
-      accion="cancel"
-      (clicked)="cerrarModalProgramacion()">
-    </app-button>
-
-    <app-button
-      accion="save"
-      [disabled]="!puedeGuardarProgramacion()"
-      (clicked)="guardarProgramacion()">
-    </app-button>
-  </div>
-
-</app-modal>
-<app-alert-dialog #alertaProgramacion />
-
-
+<!-- COMPONENTE HIJO -->
+<app-modal-programacion
+  #modalProgramacionHijo>
+</app-modal-programacion>

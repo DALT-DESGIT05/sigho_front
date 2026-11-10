@@ -1,5 +1,5 @@
 
-import { Component, computed, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CardGeneralComponent } from '../../../../components/card-general/card-general.component';
 import { SelectComponent, SelectOption } from '../../../../components/select/select.component';
@@ -10,13 +10,13 @@ import { ModalComponent } from '../../../../components/modal/modal.component';
 import { LabelComponent } from '../../../../components/label/label.component';
 import { InputTextComponent } from '../../../../components/input-text/input-text.component';
 import { AlertDialogComponent } from '../../../../components/alert-dialog/alert-dialog.component';
+import { EspecialidadService } from '../../../../services/consultorios/especialidad.service';
+import { PersonalService } from '../../../../services/consultorios/personal.service';
+import { TurnoService } from '../../../../services/consultorios/turno.service';
+import { Turno } from '../../../../interfaces/consultorios/turno.interface';
 
 
-interface Medico {
-  id: number;
-  nombre: string;
-  id_consultorio: number;
-}
+
 
 interface ProgramacionMedico {
   id: number;
@@ -42,11 +42,11 @@ interface ProgramacionMedico {
   templateUrl: './programacion-medicos-page.component.html',
   styleUrl: './programacion-medicos-page.component.scss'
 })
-export class ProgramacionMedicosPage {
+export class ProgramacionMedicosPage implements OnInit{
 
   constructor() {
-    this.filtrosForm.controls.consultorio.valueChanges.subscribe(
-      idConsultorio => this.cambiarConsultorio(idConsultorio)
+    this.filtrosForm.controls.especialidad.valueChanges.subscribe(
+      codigo_especialidad => this.cambiarEspecialidad(codigo_especialidad)
     );
     this.filtrosForm.valueChanges.subscribe(() => {
       this.consultaRealizada.set(false);
@@ -70,7 +70,14 @@ export class ProgramacionMedicosPage {
   }
 
   readonly modalProgramacion =viewChild<ModalComponent>('modalProgramacion');
+  private readonly especialidadService = inject(EspecialidadService);
+  private readonly personalService = inject(PersonalService);
+  private readonly turnoService = inject(TurnoService);
 
+  ngOnInit(): void {
+    this.cargarEspecialidades();
+    this.cargarTurnos();
+  }
   abrirModalProgramacion(): void {
     if (!this.consultaRealizada()) return;
 
@@ -96,49 +103,70 @@ export class ProgramacionMedicosPage {
   readonly programaciones = signal<ProgramacionMedico[]>([]);
   readonly consultaRealizada = signal(false);
 
-  // Datos simulados de consultorios
-  readonly consultorios = signal<SelectOption[]>([
-    { value: 1, label: 'CARDIOLOGÍA' },
-    { value: 2, label: 'MEDICINA GENERAL' },
-    { value: 3, label: 'TRAUMATOLOGÍA' },
-    { value: 4, label: 'PEDIATRÍA' }
-  ]);
-
-  // Datos simulados de médicos
-  private readonly medicosMock: Medico[] = [
-    { id: 1, nombre: 'MÉDICO DEMO 01', id_consultorio: 1 },
-    { id: 2, nombre: 'MÉDICO DEMO 02', id_consultorio: 1 },
-    { id: 3, nombre: 'MÉDICO DEMO 03', id_consultorio: 2 },
-    { id: 4, nombre: 'MÉDICO DEMO 04', id_consultorio: 3 },
-    { id: 5, nombre: 'MÉDICO DEMO 05', id_consultorio: 4 }
-  ];
-
+  readonly especialidades = signal<SelectOption[]>([]);
+  readonly cargandoEspecialidades = signal(false);
+  private solicitudMedicos = 0;
   readonly medicos = signal<SelectOption[]>([]);
   readonly cargandoMedicos = signal(false);
+  readonly turnos = signal<SelectOption[]>([]);
+  readonly dataTurnos = signal<Turno[]>([]);
+  readonly cargandoTurnos = signal(false);
   readonly alertaProgramacion =viewChild<AlertDialogComponent>('alertaProgramacion');  readonly filtrosForm = this.fb.group({
-    consultorio: [null as number | null, Validators.required],
+    especialidad: [null as number | null, Validators.required],
     medico: [{ value: null as number | null, disabled: true }, Validators.required],  fecha_inicio: ['', Validators.required],fecha_termino: ['', Validators.required]
   });
 
 
 
-  cambiarConsultorio(idConsultorio: number | null): void {
+
+  cambiarEspecialidad(codigo_especialidad: number | null): void {
+    const solicitud_actual = ++this.solicitudMedicos;
     const controlMedico = this.filtrosForm.controls.medico;
 
     controlMedico.reset(null, { emitEvent: false });
-    this.medicos.set([]);
+    controlMedico.disable({ emitEvent: false });
 
-    if (idConsultorio === null) {
-      controlMedico.disable({ emitEvent: false });
+    this.medicos.set([]);
+    this.cargandoMedicos.set(false);
+
+    if (codigo_especialidad === null) {
       return;
     }
 
-    // Posteriormente se reemplazará por el servicio Laravel.
-    const medicosFiltrados = this.medicosMock.filter(medico => medico.id_consultorio === idConsultorio).map(medico => ({value: medico.id,label: medico.nombre }));
+    this.cargandoMedicos.set(true);
 
-    this.medicos.set(medicosFiltrados);
-    controlMedico.enable({ emitEvent: false });
+    this.personalService.find_medico_by_especialidad(codigo_especialidad).subscribe({
+      next: ({ data }) => {
+        if (solicitud_actual !== this.solicitudMedicos) return;
+
+        this.medicos.set(
+          data.map(medico => ({
+            value: medico.codigo_persona,
+            label: [
+              medico.prefijo,
+              medico.nombres,
+              medico.apellido_paterno,
+              medico.apellido_materno
+            ].filter(Boolean).join(' ')
+          }))
+        );
+
+        if (data.length > 0) {
+          controlMedico.enable({ emitEvent: false });
+        }
+
+        this.cargandoMedicos.set(false);
+      },
+      error: (error) => {
+        if (solicitud_actual !== this.solicitudMedicos) return;
+
+        console.error('Error al cargar médicos:', error);
+        this.medicos.set([]);
+        this.cargandoMedicos.set(false);
+      }
+    });
   }
+
 
   consultar(): void {
     if (this.filtrosForm.invalid) {
@@ -158,7 +186,7 @@ export class ProgramacionMedicosPage {
     }
 
     const resultados = this.programacionesMock.filter(programacion =>
-      programacion.id_consultorio === filtros.consultorio &&
+      programacion.id_consultorio === filtros.especialidad &&
       programacion.id_medico === filtros.medico &&
       programacion.fecha >= filtros.fecha_inicio! &&
       programacion.fecha <= filtros.fecha_termino!
@@ -272,24 +300,26 @@ export class ProgramacionMedicosPage {
     hora_termino: ['', Validators.required],
     cupos: [0, Validators.min(1)]
   });
-  readonly consultorioSeleccionado = computed(() => {
-    const id = this.filtrosForm.controls.consultorio.value;
+  readonly especialidadSeleccionada = computed(() => {
+    const codigo_especialidad = this.filtrosForm.controls.especialidad.value;
 
-    return this.consultorios().find(item => item.value === id)?.label ?? '';
-  });
+    return this.especialidades().find(
+      especialidad => String(especialidad.value) === String(codigo_especialidad))?.label ?? '';
+  });;
 
- obtenerNombreMedico(): string {
-  const id_medico = this.filtrosForm.controls.medico.value;
+  obtenerNombreMedico(): string {
+    const id_medico = this.filtrosForm.controls.medico.value;
 
-  return this.medicos().find(
-    medico => String(medico.value) === String(id_medico)
-  )?.label ?? '';
-}
-  obtenerNombreConsultorio(): string {
-    const id_consultorio = this.filtrosForm.controls.consultorio.value;
+    return this.medicos().find(
+      medico => String(medico.value) === String(id_medico)
+    )?.label ?? '';
+  }
 
-    return this.consultorios().find(
-      consultorio => String(consultorio.value) === String(id_consultorio)
+  obtenerNombreEspecialidad(): string {
+    const codigo_especialidad = this.filtrosForm.controls.especialidad.value;
+
+    return this.especialidades().find(
+      especialidad => String(especialidad.value) === String(codigo_especialidad)
     )?.label ?? '';
   }
 
@@ -309,24 +339,20 @@ export class ProgramacionMedicosPage {
     2: 30
   };
 
-  readonly turnos = signal<SelectOption[]>([
-    { value: 1, label: 'MAÑANA' },
-    { value: 2, label: 'TARDE' }
-  ]);
 
-  private actualizarHorarioPorTurno(idTurno: number | null): void {
-  const horarios: Record<number, { inicio: string; termino: string }> = {
-    1: { inicio: '08:00', termino: '14:00' },
-    2: { inicio: '14:00', termino: '19:00' }
-  };
 
-  const horario = idTurno === null ? null : horarios[idTurno];
+
+  private actualizarHorarioPorTurno(codigo_turno: number | null): void {
+    const turno = this.dataTurnos().find(
+      item => item.codigo_turno === codigo_turno
+    );
 
     this.registroForm.patchValue({
-      hora_inicio: horario?.inicio ?? '',
-      hora_termino: horario?.termino ?? ''
+      hora_inicio: turno?.hora_inicio?.slice(0, 5) ?? '',
+      hora_termino: turno?.hora_fin?.slice(0, 5) ?? ''
     });
   }
+
 
   private calcularCupos(): void {
     const { programa, hora_inicio, hora_termino } =this.registroForm.getRawValue();
@@ -369,7 +395,7 @@ export class ProgramacionMedicosPage {
     const datos = this.registroForm.getRawValue();
 
     console.log('Programación válida para guardar:', {
-      id_consultorio: this.filtrosForm.controls.consultorio.value,
+      codigo_especialidad: this.filtrosForm.controls.especialidad.value,
       id_medico: this.filtrosForm.controls.medico.value,
       ...datos
     });
@@ -398,6 +424,52 @@ export class ProgramacionMedicosPage {
       imagen: 'assets/images/icono_de_aceptacion.png',
     });
   }
+  cargarEspecialidades(): void {
+    this.cargandoEspecialidades.set(true);
+    this.especialidadService.list_especialidad_by_enfermera().subscribe({
+      next: ({ data }) => {
+        this.especialidades.set(
+          data.map(especialidad => ({
+            value: especialidad.codigo_especialidad,
+            label: especialidad.nombre_especialidad
+          }))
+        );
+
+        this.cargandoEspecialidades.set(false);
+      },
+      error: (error) => {
+        console.error('Error al cargar especialidades:', error);
+        this.especialidades.set([]);
+        this.cargandoEspecialidades.set(false);
+      }
+    });
+  }
+
+
+  cargarTurnos(): void {
+    this.cargandoTurnos.set(true);
+    this.turnoService.list_turnos().subscribe({
+      next: ({ data }) => {
+        this.dataTurnos.set(data);
+
+        this.turnos.set(
+          data.map(turno => ({
+            value: turno.codigo_turno,
+            label: turno.nombre_turno
+          }))
+        );
+
+        this.cargandoTurnos.set(false);
+      },
+      error: (error) => {
+        console.error('Error al cargar turnos:', error);
+        this.dataTurnos.set([]);
+        this.turnos.set([]);
+        this.cargandoTurnos.set(false);
+      }
+    });
+  }
+
 
 }
 

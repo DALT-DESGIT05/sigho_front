@@ -87,6 +87,7 @@
                   <app-badge
                     [texto]="badgeText(column, row)"
                     [clases]="badgeClasses(column, row)"
+                    [icon]="badgeIcon(column, row)"
                     [title]="badgeTitle(column, row)"
                     [size]="column.badge.size || 'md'">
                   </app-badge>
@@ -171,20 +172,34 @@
                     (clicked)="emitIconLinkClick(column, row, $event)">
                   </app-icon-link>
 
-                    } @else {
-                      @if (column.icon) {
-                        <span class="d-inline-flex align-items-center gap-2">
-                          <i
-                            [class]="column.icon"
-                            [style.color]="'var(--palette-primary-fap)'"
-                            aria-hidden="true">
-                          </i>
+                    }  @else if (column.image) {
+                      <span class="d-inline-flex align-items-center gap-2">
+                        <img
+                          [src]="column.image"
+                          alt=""
+                          [width]="column.imageSize || 36"
+                          [height]="column.imageSize || 36"
+                          class="rounded-circle flex-shrink-0"
+                          style="object-fit: contain;">
 
-                          <span>{{ displayValue(column, row) }}</span>
+                        <span class="fw-semibold">
+                          {{ displayValue(column, row) }}
                         </span>
-                      } @else {
-                        {{ displayValue(column, row) }}
-                      }
+                      </span>
+
+                    } @else if (column.icon) {
+                      <span class="d-inline-flex align-items-center gap-2">
+                        <i
+                          [class]="column.icon"
+                          style="color: var(--palette-primary-fap);"
+                          aria-hidden="true">
+                        </i>
+
+                        <span>{{ displayValue(column, row) }}</span>
+                      </span>
+
+                    } @else {
+                      {{ displayValue(column, row) }}
                     }
 
               </td>

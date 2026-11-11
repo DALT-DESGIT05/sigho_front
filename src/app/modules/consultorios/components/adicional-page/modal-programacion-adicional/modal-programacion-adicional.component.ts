@@ -111,14 +111,15 @@ readonly columnasProgramacion: TableColumn<ProgramacionAdicional>[] = [
   {
     key: 'nombre_medico',
     label: 'MÉDICO',
-    icon: 'fa-solid fa-user-doctor'
+    image: 'assets/images/medico.png',
+    imageSize: 36
   },
   {
     key: 'fecha',
     label: 'FECHA',
     align: 'center'
   },
-  {
+    {
     key: 'turno',
     label: 'TURNO',
     align: 'center',
@@ -126,6 +127,10 @@ readonly columnasProgramacion: TableColumn<ProgramacionAdicional>[] = [
       texto: (_, row) => row.turno,
       clases: (_, row) =>
         row.turno === 'MAÑANA' ? 'warning' : 'info',
+      icon: (_, row) =>
+        row.turno === 'MAÑANA'
+          ? 'fa-solid fa-sun'
+          : 'fa-solid fa-moon',
       size: 'sm'
     }
   },

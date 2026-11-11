@@ -128,6 +128,15 @@ export class TableComponent<T extends object = object> {
   badgeTitle(column: TableColumn<T>, row: T): string {
     return this.resolveCellValue(column.badge!.title, row, column) ?? '';
   }
+  badgeIcon(column: TableColumn<T>, row: T): string {
+    const icon = column.badge?.icon;
+
+    if (typeof icon === 'function') {
+      return icon(this.valueFor(row, column.key), row);
+    }
+
+    return icon ?? '';
+  }
   statusCircleClasses(column: TableColumn<T>, row: T): PaletteColor {
     return this.resolveCellValue(column.statusCircle!.clases, row, column) ?? 'secondary';
   }

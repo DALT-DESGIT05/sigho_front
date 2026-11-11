@@ -46,6 +46,7 @@ export class ModalComponent {
   private readonly modalService = inject(BsModalService);
   private readonly modalTemplate = viewChild<TemplateRef<unknown>>('modalTemplate');
   modalRef?: BsModalRef;
+  readonly headerDestacado = input(false);
 
   readonly resolvedTitle = computed(() => this.titulo() || this.title());
   readonly modalDialogClasses = computed(() => {

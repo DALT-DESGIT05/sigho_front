@@ -2,16 +2,16 @@
 import { Component, inject, OnInit, signal, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { ModalComponent } from '../../../../../../components/modal/modal.component';
-import { SelectComponent, SelectOption } from '../../../../../../components/select/select.component';
-import { InputDateComponent } from '../../../../../../components/input-date/input-date.component';
-import { InputTextComponent } from '../../../../../../components/input-text/input-text.component';
-import { LabelComponent } from '../../../../../../components/label/label.component';
-import { ButtonComponent } from '../../../../../../components/button/button.component';
-import { AlertDialogComponent } from '../../../../../../components/alert-dialog/alert-dialog.component';
+import { ModalComponent } from '../../../../../components/modal/modal.component';
+import { SelectComponent, SelectOption } from '../../../../../components/select/select.component';
+import { InputDateComponent } from '../../../../../components/input-date/input-date.component';
+import { InputTextComponent } from '../../../../../components/input-text/input-text.component';
+import { LabelComponent } from '../../../../../components/label/label.component';
+import { ButtonComponent } from '../../../../../components/button/button.component';
+import { AlertDialogComponent } from '../../../../../components/alert-dialog/alert-dialog.component';
 
-import { TurnoService } from '../../../../../../services/consultorios/turno.service';
-import { Turno } from '../../../../../../interfaces/consultorios/turno.interface';
+import { TurnoService } from '../../../../../services/consultorios/turno.service';
+import { Turno } from '../../../../../interfaces/consultorios/turno.interface';
 
 export interface DatosModalProgramacion {
   codigo_especialidad: number;

@@ -155,6 +155,7 @@ export interface TableIconLinkColumn<T> {
 export interface TableColumn<T> {
   key: string;
   label?: string;
+  icon?: string;
   cssClass?: string;
   align?: TableColumnAlignment;
   headerCssClass?: string;

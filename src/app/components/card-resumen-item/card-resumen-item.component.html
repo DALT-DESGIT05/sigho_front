@@ -1,4 +1,7 @@
-<article class="resumen-item d-flex align-items-center gap-3 p-3 rounded h-100">
+<article
+  class="resumen-item d-flex align-items-center gap-3 p-3 rounded h-100"
+  [class.resumen-item--programacion]="variante() === 'programacion' || variante() === 'programacion-total' "
+  [class.resumen-item--programacion-total]=" variante() === 'programacion-total'">
   <div class="resumen-item__visual d-flex align-items-center justify-content-center flex-shrink-0 rounded overflow-hidden">
     @if (tipo_imagen(); as tipo) {
       <app-image-lazy

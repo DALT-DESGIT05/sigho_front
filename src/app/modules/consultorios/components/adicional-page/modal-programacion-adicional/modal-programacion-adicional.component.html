@@ -1,0 +1,100 @@
+<app-modal
+   #modalProgramacion
+  titulo="Programaciones Médicas Disponibles"
+  icon="fa-solid fa-calendar-days"
+  [headerDestacado]="true"
+  [ignoreBackdropClick]="true"
+  size="xl"
+  [fitContent]="true"
+  [scrollable]="true"
+  [showFooter]="true">
+
+  <!-- SUBTÍTULO DEL ENCABEZADO -->
+  <small modal-header class="programacion-modal__subtitulo">
+    Seleccione una programación para consultar sus horarios disponibles.
+  </small>
+
+  <!-- RESUMEN SUPERIOR -->
+  <div class="programacion-resumen row g-3 mb-3">
+
+    <!-- CONSULTORIO Y ACTIVIDAD MÉDICA -->
+    <div class="col-12 col-lg-9">
+      <div class="programacion-resumen__grupo h-100">
+
+        <div class="row g-0 align-items-center h-100">
+
+          <div class="col-12 col-md-6">
+            <app-card-resumen-item
+              class="programacion-resumen__item"
+              titulo="Consultorio"
+              [valor]="consultorio() || 'No seleccionado'"
+              icono="fa-solid fa-hospital"
+              variante="programacion">
+            </app-card-resumen-item>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <app-card-resumen-item
+              class="programacion-resumen__item"
+              titulo="Actividad Médica"
+              [valor]="actividadMedica() || 'No seleccionada'"
+              icono="fa-solid fa-stethoscope"
+              variante="programacion">
+            </app-card-resumen-item>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TOTAL DE PROGRAMACIONES -->
+    <div class="col-12 col-lg-3">
+      <div class="programacion-resumen__total h-100">
+
+        <app-card-resumen-item
+          class="programacion-resumen__item"
+          titulo="Programaciones"
+          [valor]="totalProgramaciones().toString()"
+          icono="fa-solid fa-users"
+          variante="programacion-total">
+        </app-card-resumen-item>
+
+      </div>
+    </div>
+
+  </div>
+
+    <!-- TABLA DE PROGRAMACIONES -->
+
+  <app-table
+    [columns]="columnasProgramacion"
+    [rows]="programaciones()"
+    [actions]="accionesProgramacion"
+    actionsLabel="ACCIÓN"
+    (action)="onAccionProgramacion($event)"
+    [scrollHeight]="null"
+    size="sm"
+    emptyMessage="No se encontraron programaciones disponibles">
+  </app-table>
+
+  <!-- PIE DEL MODAL -->
+  <div
+    modal-footer
+    class="programacion-modal__footer d-flex align-items-center justify-content-between w-100 gap-3">
+
+    <span class="programacion-modal__contador" style="color: var(--palette-primary-fap) !important;">
+      {{ totalProgramaciones() }} programaciones encontradas
+    </span>
+
+    <app-button
+      texto="Cerrar"
+      icon="fa-solid fa-xmark"
+      color="danger"
+      size="sm"
+      (clicked)="cerrar()">
+    </app-button>
+
+  </div>
+
+</app-modal>

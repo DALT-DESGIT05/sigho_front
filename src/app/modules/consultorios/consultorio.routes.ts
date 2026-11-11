@@ -11,5 +11,9 @@ export const consultorioRoutes: Routes = [
     path: 'programacion-medicos',
     loadComponent: () =>import('./pages/programacion-medicos-page/programacion-medicos-page.component').then(m => m.ProgramacionMedicosPage)
   },
+  {
+    path: 'adicional',
+    loadComponent: () =>import('./pages/adicional-page/adicional-page.component').then(m => m.AdicionalPageComponent)
+  },
 
 ]

@@ -1,0 +1,146 @@
+:host {
+  display: block;
+  min-width: 0;
+  height: 100%;
+}
+
+.resumen-item {
+  background-color: var(--palette-white);
+  border: 1px solid var(--palette-primary-fap-100);
+}
+
+.resumen-item__visual {
+  width: 3rem;
+  height: 3rem;
+  background-color: var(--palette-primary-fap-50);
+  color: var(--palette-primary-fap-text);
+}
+
+.resumen-item__contenido {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.resumen-item__titulo {
+  color: var(--palette-gray-500);
+}
+
+.resumen-item__valor {
+  color: var(--palette-primary-fap);
+}
+
+/* =========================================
+   VARIANTE: PROGRAMACIÓN MÉDICA
+========================================= */
+
+.resumen-item--programacion {
+  min-height: 5rem;
+  padding: 1rem 1.25rem !important;
+  border: none;
+  border-radius: 0 !important;
+  background: transparent;
+
+  .resumen-item__visual {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 0 !important;
+    background: transparent;
+    color: var(--palette-primary-fap);
+
+    i {
+      font-size: 2rem !important;
+    }
+  }
+
+  .resumen-item__titulo {
+    margin-bottom: 0.35rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    text-transform: none !important;
+    color: var(--palette-primary-fap-text);
+  }
+
+  .resumen-item__valor {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    line-height: 1.35;
+    color: var(--palette-primary-fap);
+  }
+}
+
+/* COLOR VERDE PARA EL INDICADOR TOTAL */
+
+:host-context(.programacion-resumen__total) {
+  .resumen-item--programacion {
+
+    .resumen-item__visual {
+      color: var(--palette-success-text);
+    }
+
+    .resumen-item__titulo,
+    .resumen-item__valor {
+      color: var(--palette-success-text);
+    }
+
+    .resumen-item__valor {
+      font-size: 1.75rem !important;
+    }
+  }
+}
+.resumen-item--programacion-total {
+  .resumen-item__visual {
+    color: var(--palette-success-text);
+  }
+
+  .resumen-item__titulo,
+  .resumen-item__valor {
+    color: var(--palette-success-text);
+  }
+
+  .resumen-item__contenido {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: center;
+  }
+
+  .resumen-item__valor {
+    font-size: 1.75rem !important;
+    line-height: 1.1;
+  }
+
+  .resumen-item__titulo {
+    margin-top: 0.25rem;
+    margin-bottom: 0 !important;
+  }
+}
+/* CONSULTORIO Y ACTIVIDAD MÉDICA */
+
+.resumen-item--programacion:not(.resumen-item--programacion-total) {
+
+  .resumen-item__visual {
+    color: var(--palette-primary-fap);
+  }
+
+  .resumen-item__titulo {
+    color: var(--palette-primary-fap-text);
+  }
+
+  .resumen-item__valor {
+    color: var(--palette-primary-fap);
+  }
+}
+
+/* TOTAL DE PROGRAMACIONES */
+
+.resumen-item--programacion-total {
+
+  .resumen-item__visual {
+    color: var(--palette-success-text);
+  }
+
+  .resumen-item__titulo,
+  .resumen-item__valor {
+    color: var(--palette-success-text);
+  }
+}
+

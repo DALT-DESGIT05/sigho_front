@@ -8,7 +8,7 @@ import { ButtonComponent } from '../../../../components/button/button.component'
 import { TableComponent } from '../../../../components/table/table.component';
 import { EspecialidadService } from '../../../../services/consultorios/especialidad.service';
 import { PersonalService } from '../../../../services/consultorios/personal.service';
-import { ModalProgramacionComponent } from './components/modal-programacion/modal-programacion.component';
+import { ModalProgramacionComponent } from '../../components/programacion-medicos-page/modal-programacion/modal-programacion.component';
 
 interface ProgramacionMedico {
   id: number;

@@ -170,9 +170,23 @@
                     [disabled]="iconLinkDisabled(column, row)"
                     (clicked)="emitIconLinkClick(column, row, $event)">
                   </app-icon-link>
-                } @else {
-                  {{ displayValue(column, row) }}
-                }
+
+                    } @else {
+                      @if (column.icon) {
+                        <span class="d-inline-flex align-items-center gap-2">
+                          <i
+                            [class]="column.icon"
+                            [style.color]="'var(--palette-primary-fap)'"
+                            aria-hidden="true">
+                          </i>
+
+                          <span>{{ displayValue(column, row) }}</span>
+                        </span>
+                      } @else {
+                        {{ displayValue(column, row) }}
+                      }
+                    }
+
               </td>
             }
             @if (hasActions()) {

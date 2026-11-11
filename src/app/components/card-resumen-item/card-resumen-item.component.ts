@@ -1,12 +1,5 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  input
-} from '@angular/core';
-import {
-  ImageLazyComponent,
-  TipoImagenLazy
-} from '../../../../../../components/image-lazy/image-lazy.component';
+import { ChangeDetectionStrategy,Component,input} from '@angular/core';
+import { ImageLazyComponent, TipoImagenLazy } from '../image-lazy/image-lazy.component';
 
 @Component({
   selector: 'app-card-resumen-item',
@@ -26,4 +19,5 @@ export class CardResumenItemComponent {
   readonly identificador = input('');
   readonly imagen = input('');
   readonly alt = input('');
+  readonly variante = input<'default' | 'programacion' | 'programacion-total'>('default');
 }

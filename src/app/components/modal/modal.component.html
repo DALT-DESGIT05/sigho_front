@@ -1,5 +1,5 @@
 <ng-template #modalTemplate>
-  <div class="modal-header app-modal__header">
+  <div class="modal-header app-modal__header"  [class.app-modal__header--destacado]="headerDestacado()">
     <div class="app-modal__header-content">
       @if (resolvedTitle() || icon()) {
         <div class="app-modal__title-row">

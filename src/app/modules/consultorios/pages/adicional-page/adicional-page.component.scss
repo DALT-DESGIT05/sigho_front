@@ -1,0 +1,36 @@
+
+:host {
+  display: block;
+}
+
+.adicional__consulta {
+  position: relative;
+  z-index: 3;
+}
+
+// Permite que el desplegable del autocomplete
+// sobresalga de la tarjeta de consulta.
+:host ::ng-deep .adicional__consulta > .app-card-general {
+  overflow: visible;
+}
+
+.adicional__dato-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--palette-primary-900);
+  margin-bottom: 0.35rem;
+}
+
+.adicional__dato-valor {
+  font-size: 0.875rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.adicional__consultorio {
+  position: relative;
+  z-index: 2;
+}
+
+:host ::ng-deep .adicional__consultorio > .app-card-general {
+  overflow: visible;
+}

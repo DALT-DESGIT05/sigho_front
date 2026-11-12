@@ -8,7 +8,7 @@
         objectFit="contain">
       </app-image-lazy>
     } @else if (imagen()) {
-      <img [src]="imagen()" [alt]="'Foto de ' + nombre()">
+      <img [src]="imagen() | imagen" [alt]="'Foto de ' + nombre()">
     } @else {
       <span class="fa-solid fa-user" aria-hidden="true"></span>
     }

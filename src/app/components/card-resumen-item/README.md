@@ -21,3 +21,8 @@ horizontal y muestra el total en una línea. En escritorio conserva el diseño h
 
 Depende de Bootstrap, Font Awesome y las variables `--palette-*` del proyecto.
 Para imágenes dinámicas utiliza `ImageLazyComponent` y su configuración de `ImageService`.
+# Imágenes locales por nombre
+
+La entrada `imagen` acepta nombres de `public/images`, además de rutas y URLs.
+Ejemplo: `<app-card-resumen-item imagen="logo" />`.
+Consulta [el catálogo y el pipe](../../pipes/README.md).

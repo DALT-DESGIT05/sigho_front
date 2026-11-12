@@ -12,7 +12,7 @@
         [alt]="alt() || valor()"
         objectFit="cover" />
     } @else if (imagen()) {
-      <img class="w-100 h-100 object-fit-cover" [src]="imagen()" [alt]="alt() || valor()" loading="lazy" />
+      <img class="w-100 h-100 object-fit-cover" [src]="imagen() | imagen" [alt]="alt() || valor()" loading="lazy" />
     } @else {
       <i class="font-20" [class]="icono() || 'fa-solid fa-circle-info'" aria-hidden="true"></i>
     }

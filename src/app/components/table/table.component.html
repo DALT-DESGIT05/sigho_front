@@ -36,7 +36,7 @@
       @if (loading()) {
         <tr>
           <td class="app-table__loading" [attr.colspan]="emptyColspan()">
-            <img src="assets/loaders/dot-chase.svg" alt="Cargando datos">
+            <img [src]="'dot_chase' | imagen" alt="Cargando datos">
           </td>
         </tr>
       } @else {
@@ -175,7 +175,7 @@
                     }  @else if (column.image) {
                       <span class="d-inline-flex align-items-center gap-2">
                         <img
-                          [src]="column.image"
+                          [src]="column.image | imagen"
                           alt=""
                           [width]="column.imageSize || 36"
                           [height]="column.imageSize || 36"

@@ -35,6 +35,13 @@ describe('LoginPageComponent', () => {
     component = fixture.componentInstance;
   });
 
+  it('resuelve los alias de las imágenes del acceso', () => {
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.module--citas img').getAttribute('src')).toBe('images/Citas.png');
+    expect(fixture.nativeElement.querySelector('.module--hospitalizacion img').getAttribute('src')).toContain('images/ChatGPT%20Image');
+  });
+
   it('hides the reCAPTCHA badge after a successful login', () => {
     document.body.classList.add('recaptcha-visible');
     component.login_model.set({ usuario: 'usuario', contrasena: 'contrasena', recuerdame: false });

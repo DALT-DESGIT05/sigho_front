@@ -47,9 +47,10 @@ describe('AlertDialogComponent', () => {
     expect(dialogo.style.width).toBe('460px');
     componente.close();
     await vi.runAllTimersAsync();
-    void componente.open({ diseno: 'centrado', ancho: '310px', titulo: 'Personalizada', mensaje: '', imagen: 'assets/svg/presencial.png' });
+    void componente.open({ diseno: 'centrado', ancho: '310px', titulo: 'Personalizada', mensaje: '', imagen: 'svg-presencial' });
     expect(dialogo.style.width).toBe('310px');
     expect(dialogo.querySelector('img')).toBeTruthy();
+    expect(dialogo.querySelector('img')!.getAttribute('src')).toBe('images/svg-presencial.png');
     dialogo.querySelector('img')!.dispatchEvent(new Event('error'));
     fixture.detectChanges();
     expect(dialogo.querySelector('i.fa-circle-info')).toBeTruthy();
@@ -99,7 +100,7 @@ describe('AlertDialogComponent', () => {
   });
 
   it('sustituye el icono por PNG y recupera el icono si falla', () => {
-    void componente.open({ titulo: 'Aviso', mensaje: '', imagen: 'assets/images/3305803.png' });
+    void componente.open({ titulo: 'Aviso', mensaje: '', imagen: 'images/3305803.png' });
     expect(dialogo.querySelector('img')).toBeTruthy();
     dialogo.querySelector('img')!.dispatchEvent(new Event('error'));
     fixture.detectChanges();

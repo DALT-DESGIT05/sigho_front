@@ -1,3 +1,4 @@
+import { ImagenPipe } from '../../pipes/imagen.pipe';
 ﻿import { CommonModule } from '@angular/common';
 import { Component, TemplateRef, computed, effect, input, output, signal } from '@angular/core';
 import { MESSAGE_DEFAULT_TABLE } from '../../config/constants';
@@ -18,7 +19,7 @@ import { PaginationComponent } from '../pagination/pagination.component';
 @Component({
   selector: 'app-table',
   standalone: true,
-  imports: [CommonModule, BadgeComponent, ButtonComponent, CheckComponent, CheckToggleComponent, RadioComponent, SelectComponent, IconLinkComponent, StatusCircleComponent, TypeIndicatorOrdenesMedicasComponent, ProgressBarsComponent, PaginationComponent],
+  imports: [ImagenPipe, CommonModule, BadgeComponent, ButtonComponent, CheckComponent, CheckToggleComponent, RadioComponent, SelectComponent, IconLinkComponent, StatusCircleComponent, TypeIndicatorOrdenesMedicasComponent, ProgressBarsComponent, PaginationComponent],
   templateUrl: './table.component.html',
   styleUrl: './table.component.scss'
 })

@@ -100,7 +100,7 @@ readonly columnasProgramacion: TableColumn<ProgramacionAdicional>[] = [
   {
     key: 'nombre_medico',
     label: 'MÉDICO',
-    image: 'assets/images/medico.png',
+    image: 'medico',
     imageSize: 36
   },
   {

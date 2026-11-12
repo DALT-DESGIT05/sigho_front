@@ -246,7 +246,7 @@ readonly consultorios = signal<SelectOption[]>([
       diseno: 'centrado',
       titulo: 'Citas Adicionales',
       mensaje: 'La cita adicional fue registrada con éxito.',
-      imagen: 'assets/images/icono_de_aceptacion.png',
+      imagen: 'icono_de_aceptacion',
       texto_confirmar: 'OK',
       color_confirmar: 'primary',
       mostrar_cancelar: false,

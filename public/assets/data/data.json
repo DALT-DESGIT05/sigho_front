@@ -3,14 +3,14 @@
       {
           "id": 1,
           "link": "/citas/menu_reservas",
-          "imagen": "assets/svg/citas medicas.png",
+          "imagen": "images/citas medicas.png",
           "description": "Descripción del ítem 1",
           "titulo": "Cita Médica"
       },
       {
           "id": 2,
           "link": "/citas/resultados_laboratorio",
-          "imagen": "assets/svg/laboratorio general.png",
+          "imagen": "images/laboratorio general.png",
           "description": "Descripción del ítem 1",
           "titulo": "Resultados de Laboratorio"
       }
@@ -19,28 +19,28 @@
       {
           "id": 1,
           "link": "/citas/reserva_citas",
-          "imagen": "assets/svg/reservaciones.png",
+          "imagen": "images/reservaciones.png",
           "description": "Descripción del ítem 1",
           "titulo": "Reserva de Citas"
       },
       {
           "id": 2,
           "link": "/citas/anulacion_citas",
-          "imagen": "assets/svg/anular citas.png",
+          "imagen": "images/anular citas.png",
           "description": "Descripción del ítem 1",
           "titulo": "Anulación de Citas"
       },
       {
           "id": 3,
           "link": "/citas/historial_citas",
-          "imagen": "assets/svg/historial.png",
+          "imagen": "images/historial.png",
           "description": "Descripción del ítem 1",
           "titulo": "Historial de Citas"
       },
       {
           "id": 4,
           "link": "/citas/citas_virtuales",
-          "imagen": "assets/svg/telemedicina.png",
+          "imagen": "images/telemedicina.png",
           "description": "Telemedicina",
           "titulo": "Telemedicina"
       }
@@ -49,7 +49,7 @@
       {
           "id": 1,
           "link": "/citas/reserva_citas",
-          "imagen": "assets/svg/presencial.png",
+          "imagen": "images/svg-presencial.png",
           "description": "Descripción del ítem 1",
           "titulo": "CONSULTA PRESENCIAL",
           "codigo":"01"
@@ -57,7 +57,7 @@
       {
           "id": 2,
           "link": "/citas/anulacion_citas",
-          "imagen": "assets/svg/virtual.png",
+          "imagen": "images/svg-virtual.png",
           "description": "Descripción del ítem 1",
           "titulo": "CONSULTA VIRTUAL",
           "codigo":"16"
@@ -69,7 +69,7 @@
           "consultorio": "CARDIOLOGIA",
           "cantidad": "0",
           "cod_unicon": "823",
-          "imagen": "assets/svg/102.png"
+          "imagen": "images/102.png"
       },
       {
           "codigo": "002",
@@ -81,7 +81,7 @@
           "codigo": "103",
           "consultorio": "CIRUGIA GENERAL",
           "cantidad": "0",
-          "cod_unicon": "assets/svg/103.png"
+          "cod_unicon": "images/103.png"
       },
       {
           "codigo": "003",

@@ -1,3 +1,4 @@
+import { ImagenPipe } from '../../pipes/imagen.pipe';
 
 import { Component, input, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -5,7 +6,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 @Component({
   selector: 'app-card-ipress',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [ImagenPipe, RouterLink, RouterLinkActive],
   templateUrl: './card-ipress.component.html',
   styleUrl: './card-ipress.component.scss',
 })

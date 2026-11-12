@@ -97,7 +97,7 @@
               <div class="reserva-citas__modalidad">
                 <app-card
                   title="Consulta Presencial"
-                  imageSrc="assets/svg/presencial.png"
+                  [imageSrc]="'svg_presencial' | imagen"
                   altText="Consulta Presencial"
                   variant="modalidad"
                   [elevacion]="true"
@@ -110,7 +110,7 @@
               <div class="reserva-citas__modalidad">
                 <app-card
                   title="Consulta Virtual"
-                  imageSrc="assets/svg/virtual.png"
+                  [imageSrc]="'svg_virtual' | imagen"
                   altText="Consulta Virtual"
                   variant="modalidad"
                   [elevacion]="true"

@@ -3,7 +3,7 @@
   @if (useFloatingLabel()) { <label class="app-select__floating-label" [for]="id()">{{ visibleLabel() }}</label> }
   <button type="button" class="select-trigger" [id]="id() || null" [disabled]="isDisabled()" [attr.aria-expanded]="isOpen()" [attr.aria-label]="ariaLabel() || visibleLabel() || placeholder()" (click)="toggle()">
     @if (selectedOption(); as selected) {
-      @if (selected.image) { <img class="select-image" [src]="selected.image" alt=""> } @else if (selected.icon) { <i class="select-icon" [class]="selected.icon" aria-hidden="true"></i> }
+      @if (selected.image) { <img class="select-image" [src]="selected.image | imagen" alt=""> } @else if (selected.icon) { <i class="select-icon" [class]="selected.icon" aria-hidden="true"></i> }
       <span class="select-text" [class]="'select-tone-' + (selected.tone || 'secondary')">{{ selected.label }}</span>
       @if (selected.count !== undefined && selected.count !== null) { <span class="select-count">{{ selected.count }}</span> }
     } @else { <span class="select-text">{{ placeholder() }}</span> }
@@ -13,7 +13,7 @@
     <div class="select-menu" role="listbox">
       @for (option of displayOptions(); track option.value) {
         <button type="button" class="select-option" [class.is-selected]="selectedOption()?.value === option.value" [class.is-disabled]="option.disabled" [disabled]="option.disabled" (click)="select(option)">
-          @if (option.image) { <img class="select-image" [src]="option.image" alt=""> } @else if (option.icon) { <i class="select-icon" [class]="option.icon" aria-hidden="true"></i> }
+          @if (option.image) { <img class="select-image" [src]="option.image | imagen" alt=""> } @else if (option.icon) { <i class="select-icon" [class]="option.icon" aria-hidden="true"></i> }
           <span class="select-option-content"><span [class]="'select-option-label select-tone-' + (option.tone || 'secondary')">{{ option.label }}</span>@if (option.detail) { <small [class]="'select-detail select-detail--' + detailColor()">{{ option.detail }}</small> }</span>
           @if (option.count !== undefined && option.count !== null) { <span class="select-count">{{ option.count }}</span> }
         </button>

@@ -217,7 +217,7 @@ export class ModalProgramacionComponent implements OnInit {
       texto_confirmar: 'Aceptar',
       cerrar_fuera: false,
       cerrar_escape: false,
-      imagen: 'assets/images/icono_de_aceptacion.png'
+      imagen: 'icono_de_aceptacion'
     });
   }
 }

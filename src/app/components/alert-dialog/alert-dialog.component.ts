@@ -1,3 +1,4 @@
+import { ImagenPipe } from '../../pipes/imagen.pipe';
 import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -71,7 +72,7 @@ let siguiente_id = 0;
 @Component({
   selector: 'app-alert-dialog',
   standalone: true,
-  imports: [ButtonComponent],
+  imports: [ImagenPipe, ButtonComponent],
   templateUrl: './alert-dialog.component.html',
   styleUrl: './alert-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,3 +1,4 @@
+import { ImagenPipe } from '../../../../pipes/imagen.pipe';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
@@ -6,7 +7,7 @@ import { CardGeneralComponent } from '../../../../components/card-general/card-g
 
 @Component({
   selector: 'app-menu-reservas',
-  imports: [ RouterLink,AlertComponent,CardGeneralComponent],
+  imports: [ImagenPipe,  RouterLink,AlertComponent,CardGeneralComponent],
   templateUrl: './menu-reservas-page.component.html',
   styleUrl: './menu-reservas-page.component.scss',
 })

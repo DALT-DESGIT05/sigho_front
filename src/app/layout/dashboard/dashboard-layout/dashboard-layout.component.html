@@ -16,13 +16,13 @@
             <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
             <!-- Dark Logo icon -->
 
-            <img src="assets/images/escudo_fap.png" alt="FAP" />
+            <img [src]="'escudo_fap' | imagen" alt="FAP" />
 
           </b>
           <!--End Logo icon -->
           <!-- Logo text --><span>
             <!-- dark Logo text -->
-            <!-- <img src="assets/images/logofinal.png" alt="homepage" class="dark-logo dark-log logo-new" /> -->
+            <!-- <img [src]="'logofinal' | imagen" alt="homepage" class="dark-logo dark-log logo-new" /> -->
              <span class="brand-system-name">SIGO WEB FAP</span>
             <!-- Light Logo text -->
             </span>
@@ -112,7 +112,7 @@
   <aside id="dashboard-sidebar" class="left-sidebar" [class.open]="isSidebarOpen">
     <div class="sidebar-brand">
       <a class="sidebar-brand-link" routerLink="/" aria-label="Ir al inicio">
-        <img src="assets/images/escudo_fap.png" alt="FAP" />
+        <img [src]="'escudo_fap' | imagen" alt="FAP" />
         <span class="sidebar-brand-copy">
           <strong>SIGHO WEB FAP</strong>
           <small>Sistema de Gestión Hospitalaria</small>

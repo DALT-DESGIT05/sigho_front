@@ -1,3 +1,4 @@
+import { ImagenPipe } from '../../../../pipes/imagen.pipe';
 import { Component, computed, signal } from '@angular/core';
 import { TabItem, TabsComponent } from '../../../../components/tabs/tabs.component';
 import { AlertComponent } from '../../../../components/alert/alert.component';
@@ -10,7 +11,7 @@ import { BreadcrumbComponent,BreadcrumbItem } from '../../../../components/bread
 import { InputFilterComponent } from '../../../../components/input-filter/input-filter.component';
 
 @Component({
-  imports: [TabsComponent, AlertComponent,LabelComponent,CardPersonaComponent,CardComponent,CardIpressComponent,BreadcrumbComponent,InputFilterComponent],
+  imports: [ImagenPipe, TabsComponent, AlertComponent,LabelComponent,CardPersonaComponent,CardComponent,CardIpressComponent,BreadcrumbComponent,InputFilterComponent],
   selector: 'app-reserva-citas-page',
   styleUrl: './reserva-citas-page.component.scss',
   templateUrl: './reserva-citas-page.component.html',
@@ -39,17 +40,17 @@ export class ReservaCitasPageComponent {
     {
       codigo: 'LP',
       nombre: 'HOSPITAL LAS PALMAS',
-      imagen: 'assets/images/823.png',
+      imagen: 'hospital_las_palmas',
     },
     {
       codigo: 'HC',
       nombre: 'HOSPITAL CENTRAL FAP',
-      imagen: 'assets/images/721.png',
+      imagen: 'hospital_central_fap',
     },
     {
       codigo: 'SG',
       nombre: 'SAN GABINO',
-      imagen: 'assets/images/828.png',
+      imagen: 'san_gabino',
     },
   ]);
 
@@ -203,29 +204,29 @@ export class ReservaCitasPageComponent {
   });
 
   readonly especialidades = signal([
-    { codigo: '002', nombre: 'CARDIOLOGÍA', imagen: 'assets/svg/002.png' },
-    { codigo: '003', nombre: 'CIRUGÍA GENERAL', imagen: 'assets/svg/003.png' },
-    { codigo: '004', nombre: 'CIRUGÍA PLÁSTICA', imagen: 'assets/svg/004.png' },
-    { codigo: '005', nombre: 'UROLOGÍA', imagen: 'assets/svg/005.png' },
-    { codigo: '006', nombre: 'OTORRINOLARINGOLOGÍA', imagen: 'assets/svg/006.png' },
-    { codigo: '008', nombre: 'OFTALMOLOGÍA', imagen: 'assets/svg/008.png' },
-    { codigo: '009', nombre: 'GASTROENTEROLOGÍA', imagen: 'assets/svg/009.png' },
-    { codigo: '011', nombre: 'MEDICINA INTERNA', imagen: 'assets/svg/011.png' },
-    { codigo: '012', nombre: 'PSICOLOGÍA', imagen: 'assets/svg/012.png' },
-    { codigo: '013', nombre: 'PSIQUIATRÍA', imagen: 'assets/svg/013.png' },
-    { codigo: '014', nombre: 'NEUMOLOGÍA', imagen: 'assets/svg/014.png' },
-    { codigo: '015', nombre: 'NEUROLOGÍA', imagen: 'assets/svg/015.png' },
-    { codigo: '016', nombre: 'CIRUGÍA TÓRAX Y CARDIOVASCULAR', imagen: 'assets/svg/016.png' },
-    { codigo: '017', nombre: 'DERMATOLOGÍA', imagen: 'assets/svg/017.png' },
-    { codigo: '018', nombre: 'MEDICINA FÍSICA Y REHABILITACIÓN', imagen: 'assets/svg/018.png' },
-    { codigo: '020', nombre: 'REUMATOLOGÍA', imagen: 'assets/svg/020.png' },
-    { codigo: '021', nombre: 'TRAUMATOLOGÍA', imagen: 'assets/svg/021.png' },
-    { codigo: '022', nombre: 'NEFROLOGÍA', imagen: 'assets/svg/022.png' },
-    { codigo: '024', nombre: 'ENDOCRINOLOGÍA', imagen: 'assets/svg/024.png' },
-    { codigo: '046', nombre: 'ONCOLOGÍA', imagen: 'assets/svg/046.png' },
-    { codigo: '048', nombre: 'HEMATOLOGÍA', imagen: 'assets/svg/048.png' },
-    { codigo: '079', nombre: 'LABORATORIO', imagen: 'assets/svg/079.png' },
-    { codigo: '083', nombre: 'INFECTOLOGÍA', imagen: 'assets/svg/083.png' }
+    { codigo: '002', nombre: 'CARDIOLOGÍA', imagen: 'cardiologia' },
+    { codigo: '003', nombre: 'CIRUGÍA GENERAL', imagen: 'cirugia_general' },
+    { codigo: '004', nombre: 'CIRUGÍA PLÁSTICA', imagen: 'cirugia_plastica' },
+    { codigo: '005', nombre: 'UROLOGÍA', imagen: 'urologia' },
+    { codigo: '006', nombre: 'OTORRINOLARINGOLOGÍA', imagen: 'otorrinolaringologia' },
+    { codigo: '008', nombre: 'OFTALMOLOGÍA', imagen: 'oftalmologia' },
+    { codigo: '009', nombre: 'GASTROENTEROLOGÍA', imagen: 'gastroenterologia' },
+    { codigo: '011', nombre: 'MEDICINA INTERNA', imagen: 'medicina_interna' },
+    { codigo: '012', nombre: 'PSICOLOGÍA', imagen: 'psicologia' },
+    { codigo: '013', nombre: 'PSIQUIATRÍA', imagen: 'psiquiatria' },
+    { codigo: '014', nombre: 'NEUMOLOGÍA', imagen: 'neumologia' },
+    { codigo: '015', nombre: 'NEUROLOGÍA', imagen: 'neurologia' },
+    { codigo: '016', nombre: 'CIRUGÍA TÓRAX Y CARDIOVASCULAR', imagen: 'cirugia_torax_y_cardiovascular' },
+    { codigo: '017', nombre: 'DERMATOLOGÍA', imagen: 'dermatologia' },
+    { codigo: '018', nombre: 'MEDICINA FÍSICA Y REHABILITACIÓN', imagen: 'medicina_fisica_y_rehabilitacion' },
+    { codigo: '020', nombre: 'REUMATOLOGÍA', imagen: 'reumatologia' },
+    { codigo: '021', nombre: 'TRAUMATOLOGÍA', imagen: 'traumatologia' },
+    { codigo: '022', nombre: 'NEFROLOGÍA', imagen: 'nefrologia' },
+    { codigo: '024', nombre: 'ENDOCRINOLOGÍA', imagen: 'endocrinologia' },
+    { codigo: '046', nombre: 'ONCOLOGÍA', imagen: 'oncologia' },
+    { codigo: '048', nombre: 'HEMATOLOGÍA', imagen: 'hematologia' },
+    { codigo: '079', nombre: 'LABORATORIO', imagen: 'laboratorio' },
+    { codigo: '083', nombre: 'INFECTOLOGÍA', imagen: 'infectologia' }
   ]);
 
 

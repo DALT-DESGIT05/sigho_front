@@ -20,7 +20,7 @@
       [class.rounded-circle]="configuracion().diseno === 'centrado'"
       aria-hidden="true">
       @if (configuracion().imagen && !imagen_fallida()) {
-        <img class="w-100 h-100 object-fit-contain" [src]="configuracion().imagen" alt="" (error)="on_error_imagen()" />
+        <img class="w-100 h-100 object-fit-contain" [src]="configuracion().imagen | imagen" alt="" (error)="on_error_imagen()" />
       } @else {
         <i [class]="configuracion().icono"></i>
       }

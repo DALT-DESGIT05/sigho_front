@@ -1,10 +1,11 @@
+import { ImagenPipe } from '../../pipes/imagen.pipe';
 import { ChangeDetectionStrategy,Component,input} from '@angular/core';
 import { ImageLazyComponent, TipoImagenLazy } from '../image-lazy/image-lazy.component';
 
 @Component({
   selector: 'app-card-resumen-item',
   standalone: true,
-  imports: [
+  imports: [ImagenPipe,
     ImageLazyComponent
   ],
   templateUrl: './card-resumen-item.component.html',

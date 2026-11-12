@@ -146,7 +146,7 @@ await this.alerta().open({
   encabezado: 'SIGHO · INFORMACIÓN',
   titulo: 'Información de la IPRESS',
   mensaje: 'Revise los datos antes de continuar.',
-  imagen: 'assets/svg/presencial.png'
+  imagen: 'images/svg-presencial.png'
 });
 ```
 
@@ -157,7 +157,7 @@ ModalComponent, UtilService, util.interface.ts, styles.scss, main.css y default.
 Se usa ButtonComponent para las acciones y los tipos ButtonVariant y PaletteColor.
 LabelComponent está orientado a campos de formulario; aquí se usa HTML semántico.
 ImageLazyComponent solo obtiene fotografías desde servicios, por eso PNG utiliza img.
-Los PNG existentes incluyen `assets/svg/presencial.png` y fondos de módulos; no se
+Los PNG existentes incluyen `images/svg-presencial.png` y fondos de módulos; no se
 encontró un juego específico para los cinco estados, que utilizan Font Awesome instalado.
 
 Bootstrap proporciona flex, alineación, gap, padding, márgenes, tamaños de imagen,
@@ -173,3 +173,7 @@ Tokens usados directamente: `--palette-white`, `--palette-black`, `--palette-gra
 Las pruebas unitarias verifican resultado asíncrono, cierre duplicado, Escape, fallback
 PNG y limpieza. JSDOM simula showModal/close: la capa superior, Tab y el aspecto visual
 requieren verificación en navegador real.
+# Imágenes locales por nombre
+
+La opción `imagen` también acepta nombres como `'icono_de_aceptacion'`.
+Las rutas y URLs existentes siguen siendo válidas. Consulta [el catálogo y el pipe](../../pipes/README.md).

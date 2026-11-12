@@ -8,7 +8,7 @@
   (click)="select()">
   <span class="selection-card__visual">
     @if (hasImage()) {
-      <img class="selection-card__image" [src]="imageSrc()" [alt]="imageAlt()" />
+      <img class="selection-card__image" [src]="imageSrc() | imagen" [alt]="imageAlt()" />
     } @else if (hasIcon()) {
       <i class="selection-card__icon" [class]="icon()" aria-hidden="true"></i>
     }

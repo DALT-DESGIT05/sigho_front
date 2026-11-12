@@ -1,3 +1,4 @@
+import { ImagenPipe } from '../../../pipes/imagen.pipe';
 import { Component, computed, inject, OnInit, viewChild } from '@angular/core';
 import {
   RouterModule,
@@ -22,7 +23,7 @@ import { ModalComponent } from '../../../components/modal/modal.component';
 @Component({
   selector: 'app-dashboard-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterModule, CommonModule, ImageLazyComponent, Last_activity_component, ButtonComponent, ModalComponent],
+  imports: [ImagenPipe, RouterOutlet, RouterModule, CommonModule, ImageLazyComponent, Last_activity_component, ButtonComponent, ModalComponent],
   templateUrl: './dashboard-layout.component.html',
   styleUrl: './dashboard-layout.component.scss',
   host: { '(window:resize)': 'onWindowResize()', '(document:click)': 'onDocumentClick($event)' },

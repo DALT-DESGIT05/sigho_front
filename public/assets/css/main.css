@@ -2836,7 +2836,7 @@ File: scss
 Custom-select
 ******************/
 .custom-select {
-  background: url(../../assets/images/custom-select.png) right 0.75rem center no-repeat;
+  background: url(../../images/custom-select.png) right 0.75rem center no-repeat;
 }
 
 /*******************
@@ -6470,7 +6470,7 @@ File: scss
 }
 
 .bg-logo-marca{
-  background-image: url('../images/Imagen3.png'); /* Cambia 'assets/images/tu-imagen.jpg' por la ruta de tu imagen */
+  background-image: url('../../images/Imagen3.png');
   background-size: auto; /* O 'cover', dependiendo de cómo quieras que se ajuste la imagen */
   background-repeat: no-repeat;
   background-position: center;

@@ -1,15 +1,16 @@
+import { ImagenPipe } from '../../pipes/imagen.pipe';
 import { AfterViewInit, Component, ElementRef, OnChanges, OnDestroy, SimpleChanges, inject, input, output, signal } from '@angular/core';
 import { Observable, Subscription, take } from 'rxjs';
 import { ImageService } from '../../services/image.service';
 
 export type TipoImagenLazy = 'mi-afiliado' | 'afiliado' | 'medico' | 'mi-foto';
 
-@Component({ selector: 'app-image-lazy', standalone: true, imports: [], templateUrl: './image-lazy.component.html', styleUrl: './image-lazy.component.scss' })
+@Component({ selector: 'app-image-lazy', standalone: true, imports: [ImagenPipe, ], templateUrl: './image-lazy.component.html', styleUrl: './image-lazy.component.scss' })
 export class ImageLazyComponent implements AfterViewInit, OnChanges, OnDestroy {
   readonly tipo = input.required<TipoImagenLazy>();
   readonly identificador = input('');
   readonly alt = input('Imagen');
-  readonly fallbackSrc = input('assets/images/3305803.png');
+  readonly fallbackSrc = input('foto_por_defecto');
   readonly imageClass = input('');
   readonly objectFit = input<'contain' | 'cover'>('contain');
   readonly imageError = output<void>();

@@ -1,3 +1,4 @@
+import { ImagenPipe } from '../../pipes/imagen.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, computed, effect, forwardRef, inject, input, output, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -8,7 +9,7 @@ export type SelectValue = string | number | null;
 export interface SelectOption { value: SelectValue; label: string; detail?: string; count?: number; icon?: string; image?: string; tone?: PaletteColor; disabled?: boolean; }
 export interface SelectChangeEvent { value: SelectValue; option: SelectOption | null; }
 
-@Component({ selector: 'app-select', imports: [CommonModule, LabelComponent], templateUrl: './select.component.html', styleUrl: './select.component.scss', providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SelectComponent), multi: true }], host: { '(document:click)': 'closeWhenClickingOutside($event.target)' } })
+@Component({ selector: 'app-select', imports: [ImagenPipe, CommonModule, LabelComponent], templateUrl: './select.component.html', styleUrl: './select.component.scss', providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SelectComponent), multi: true }], host: { '(document:click)': 'closeWhenClickingOutside($event.target)' } })
 export class SelectComponent implements ControlValueAccessor {
   readonly label = input(''); readonly title = input(''); readonly nombre = input(''); readonly helpText = input(''); readonly error = input(''); readonly id = input('');
   readonly required = input(false); readonly invalid = input(false); readonly ariaLabel = input(''); readonly color = input<PaletteColor>('primary');

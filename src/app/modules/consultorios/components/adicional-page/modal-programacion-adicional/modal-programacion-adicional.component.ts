@@ -92,6 +92,7 @@ export class ModalProgramacionAdicionalComponent {
       if (programacion.disponibles <= 0) return;
 
       this.programacionSeleccionada.emit(programacion);
+
     }
 
 

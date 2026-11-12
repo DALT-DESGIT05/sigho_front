@@ -7,7 +7,7 @@
   [centered]="true"
   [fitContent]="true"
   [ignoreBackdropClick]="true"
-  [showFooter]="true">
+  [showFooter]="true" [footerEstandar]="true">
 
   <div class="programacion-medicos__modal">
 
@@ -129,8 +129,7 @@
   </div>
 
   <div modal-footer class="d-flex justify-content-between w-100">
-
-    <app-button
+    <app-button modal-footer-close
       accion="cancel"
       (clicked)="cerrarModalProgramacion()">
     </app-button>

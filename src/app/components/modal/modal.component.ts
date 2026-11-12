@@ -34,6 +34,7 @@ export class ModalComponent {
   readonly ignoreBackdropClick = input(false);
   readonly showCloseButton = input(true);
   readonly showFooter = input(false);
+  readonly footer_estandar = input(false, { alias: 'footerEstandar' });
   /** Permite que el alto del modal se ajuste a su contenido. */
   readonly fitContent = input(false);
   /** Oscurece el modal que queda detrás cuando este modal se abre encima de otro. */

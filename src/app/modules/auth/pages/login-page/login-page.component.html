@@ -129,10 +129,12 @@
           </div>
         </form>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer login-modal__footer--estandar">
+        <app-button modal-footer-close action="close" size="sm" (clicked)="close_modal()" />
+
         <button type="button" class="btn login-primary-button me-1 btn-sm" (click)="restablecer_by_correo()">Confirmar <i class="fa fa-check ml-4"
             aria-hidden="true"></i></button>
-        <app-button action="close" size="sm" (clicked)="close_modal()" />
+
       </div>
     </div>
   </div>
@@ -198,8 +200,9 @@
         </div>
       </div>
 
-      <div class="modal-footer">
-        <app-button action="close" size="sm" (clicked)="close_modal_2fa()" />
+      <div class="modal-footer login-modal__footer--estandar">
+        <app-button modal-footer-close action="close" size="sm" (clicked)="close_modal_2fa()" />
+
       </div>
     </div>
   </div>

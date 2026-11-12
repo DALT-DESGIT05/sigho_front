@@ -2,7 +2,7 @@
   title="Vista previa del documento"
   icon="fa-solid fa-file-lines"
   [size]="size()"
-  [showFooter]="true"
+  [showFooter]="true" [footerEstandar]="true"
   [scrollable]="false"
   (closed)="al_cerrar_modal()"
 >
@@ -94,12 +94,14 @@
   </section>
 
   <div modal-footer>
+    <app-button modal-footer-close action="close" size="sm" (clicked)="cerrar()" />
+
     @if (puede_imprimir()) {
       <app-button action="print" size="sm" (clicked)="imprimir()" />
     }
     @if (permitir_descarga()) {
       <app-button action="download" size="sm" (clicked)="descargar()" />
     }
-    <app-button action="close" size="sm" (clicked)="cerrar()" />
+
   </div>
 </app-modal>

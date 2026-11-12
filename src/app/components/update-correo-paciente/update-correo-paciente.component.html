@@ -1,4 +1,4 @@
-<app-modal #modal titulo="Actualizar correo" [keyboard]="false" [ignoreBackdropClick]="true" [showCloseButton]="false" [showFooter]="true">
+<app-modal #modal titulo="Actualizar correo" [keyboard]="false" [ignoreBackdropClick]="true" [showCloseButton]="false" [showFooter]="true" [footerEstandar]="true">
   <label class="form-label" for="correo-paciente">Correo</label>
   <input
     id="correo-paciente"
@@ -8,7 +8,9 @@
     [formField]="correo_form.correo">
 
   <div modal-footer class="d-flex gap-2">
+    <app-button modal-footer-close action="close" size="sm" (clicked)="close_modal()"></app-button>
+
     <app-button action="save" size="sm" [loading]="isSaving()" [disabled]="isCompleted() || isSaving()" (clicked)="btn_save()"></app-button>
-    <app-button action="close" size="sm" (clicked)="close_modal()"></app-button>
+
   </div>
 </app-modal>

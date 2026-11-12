@@ -57,6 +57,32 @@
   margin-left: .75rem;
 }
 
+.app-modal__footer--estandar [modal-footer] {
+  width: 100%;
+  flex: 1 1 100%;
+  justify-content: flex-end !important;
+  text-align: end;
+  min-width: 0;
+}
+
+.app-modal__footer--estandar [modal-footer] > [modal-footer-close] {
+  display: flex;
+  justify-content: flex-start;
+  text-align: start;
+  flex: 1 0 auto;
+  margin-inline-end: auto;
+}
+
+.app-modal__footer--estandar [modal-footer] > :not([modal-footer-close]) {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.app-modal__footer--estandar [modal-footer] > app-button + app-button > .btn {
+  margin-left: 0;
+}
+
 /* El servicio de ngx-bootstrap comparte un solo backdrop entre modales.
    Esta capa devuelve la separación visual cuando un app-modal abre otro. */
 modal-container:has(.app-modal--separated)::before {

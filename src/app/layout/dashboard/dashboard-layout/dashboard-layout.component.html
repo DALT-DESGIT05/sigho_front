@@ -285,7 +285,6 @@
       <!-- Bread crumb and right sidebar toggle -->
       <!-- ============================================================== -->
 
-
       <!-- ============================================================== -->
       <!-- End Bread crumb and right sidebar toggle -->
       <!-- ============================================================== -->
@@ -371,8 +370,7 @@
   <!-- ============================================================== -->
 </div>
 
-
-<app-modal #profileModal title="Información del usuario" icon="fa-solid fa-user" [showFooter]="true">
+<app-modal #profileModal title="Información del usuario" icon="fa-solid fa-user" [showFooter]="true" [footerEstandar]="true">
   <div class="d-flex align-items-center">
     <app-image-lazy tipo="mi-foto" alt="Foto de perfil" imageClass="rounded-circle" objectFit="cover" class="profile-modal-image" />
     <div>
@@ -381,8 +379,10 @@
     </div>
   </div>
   <div modal-footer class="d-flex gap-2">
+    <app-button modal-footer-close action="close" size="sm" (clicked)="closeProfileModal()" />
+
     <app-button action="exit" size="sm" (clicked)="salir()" />
-    <app-button action="close" size="sm" (clicked)="closeProfileModal()" />
+
   </div>
 </app-modal>
 <!-- End Wrapper -->

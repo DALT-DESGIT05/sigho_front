@@ -6,7 +6,7 @@
   [headerDestacado]="true"
   [fitContent]="true"
   [scrollable]="true"
-  [showFooter]="true"
+  [showFooter]="true" [footerEstandar]="true"
   [ignoreBackdropClick]="true"
   [keyboard]="false">
 
@@ -87,18 +87,17 @@
   <div
     modal-footer
     class="programacion-modal__footer d-flex align-items-center justify-content-between w-100 gap-3">
-
-    <span class="programacion-modal__contador" style="color: var(--palette-primary-fap) !important;">
-      {{ totalProgramaciones() }} programaciones encontradas
-    </span>
-
-    <app-button
+    <app-button modal-footer-close
       texto="Cerrar"
       icon="fa-solid fa-xmark"
       color="danger"
       size="sm"
       (clicked)="cerrar()">
     </app-button>
+
+    <span class="programacion-modal__contador" style="color: var(--palette-primary-fap) !important;">
+      {{ totalProgramaciones() }} programaciones encontradas
+    </span>
 
   </div>
 

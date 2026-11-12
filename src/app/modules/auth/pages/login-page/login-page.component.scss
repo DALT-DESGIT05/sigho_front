@@ -288,3 +288,11 @@
   .login-card { position: relative; top: auto; left: auto; width: calc(100% - 28px); margin: 24px auto 36px; padding: 25px 20px; transform: none; }
   .module, .values { display: none; }
 }
+.login-modal__footer--estandar {
+  justify-content: flex-end;
+  gap: .75rem;
+
+  > [modal-footer-close] {
+    margin-inline-end: auto;
+  }
+}

@@ -4,10 +4,8 @@
   size="lg"
   [centered]="true"
   [scrollable]="true"
-  [showFooter]="true"
+  [showFooter]="true" [footerEstandar]="true"
   (closed)="cerrarFicha()">
-
-
 
     @if (cargando()) {
       <div class="estado-contenido">
@@ -49,10 +47,11 @@
       </div>
     }
     <div modal-footer>
-      <app-button
+    <app-button modal-footer-close
         action="close"
         (clicked)="modalFicha.close()">
       </app-button>
+
     </div>
 
 </app-modal>

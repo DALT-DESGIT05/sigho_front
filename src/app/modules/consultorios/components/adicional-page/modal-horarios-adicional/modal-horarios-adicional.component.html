@@ -7,7 +7,7 @@
   [headerDestacado]="true"
   [fitContent]="true"
   [scrollable]="true"
-  [showFooter]="true"
+  [showFooter]="true" [footerEstandar]="true"
   [separateFromParent]="true"
   [ignoreBackdropClick]="true"
   [keyboard]="false">
@@ -56,12 +56,13 @@
 
   <!-- FOOTER -->
   <div modal-footer class="d-flex justify-content-end w-100">
-    <app-button
+    <app-button modal-footer-close
       texto="Cerrar"
       color="danger"
       icon="fa-solid fa-xmark"
       (clicked)="cerrar()">
     </app-button>
+
   </div>
 
 </app-modal>

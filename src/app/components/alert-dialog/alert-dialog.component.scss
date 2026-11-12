@@ -9,13 +9,15 @@
   margin: auto;
   padding: 0;
   overflow: auto;
+
   background: var(--palette-white);
   color: var(--palette-black);
-  border: 1px solid var(--palette-gray-200);
-  border-radius: 1rem;
-  box-shadow: 0 .25rem 1rem color-mix(in srgb, var(--palette-black) 6%, transparent);
-}
 
+  border: 1px solid var(--palette-gray-500);
+  border-radius: 1rem;
+
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+}
 .alert-dialog::backdrop {
   background: color-mix(in srgb, var(--palette-black) 38%, transparent);
 }
@@ -123,7 +125,7 @@
 }
 
 .alert-dialog--centrado {
-  border: .75rem solid var(--palette-gray-50);
+  border: .75rem solid var(--palette-gray-200);
   border-radius: 2rem;
 }
 

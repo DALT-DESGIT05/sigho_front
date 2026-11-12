@@ -116,6 +116,10 @@
     #modalHorarios
     [horarios]="horariosDisponibles()"
     [disabled]="registrandoCita()"
-    [hora_cargando]="horaCargando()">
+    [hora_cargando]="horaCargando()"
+    (horario_seleccionado)="registrarCitaAdicional($event)">
   </app-modal-horarios-adicional>
+
+
+<app-alert-dialog #alertDialog></app-alert-dialog>
 

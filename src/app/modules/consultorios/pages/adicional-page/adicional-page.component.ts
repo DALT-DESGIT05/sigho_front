@@ -11,6 +11,7 @@ import { PatientSummaryComponent,PatientSummaryData } from '../../../../componen
 import { ModalProgramacionAdicionalComponent, ProgramacionAdicional } from '../../components/adicional-page/modal-programacion-adicional/modal-programacion-adicional.component';
 import { ModalHorariosAdicionalComponent } from '../../components/adicional-page/modal-horarios-adicional/modal-horarios-adicional.component';
 import { Horario_grid_item } from '../../../../interfaces/citas/horario-grid.interface';
+import { AlertDialogComponent } from '../../../../components/alert-dialog/alert-dialog.component';
 
 interface PacienteAdicional {
   codigo_paciente: number;
@@ -26,7 +27,7 @@ interface PacienteAdicional {
   standalone: true,
   imports:[
             ReactiveFormsModule,CardGeneralComponent,AutoCompleteComponent,ButtonComponent,PatientSummaryComponent,SelectComponent,ModalProgramacionAdicionalComponent,
-            ModalHorariosAdicionalComponent
+            ModalHorariosAdicionalComponent,AlertDialogComponent
           ],
   templateUrl: './adicional-page.component.html',
   styleUrl: './adicional-page.component.scss'
@@ -43,6 +44,7 @@ export class AdicionalPageComponent {
   readonly horariosDisponibles =signal<Horario_grid_item[]>([]);
   readonly registrandoCita = signal(false);
   readonly horaCargando = signal('');
+  readonly alertDialog = viewChild<AlertDialogComponent>('alertDialog');
 
   // Datos ficticios únicamente para diseñar la pantalla.
   private readonly pacientesMock: PacienteAdicional[] = [
@@ -215,6 +217,42 @@ readonly consultorios = signal<SelectOption[]>([
     this.programacionSeleccionada.set(programacion);
     this.horariosDisponibles.set(this.generarHorariosMock(programacion));
     this.modalHorarios()?.abrir();
+  }
+
+  async registrarCitaAdicional(horario: Horario_grid_item): Promise<void> {
+
+    if (this.registrandoCita() || !horario.disponible) {
+      return;
+    }
+
+    const programacion = this.programacionSeleccionada();
+
+    if (!programacion) {
+      return;
+    }
+
+    this.registrandoCita.set(true);
+    this.horaCargando.set(horario.hora);
+
+    // SIMULACIÓN: posteriormente se registrará mediante el backend.
+    this.registrandoCita.set(false);
+    this.horaCargando.set('');
+
+    this.modalHorarios()?.cerrar();
+    this.modalProgramacion()?.cerrar();
+
+    await this.alertDialog()?.open({
+      tipo: 'success',
+      diseno: 'centrado',
+      titulo: 'Citas Adicionales',
+      mensaje: 'La cita adicional fue registrada con éxito.',
+      imagen: 'assets/images/icono_de_aceptacion.png',
+      texto_confirmar: 'OK',
+      color_confirmar: 'primary',
+      mostrar_cancelar: false,
+      cerrar_fuera: false,
+      cerrar_escape: false
+    });
   }
 
 }

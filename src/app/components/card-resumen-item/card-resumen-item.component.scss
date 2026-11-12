@@ -144,3 +144,45 @@
   }
 }
 
+@media (max-width: 767.98px) {
+  .resumen-item.resumen-item--compacto-movil {
+    flex-direction: row;
+    gap: .5rem !important;
+    min-height: 0 !important;
+    padding: .5rem .75rem !important;
+    height: auto !important;
+
+    .resumen-item__visual {
+      width: 1.75rem;
+      height: 1.75rem;
+
+      i {
+        font-size: 1.25rem !important;
+      }
+    }
+
+    .resumen-item__titulo {
+      font-size: .7rem !important;
+      margin-top: 0;
+      margin-bottom: .125rem !important;
+    }
+
+    .resumen-item__valor {
+      font-size: .8rem !important;
+      line-height: 1.25;
+    }
+
+    &.resumen-item--programacion-total .resumen-item__contenido {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+      align-items: baseline;
+      gap: .375rem;
+
+      .resumen-item__titulo {
+        margin: 0 !important;
+      }
+    }
+  }
+}
+

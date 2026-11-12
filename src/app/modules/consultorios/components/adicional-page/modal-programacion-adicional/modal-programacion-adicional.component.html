@@ -30,6 +30,7 @@
               titulo="Consultorio"
               [valor]="consultorio() || 'No seleccionado'"
               icono="fa-solid fa-hospital"
+              [compactoEnMovil]="true"
               variante="programacion">
             </app-card-resumen-item>
           </div>
@@ -40,6 +41,7 @@
               titulo="Actividad Médica"
               [valor]="actividadMedica() || 'No seleccionada'"
               icono="fa-solid fa-stethoscope"
+              [compactoEnMovil]="true"
               variante="programacion">
             </app-card-resumen-item>
           </div>
@@ -58,6 +60,7 @@
           titulo="Programaciones"
           [valor]="totalProgramaciones().toString()"
           icono="fa-solid fa-users"
+          [compactoEnMovil]="true"
           variante="programacion-total">
         </app-card-resumen-item>
 

@@ -15,6 +15,7 @@ export class CardResumenItemComponent {
   readonly titulo = input.required<string>();
   readonly valor = input.required<string>();
   readonly icono = input('');
+  readonly compacto_en_movil = input(false, { alias: 'compactoEnMovil' });
   readonly tipo_imagen = input<TipoImagenLazy | null>(null, { alias: 'tipoImagen' });
   readonly identificador = input('');
   readonly imagen = input('');

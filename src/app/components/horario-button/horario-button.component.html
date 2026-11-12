@@ -5,14 +5,18 @@
   [class.app-horario-button--disponible]="horario_actual.disponible"
   [class.app-horario-button--ocupado]="!horario_actual.disponible"
   [disabled]="disabled() || !horario_actual.disponible || loading()"
-  [attr.title]="horario_actual.disponible ? 'Registrar atención a las ' + horario_actual.hora : 'Horario ocupado'"
-  [attr.aria-busy]="loading()"
+  [attr.title]="horario_actual.disponible ? 'Reservar cita a las ' + horario_actual.hora : 'Horario ocupado'"  [attr.aria-busy]="loading()"
   (click)="seleccionar_horario()"
 >
   @if (loading()) {
     <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-  } @else {
-    <img [src]="horario_actual.disponible ? 'assets/svg/time-unlock.svg' : 'assets/svg/time-lock.svg'" alt="">
+  }@else {
+    <i
+      [class]="horario_actual.disponible
+        ? 'fa-solid fa-circle-check'
+        : 'fa-solid fa-lock'"
+      aria-hidden="true">
+    </i>
   }
   <span>{{ horario_actual.hora }}</span>
 </button>

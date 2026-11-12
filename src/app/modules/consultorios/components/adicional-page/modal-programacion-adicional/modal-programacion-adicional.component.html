@@ -1,13 +1,14 @@
 <app-modal
-   #modalProgramacion
+  #modalProgramacion
   titulo="Programaciones Médicas Disponibles"
   icon="fa-solid fa-calendar-days"
-  [headerDestacado]="true"
-  [ignoreBackdropClick]="true"
   size="xl"
+  [headerDestacado]="true"
   [fitContent]="true"
   [scrollable]="true"
-  [showFooter]="true">
+  [showFooter]="true"
+  [ignoreBackdropClick]="true"
+  [keyboard]="false">
 
   <!-- SUBTÍTULO DEL ENCABEZADO -->
   <small modal-header class="programacion-modal__subtitulo">
@@ -68,6 +69,7 @@
     <!-- TABLA DE PROGRAMACIONES -->
 
   <app-table
+    class="programacion-modal__tabla"
     [columns]="columnasProgramacion"
     [rows]="programaciones()"
     [actions]="accionesProgramacion"

@@ -8,7 +8,9 @@ import { AutoCompleteComponent } from '../../../../components/auto-complete/auto
 import { ButtonComponent } from '../../../../components/button/button.component';
 import { SelectComponent, SelectOption } from '../../../../components/select/select.component';
 import { PatientSummaryComponent,PatientSummaryData } from '../../../../components/patient-summary/patient-summary.component';
-import { ModalProgramacionAdicionalComponent } from '../../components/adicional-page/modal-programacion-adicional/modal-programacion-adicional.component';
+import { ModalProgramacionAdicionalComponent, ProgramacionAdicional } from '../../components/adicional-page/modal-programacion-adicional/modal-programacion-adicional.component';
+import { ModalHorariosAdicionalComponent } from '../../components/adicional-page/modal-horarios-adicional/modal-horarios-adicional.component';
+import { Horario_grid_item } from '../../../../interfaces/citas/horario-grid.interface';
 
 interface PacienteAdicional {
   codigo_paciente: number;
@@ -23,7 +25,8 @@ interface PacienteAdicional {
   selector: 'app-adicional-page',
   standalone: true,
   imports:[
-            ReactiveFormsModule,CardGeneralComponent,AutoCompleteComponent,ButtonComponent,PatientSummaryComponent,SelectComponent,ModalProgramacionAdicionalComponent
+            ReactiveFormsModule,CardGeneralComponent,AutoCompleteComponent,ButtonComponent,PatientSummaryComponent,SelectComponent,ModalProgramacionAdicionalComponent,
+            ModalHorariosAdicionalComponent
           ],
   templateUrl: './adicional-page.component.html',
   styleUrl: './adicional-page.component.scss'
@@ -35,6 +38,11 @@ export class AdicionalPageComponent {
   readonly pacienteConsultado = signal<PacienteAdicional | null>(null);
   private readonly fb = new FormBuilder();
   readonly modalProgramacion = viewChild<ModalProgramacionAdicionalComponent>('modalProgramacion');
+  readonly modalHorarios =viewChild<ModalHorariosAdicionalComponent>('modalHorarios');
+  readonly programacionSeleccionada =signal<ProgramacionAdicional | null>(null);
+  readonly horariosDisponibles =signal<Horario_grid_item[]>([]);
+  readonly registrandoCita = signal(false);
+  readonly horaCargando = signal('');
 
   // Datos ficticios únicamente para diseñar la pantalla.
   private readonly pacientesMock: PacienteAdicional[] = [
@@ -181,4 +189,32 @@ readonly consultorios = signal<SelectOption[]>([
       item => item.value === codigo
     )?.label ?? '';
   }
+
+  private generarHorariosMock(programacion: ProgramacionAdicional): Horario_grid_item[] {
+    const horarios: Horario_grid_item[] = [];
+    const [horas, minutos] = programacion.hora_inicio.split(':').map(Number);
+    const inicio = horas * 60 + minutos;
+
+    for (let i = 0; i < programacion.cupos; i++) {
+      const totalMinutos = inicio + i * 20;
+      const hora = Math.floor(totalMinutos / 60);
+      const minuto = totalMinutos % 60;
+
+      horarios.push({
+        hora: `${String(hora).padStart(2, '0')}:${String(minuto).padStart(2, '0')}`,
+        disponible: !(
+          programacion.id_programacion === 2 && (i === 0 || i === 5)
+        )
+      });
+    }
+
+    return horarios;
+  }
+
+  abrirHorarios(programacion: ProgramacionAdicional): void {
+    this.programacionSeleccionada.set(programacion);
+    this.horariosDisponibles.set(this.generarHorariosMock(programacion));
+    this.modalHorarios()?.abrir();
+  }
+
 }

@@ -108,6 +108,14 @@
   <app-modal-programacion-adicional
     #modalProgramacion
     [consultorio]="nombreConsultorio"
-    [actividadMedica]="nombreActividadMedica">
+    [actividadMedica]="nombreActividadMedica"
+    (programacionSeleccionada)="abrirHorarios($event)">
   </app-modal-programacion-adicional>
+
+  <app-modal-horarios-adicional
+    #modalHorarios
+    [horarios]="horariosDisponibles()"
+    [disabled]="registrandoCita()"
+    [hora_cargando]="horaCargando()">
+  </app-modal-horarios-adicional>
 

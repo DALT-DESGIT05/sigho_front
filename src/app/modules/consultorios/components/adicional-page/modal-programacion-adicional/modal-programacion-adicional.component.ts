@@ -6,18 +6,7 @@ import { TableComponent } from '../../../../../components/table/table.component'
 import { CardResumenItemComponent } from '../../../../../components/card-resumen-item/card-resumen-item.component';
 import { ButtonComponent } from '../../../../../components/button/button.component';
 
-export interface ProgramacionAdicional {
-  id_programacion: number;
-  codigo_medico: string;
-  nombre_medico: string;
-  fecha: string;
-  turno: string;
-  hora_inicio: string;
-  hora_termino: string;
-  cupos: number;
-  reservados: number;
-  disponibles: number;
-}
+
 export interface ProgramacionAdicional {
   id_programacion: number;
   codigo_medico: string;
@@ -103,7 +92,6 @@ export class ModalProgramacionAdicionalComponent {
       if (programacion.disponibles <= 0) return;
 
       this.programacionSeleccionada.emit(programacion);
-      this.cerrar();
     }
 
 

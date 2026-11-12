@@ -3,6 +3,39 @@
   display: block;
 }
 
+// El modal se renderiza fuera del host mediante ngx-bootstrap.
+// La clase de la tabla limita estas reglas a este modal.
+::ng-deep .modal-dialog:has(.programacion-modal__tabla) {
+  .modal-content {
+  height: auto;
+  min-height: 0;
+
+  .modal-body {
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow: hidden;
+
+    > .programacion-resumen {
+      flex-shrink: 0;
+    }
+
+    > .programacion-modal__tabla {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      flex: 0 1 auto;
+
+      > .table-container {
+        min-height: 0;
+        overflow: auto;
+      }
+    }
+  }
+}
+}
+
 /* =========================================
    RESUMEN SUPERIOR
 ========================================= */

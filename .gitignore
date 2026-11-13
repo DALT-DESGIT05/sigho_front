@@ -51,3 +51,7 @@ src/environments/environments.ts
 # Docker development files
 Dockerfile
 compose.yaml
+
+# Test and tooling artifacts
+.vitest/
+.atl/

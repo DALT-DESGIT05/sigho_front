@@ -1,0 +1,231 @@
+<div class="tab-pane-content laboratorio-pane">
+  <div class="clinical-list-header">
+    <div class="clinical-title-actions">
+      <h3 class="clinical-list-title">Exámenes de laboratorio</h3>
+      <app-button
+        action="create"
+        color="primary"
+        size="sm"
+        [soloIcono]="true"
+        title="Registrar examen de laboratorio"
+        (clicked)="abrir_modal_laboratorio()"
+      />
+    </div>
+    @if (ordenes_laboratorio().length > 0) {
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm"
+        title="Imprimir orden de laboratorio"
+        aria-label="Imprimir orden de laboratorio"
+        (click)="imprimir_orden_laboratorio()"
+      >
+        Imprimir orden <i class="fa fa-print" aria-hidden="true"></i>
+      </button>
+    }
+  </div>
+  <section class="clinical-section-card mt-3">
+    <legend>Laboratorio</legend>
+    <app-table
+      size="sm"
+      [scrollHeight]="null"
+      [columns]="columnasOrdenes"
+      [cellTemplates]="plantillasCelda()"
+      [rows]="ordenes_laboratorio()"
+      [loading]="cargando_laboratorio()"
+      emptyMessage="No se registran órdenes de laboratorio"
+    />
+  </section>
+
+  <ng-template #estadoTpl let-fila>
+    <app-badge
+      size="xs"
+      [texto]="fila.estado_laboratorio_nombre || fila.estado_nombre || '-'"
+      [clases]="estado_badge_class(fila.estado_laboratorio_nombre || fila.estado_nombre)"
+    />
+  </ng-template>
+
+  <ng-template #accionesTpl let-fila>
+    <div class="text-center">
+      <app-button
+        action="delete"
+        size="sm"
+        [soloIcono]="true"
+        title="Eliminar orden de laboratorio"
+        [disabled]="!detalle().fecha_hora_llamada_med"
+        (clicked)="eliminarLaboratorio.emit(fila.laboratorio_id)"
+      />
+    </div>
+  </ng-template>
+
+  <div class="laboratory-print-area" aria-hidden="true">
+    <div #orden_impresion class="laboratory-print-document">
+      <header class="laboratory-print-header">
+        <h4>Orden de laboratorio</h4>
+        <p>Paciente: {{ detalle().paciente.nombre_completo }}</p>
+        <p>H.C.: {{ detalle().paciente.numero_historia || '-' }}</p>
+        <p>Atención: {{ detalle().atencion_id }}</p>
+      </header>
+      <div class="laboratory-print-content">
+        @for (area of areas_orden_laboratorio(); track area.nombre) {
+          <h5>{{ area.nombre }}</h5>
+          <table class="table table-sm table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>CÓDIGO</th>
+                <th>EXAMEN</th>
+                <th>PRIORIDAD</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (orden of area.ordenes; track orden.laboratorio_id) {
+                <tr>
+                  <td>{{ orden.servicio_codigo }}</td>
+                  <td>{{ orden.servicio_nombre || orden.servicio_codigo }}</td>
+                  <td>{{ orden.prioridad_nombre }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (laboratorio_modal_abierto()) {
+    <div class="laboratory-modal-backdrop" role="presentation">
+      <div
+        class="laboratory-catalog-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="laboratory-modal-title"
+      >
+        <div class="modal-header">
+          <h5 id="laboratory-modal-title" class="modal-title">Exámenes de Laboratorio</h5>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Cerrar"
+            (click)="cerrar_modal_laboratorio()"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="laboratory-catalog-layout">
+            <fieldset class="laboratory-fieldset laboratory-fieldset--areas">
+              <legend><i class="fa-solid fa-list-check" aria-hidden="true"></i>Áreas</legend>
+              <nav class="laboratory-area-nav" aria-label="Áreas de laboratorio">
+                <div class="laboratory-area-list">
+                  <button
+                    type="button"
+                    class="laboratory-area-item"
+                    [class.active]="laboratorio_area_activa() === null"
+                    (click)="seleccionar_area_laboratorio(null)"
+                  >
+                    <span class="laboratory-area-info">
+                      <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+                      <span>Todas las áreas</span>
+                    </span>
+                    <span class="laboratory-area-count">{{ total_servicios_laboratorio() }}</span>
+                  </button>
+                  @for (area of areas_laboratorio(); track area.codigo) {
+                    <button
+                      type="button"
+                      class="laboratory-area-item"
+                      [class.active]="laboratorio_area_activa() === area.codigo"
+                      (click)="seleccionar_area_laboratorio(area.codigo)"
+                    >
+                      <span class="laboratory-area-info">
+                        <i class="fa-solid fa-vial" aria-hidden="true"></i>
+                        <span>{{ area.nombre }}</span>
+                      </span>
+                      <span class="laboratory-area-count">{{ area.servicios.length }}</span>
+                    </button>
+                  }
+                </div>
+              </nav>
+            </fieldset>
+
+            <fieldset class="laboratory-fieldset laboratory-fieldset--exams">
+              <legend><i class="fa-solid fa-vials" aria-hidden="true"></i>Exámenes Disponibles</legend>
+              <div class="laboratory-tab-content">
+                <div class="laboratory-search mb-3">
+                  <span class="laboratory-search-icon">
+                    <i class="fa fa-search" aria-hidden="true"></i>
+                  </span>
+                  <input
+                    type="search"
+                    class="form-control"
+                    placeholder="Buscar examen por código o descripción..."
+                    [value]="laboratorio_filtro()"
+                    (input)="actualizar_filtro_laboratorio($event)"
+                  />
+                </div>
+                <div class="row g-3 laboratory-service-columns">
+                  @for (columna of columnas_laboratorio(); track $index; let columna_index = $index) {
+                    <div class="col-12 col-xl-6">
+                      <ul class="list-group">
+                        @for (servicio of columna; let servicio_index = $index; track servicio.codigo) {
+                          <li class="list-group-item d-flex align-items-center">
+                            <span class="me-2">{{ indice_laboratorio(columna_index, servicio_index) + 1 }}.</span>
+                            <input
+                              type="checkbox"
+                              class="form-check-input me-2 mt-0"
+                              [checked]="servicio_laboratorio_marcado(servicio.codigo)"
+                              (change)="alternar_servicio_laboratorio($event, servicio.codigo)"
+                            />
+                            <span class="form-check-label">{{ servicio.codigo + ' - ' + servicio.nombre }}</span>
+                          </li>
+                        }
+                      </ul>
+                    </div>
+                  }
+                </div>
+              </div>
+            </fieldset>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="laboratory-footer-controls">
+            <div class="laboratory-control-group">
+              <app-select
+                label="Prioridad"
+                placeholder="-- Seleccione --"
+                [options]="prioridadesOptions()"
+                [showEmptyOption]="true"
+                emptyOptionLabel="-- Seleccione --"
+                size="sm"
+                [selectedValue]="prioridad_laboratorio_id()"
+                (selectedValueChange)="actualizar_prioridad_laboratorio_valor($event)"
+              />
+            </div>
+            <div class="laboratory-control-group laboratory-control-group--diagnostico">
+              <app-select
+                label="Diagnóstico"
+                placeholder="-- Seleccione diagnóstico --"
+                [options]="diagnosticosOptions()"
+                [showEmptyOption]="true"
+                emptyOptionLabel="-- Seleccione diagnóstico --"
+                size="sm"
+                [selectedValue]="diagnostico_laboratorio_id()"
+                (selectedValueChange)="actualizar_diagnostico_laboratorio_valor($event)"
+              />
+            </div>
+          </div>
+          <app-button
+            texto="Grabar"
+            action="save"
+            color="primary"
+            size="sm"
+            [disabled]="
+              guardando_laboratorio() ||
+              servicios_laboratorio_seleccionados().size === 0 ||
+              prioridad_laboratorio_id() === null ||
+              diagnostico_laboratorio_id() === null
+            "
+            (clicked)="guardar_laboratorio()"
+          />
+          <app-button texto="Cerrar" action="close" size="sm" (clicked)="cerrar_modal_laboratorio()" />
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,251 @@
+.laboratorio-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.clinical-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.clinical-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.clinical-list-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: #1e293b;
+}
+
+.laboratory-view-tabs {
+  display: flex;
+  border-bottom: 2px solid #e2e8f0;
+  gap: 0.5rem;
+}
+
+.laboratory-view-tab {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #0f172a;
+  }
+
+  &.active {
+    color: #0284c7;
+    border-bottom-color: #0284c7;
+    font-weight: 600;
+  }
+}
+
+.laboratory-print-area {
+  display: none;
+}
+
+.laboratory-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1055;
+  padding: 1rem;
+}
+
+.laboratory-catalog-modal {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 950px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
+
+    .modal-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #0f172a;
+      margin: 0;
+    }
+  }
+
+  .modal-body {
+    padding: 1rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .modal-footer {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+}
+
+.laboratory-modal-layout {
+  display: flex;
+  gap: 1.25rem;
+  min-height: 420px;
+}
+
+.laboratory-areas-column {
+  width: 250px;
+  flex-shrink: 0;
+  border-right: 1px solid #e2e8f0;
+  padding-right: 1rem;
+  display: flex;
+  flex-direction: column;
+
+  .laboratory-areas-header h6 {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+}
+
+.laboratory-areas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.laboratory-area-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: transparent;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: #334155;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: #f1f5f9;
+  }
+
+  &.active {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    font-weight: 600;
+
+    .laboratory-area-count {
+      background-color: #bae6fd;
+      color: #0284c7;
+    }
+  }
+
+  .laboratory-area-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    i {
+      font-size: 0.875rem;
+      width: 16px;
+      text-align: center;
+    }
+  }
+
+  .laboratory-area-count {
+    background-color: #f1f5f9;
+    padding: 0.125rem 0.375rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+  }
+}
+
+.clinical-section-card {
+  background: #f4f9fd;
+  border: 1px solid #bdd7ee;
+  border-radius: 0.7rem;
+  margin: 0 0 1rem;
+  padding: 1.15rem 0.9rem 0.25rem;
+
+  > legend {
+    background: #f4f9fd;
+    color: #002060;
+    float: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin: -1.75rem 0 0.75rem;
+    padding: 0 0.4rem;
+    text-transform: uppercase;
+    width: auto;
+  }
+
+  .table-responsive {
+    border: 1px solid #d5e2ee;
+    border-radius: 0.6rem;
+    overflow: hidden;
+  }
+
+  .table {
+    border-color: #d5e2ee;
+    margin: 0;
+
+    > thead > tr > th {
+      background: #bdd7ee !important;
+      color: #002060 !important;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 0.6rem 0.7rem;
+      text-transform: uppercase;
+      vertical-align: middle;
+    }
+
+    > tbody > tr > td {
+      border-color: #d5e2ee;
+      color: #1f2937;
+      font-size: 12px;
+      padding: 0.5rem 0.7rem;
+      vertical-align: middle;
+    }
+  }
+}

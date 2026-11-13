@@ -1,0 +1,149 @@
+<div class="tab-pane-content hospitalizacion-pane">
+  <div class="clinical-list-header hospitalization-header">
+    <div>
+      <h3 class="clinical-list-title">Orden de hospitalización</h3>
+      <p class="hospitalization-subtitle">
+        Registre el diagnóstico y motivo de la hospitalización.
+      </p>
+    </div>
+    @if (ordenes_hospitalizacion().length > 0) {
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm"
+        title="Generar orden de hospitalización"
+        aria-label="Generar orden de hospitalización"
+        (click)="imprimir_orden_hospitalizacion()"
+      >
+        Generar orden <i class="fa fa-print" aria-hidden="true"></i>
+      </button>
+    }
+  </div>
+  <div class="hospitalization-form">
+    <fieldset class="hospitalization-section">
+      <legend>Diagnóstico de hospitalización</legend>
+      <app-select
+        id="hospitalizacion-diagnostico"
+        placeholder="-- Seleccione diagnóstico --"
+        [options]="diagnosticosOptions()"
+        [showEmptyOption]="true"
+        emptyOptionLabel="-- Seleccione diagnóstico --"
+        size="md"
+        [disabled]="!detalle().fecha_hora_llamada_med"
+        [selectedValue]="diagnostico_hospitalizacion_id()"
+        (selectedValueChange)="actualizar_diagnostico_hospitalizacion_valor($event)"
+      />
+    </fieldset>
+
+    <fieldset class="hospitalization-section">
+      <legend>Motivo de hospitalización</legend>
+      <div class="hospitalization-choices">
+        @for (motivo of motivos_hospitalizacion(); track motivo.motivo_id) {
+          <label
+            class="hospitalization-choice"
+            [class.hospitalization-choice--selected]="
+              motivo_hospitalizacion_id() === motivo.motivo_id
+            "
+          >
+            <input
+              type="checkbox"
+              class="form-check-input"
+              [checked]="motivo_hospitalizacion_id() === motivo.motivo_id"
+              [disabled]="!detalle().fecha_hora_llamada_med"
+              (change)="seleccionar_motivo_hospitalizacion(motivo.motivo_id)"
+            />
+            <span>{{ motivo.nombre }}</span>
+            <i class="fa fa-check" aria-hidden="true"></i>
+          </label>
+        }
+      </div>
+    </fieldset>
+
+    <fieldset class="hospitalization-section">
+      <legend>Información clínica</legend>
+      <app-input-text
+        id="hospitalizacion-observacion"
+        label="Observación"
+        size="md"
+        [maxlength]="200"
+        placeholder="Observación opcional..."
+        [value]="observacion_hospitalizacion()"
+        [disabled]="!detalle().fecha_hora_llamada_med"
+        (valueChange)="actualizar_observacion_texto($event)"
+      />
+    </fieldset>
+
+    <div class="hospitalization-actions">
+      <app-button
+        texto="Agregar"
+        action="save"
+        color="primary"
+        size="sm"
+        [loading]="guardando_hospitalizacion()"
+        [disabled]="
+          !detalle().fecha_hora_llamada_med ||
+          diagnostico_hospitalizacion_id() === null ||
+          motivo_hospitalizacion_id() === null
+        "
+        (clicked)="guardar()"
+      />
+    </div>
+  </div>
+
+  <section class="clinical-section-card">
+    <div class="clinical-list-header">
+      <h3>Órdenes de hospitalización registradas</h3>
+    </div>
+    <app-table
+      size="sm"
+      [scrollHeight]="null"
+      [columns]="columnasOrdenes"
+      [cellTemplates]="plantillasCelda()"
+      [rows]="ordenes_hospitalizacion()"
+      [loading]="cargando_hospitalizacion()"
+      emptyMessage="No se han registrado órdenes de hospitalización."
+    />
+  </section>
+
+  <ng-template #accionesTpl let-fila>
+    <div class="text-center">
+      <app-button
+        action="delete"
+        size="sm"
+        [soloIcono]="true"
+        title="Eliminar orden de hospitalización"
+        [disabled]="guardando_hospitalizacion()"
+        (clicked)="eliminarHospitalizacion.emit(fila.orden_hospitalizacion_id)"
+      />
+    </div>
+  </ng-template>
+  <div class="hospitalizacion-print-area" aria-hidden="true">
+    <div #orden_impresion_hospitalizacion class="laboratory-print-document">
+      <header class="laboratory-print-header">
+        <h4>Orden de hospitalización</h4>
+        <p>Paciente: {{ detalle().paciente.nombre_completo }}</p>
+        <p>Historia clínica: {{ detalle().paciente.numero_historia || '-' }}</p>
+        @if (ordenes_hospitalizacion().length > 0) {
+          <p>Fecha de registro: {{ ordenes_hospitalizacion()[0].fecha_registro }}</p>
+        }
+      </header>
+      <table>
+        <thead>
+          <tr>
+            <th>Diagnóstico</th>
+            <th>Motivo</th>
+            <th>Observación</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (orden of ordenes_hospitalizacion(); track orden.orden_hospitalizacion_id) {
+            <tr>
+              <td>{{ orden.diagnostico_codigo }} - {{ orden.diagnostico_nombre }}</td>
+              <td>{{ orden.motivo_nombre }}</td>
+              <td>{{ orden.observacion || '-' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

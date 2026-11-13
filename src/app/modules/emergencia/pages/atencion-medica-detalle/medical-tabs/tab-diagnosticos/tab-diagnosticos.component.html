@@ -1,0 +1,168 @@
+<div class="tab-pane-content diagnosticos-pane">
+  <section class="clinical-section-card">
+    <div class="clinical-list-header">
+      <div class="clinical-title-actions">
+        <h3>Diagnósticos registrados</h3>
+        <app-button
+          action="create"
+          color="primary"
+          size="sm"
+          [soloIcono]="true"
+          title="Registrar diagnóstico"
+          [disabled]="!habilitado()"
+          (clicked)="abrir_modal()"
+        />
+      </div>
+    </div>
+    <app-table
+      size="sm"
+      [scrollHeight]="null"
+      [columns]="columnasDiagnosticos"
+      [cellTemplates]="plantillasCelda()"
+      [rows]="diagnosticos()"
+      [loading]="cargando()"
+      emptyMessage="No se han registrado diagnósticos."
+    />
+  </section>
+</div>
+
+<ng-template #accionesTpl let-fila>
+  <div class="text-center">
+    <app-button
+      action="delete"
+      size="sm"
+      [soloIcono]="true"
+      title="Eliminar diagnóstico"
+      [disabled]="!habilitado() || guardando()"
+      (clicked)="eliminar.emit(fila.diagnostico_id)"
+    />
+  </div>
+</ng-template>
+
+<app-modal
+  #modal
+  title="Registrar diagnóstico"
+  icon="fa-solid fa-notes-medical"
+  size="lg"
+  [showFooter]="true"
+>
+  <div class="row g-3">
+    <div class="col-12 position-relative">
+      @if (diagnostico_seleccionado()) {
+        <app-label texto="Diagnóstico CIE-10" [required]="true" color="primary" />
+        <div class="selected-diagnostico">
+          <strong>{{ diagnostico_seleccionado()!.codigo }}</strong>
+          <span>{{ diagnostico_seleccionado()!.descripcion }}</span>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Quitar diagnóstico seleccionado"
+            [disabled]="!habilitado() || guardando()"
+            (click)="limpiar_formulario()"
+          ></button>
+        </div>
+      } @else {
+        <app-auto-complete
+          label="Diagnóstico CIE-10"
+          [required]="true"
+          placeholder="Escriba código o descripción..."
+          [dataSource]="buscar_diagnostico_datasource"
+          [displayWith]="mostrar_diagnostico"
+          [minLength]="2"
+          [debounceTime]="400"
+          size="md"
+          (optionSelected)="seleccionar_diagnostico($event)"
+        />
+      }
+    </div>
+    <div class="col-md-5">
+      <app-select
+        label="Tipo de diagnóstico"
+        [requerido]="true"
+        placeholder="-- Seleccione --"
+        [options]="tiposDiagnosticoOptions()"
+        [showEmptyOption]="true"
+        emptyOptionLabel="-- Seleccione --"
+        size="md"
+        [disabled]="!habilitado() || guardando()"
+        [selectedValue]="tipo_diagnostico_id()"
+        (selectedValueChange)="actualizar_tipo_diagnostico_valor($event)"
+      />
+    </div>
+    <div class="col-md-7">
+      <app-input-text
+        label="Observación"
+        size="md"
+        [maxlength]="200"
+        placeholder="Ingrese una observación opcional..."
+        [value]="observacion_diagnostico()"
+        [disabled]="!habilitado() || guardando()"
+        (valueChange)="actualizar_observacion_texto($event)"
+      />
+    </div>
+    <div class="col-12 d-flex justify-content-end">
+      <app-button
+        action="create"
+        color="primary"
+        size="sm"
+        [soloIcono]="true"
+        title="Añadir a la lista"
+        [disabled]="
+          !habilitado() ||
+          !diagnostico_seleccionado() ||
+          tipo_diagnostico_id() === null ||
+          guardando()
+        "
+        (clicked)="agregar_temporal()"
+      />
+    </div>
+
+    <div class="col-12 mt-2">
+      <section class="clinical-section-card mb-0">
+        <div class="clinical-list-header">
+          <div class="clinical-title-actions">
+            <h3>Diagnósticos a registrar ({{ diagnosticos_temporales().length }})</h3>
+          </div>
+        </div>
+        <app-table
+          size="sm"
+          [scrollHeight]="null"
+          [columns]="columnasTemporales"
+          [cellTemplates]="plantillasTempCelda()"
+          [rows]="diagnosticos_temporales()"
+          emptyMessage="No se han registrado diagnósticos."
+        />
+      </section>
+    </div>
+  </div>
+
+  <ng-template #accionesTempTpl let-fila>
+    <div class="text-center">
+      <app-button
+        action="delete"
+        size="sm"
+        [soloIcono]="true"
+        title="Eliminar de la lista"
+        (clicked)="quitar_temporal(fila.cie10_id)"
+      />
+    </div>
+  </ng-template>
+  <div modal-footer>
+    <small class="diagnostico-form-status">
+      @if (!habilitado()) {
+        Inicie la atención médica para registrar.
+      }
+    </small>
+    <app-button
+      texto="Guardar"
+      action="save"
+      color="primary"
+      size="sm"
+      clases="diagnostico-save-button"
+      [loading]="guardando()"
+      [disabled]="!habilitado() || diagnosticos_temporales().length === 0"
+      (clicked)="guardar()"
+    />
+    <app-button action="close" size="sm" (clicked)="cerrar_modal()" />
+  </div>
+</app-modal>

@@ -1,0 +1,17 @@
+<section class="medical-attention-page">
+  <app-card-general title="Cola de Atención Médica">
+    <div class="medical-attention-table-region">
+      <app-table
+        size="sm"
+        selectionKey="atencion_id"
+        [scrollHeight]="null"
+        [columns]="columns"
+        [rows]="atenciones()"
+        [actions]="actions"
+        [loading]="cargando()"
+        (action)="ejecutar_accion($event)"
+        emptyMessage="No hay pacientes listos para atención médica."
+      />
+    </div>
+  </app-card-general>
+</section>

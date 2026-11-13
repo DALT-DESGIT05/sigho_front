@@ -1,0 +1,524 @@
+<section class="admission-page">
+  <form class="admission-form" (submit)="guardar_admision(); $event.preventDefault()" novalidate>
+      <app-card-general title="Paciente" headerClass="admission-panel-header">
+        <div card-header>
+          @if (badge_iafas_header(); as badgeText) {
+            <span class="patient-header-iafas-text" [title]="badgeText">
+              {{ badgeText }}
+            </span>
+          }
+        </div>
+        <div card-header-actions class="patient-type-actions">
+          <app-check
+            label="FAP"
+            label_position="left"
+            color="secondary"
+            size="md"
+            [checked]="admision_model().paciente_fap"
+            (checkedChange)="seleccionar_tipo_paciente('fap', $event)"
+          />
+          <app-check
+            label="EXTRAFAP"
+            label_position="left"
+            color="secondary"
+            size="md"
+            [checked]="admision_model().paciente_extrafap"
+            (checkedChange)="seleccionar_tipo_paciente('extrafap', $event)"
+          />
+          <app-check
+            label="NN"
+            label_position="left"
+            color="secondary"
+            size="md"
+            [checked]="admision_model().paciente_nn"
+            (checkedChange)="seleccionar_tipo_paciente('nn', $event)"
+          />
+        </div>
+
+        @if (admision_model().paciente_fap) {
+          <div class="patient-search-row">
+            <app-input-group label="NSA / DNI / Nombres y Apellidos" size="sm" color="primary" [projectedControl]="true">
+              <app-auto-complete
+                input-group-control
+                [showLabel]="false"
+                size="sm"
+                color="primary"
+                placeholder="Buscar por NSA, DNI, apellidos o nombres"
+                [dataSource]="buscar_pacientes"
+                [displayWith]="mostrar_paciente"
+                valueKey="codigo_afiliado"
+                [minLength]="3"
+                [debounceTime]="450"
+                emptyMessage="No se encontró ningún paciente."
+                (searchChange)="cambiar_busqueda_paciente()"
+                (optionSelected)="seleccionar_paciente($event)"
+                (cleared)="limpiar_paciente()"
+              />
+            </app-input-group>
+            <app-button
+              text="Registrar acompañante"
+              icon="fa-solid fa-user-plus"
+              color="secondary"
+              size="sm"
+              [disabled]="!acompanante_habilitado()"
+              [loading]="registrando_acompanante()"
+              (clicked)="abrir_modal_acompanante()"
+            />
+            <div class="patient-disability-check">
+              <app-check
+                label="Indicador Discapacidad"
+                color="primary"
+                size="sm"
+                [checked]="admision_model().ind_discapacitado"
+                (checkedChange)="actualizar_discapacidad($event)"
+              />
+            </div>
+          </div>
+          @if (error_paciente()) {
+            <div class="text-danger small mt-1" role="alert">{{ error_paciente() }}</div>
+          }
+        } @else if (admision_model().paciente_extrafap) {
+          <div class="patient-search-row">
+            <app-input-group
+              label="Dni / Nombres y Apellidos"
+              size="sm"
+              color="primary"
+              [projectedControl]="true"
+            >
+              <app-auto-complete
+                input-group-control
+                [showLabel]="false"
+                size="sm"
+                color="primary"
+                placeholder="Buscar por DNI, apellidos o nombres"
+                [dataSource]="buscar_pacientes_extrafap"
+                [displayWith]="mostrar_paciente"
+                valueKey="paciente_id"
+                [minLength]="3"
+                [debounceTime]="450"
+                emptyMessage="No se encontró ningún paciente EXTRAFAP."
+                (searchChange)="cambiar_busqueda_paciente()"
+                (optionSelected)="seleccionar_paciente($event)"
+                (cleared)="limpiar_paciente()"
+              />
+            </app-input-group>
+            <app-button
+              text="Registrar acompañante"
+              icon="fa-solid fa-user-plus"
+              color="secondary"
+              size="sm"
+              [disabled]="!acompanante_habilitado()"
+              [loading]="registrando_acompanante()"
+              (clicked)="abrir_modal_acompanante()"
+            />
+            <div class="patient-disability-check">
+              <app-check
+                label="Indicador Discapacidad"
+                color="primary"
+                size="sm"
+                [checked]="admision_model().ind_discapacitado"
+                (checkedChange)="actualizar_discapacidad($event)"
+              />
+            </div>
+          </div>
+          @if (error_paciente()) {
+            <div class="text-danger small mt-1" role="alert">{{ error_paciente() }}</div>
+          }
+
+          @if (
+            !paciente_seleccionado() && busqueda_extrafap_realizada() && resultados_extrafap() === 0
+          ) {
+            <div class="row g-3 mt-1">
+              <div class="col-12 col-md-3">
+                <app-select
+                  size="sm"
+                  label="Tipo de documento"
+                  [requerido]="true"
+                  placeholder="-- Seleccione --"
+                  [options]="tipo_documento_options()"
+                  [showEmptyOption]="true"
+                  emptyOptionLabel="-- Seleccione --"
+                  [formField]="admision_form.tipo_documento_id"
+                  [invalid]="!!error_campo('tipo_documento_id', 'tipo_documento_id')"
+                  [error]="error_campo('tipo_documento_id', 'tipo_documento_id')"
+                />
+              </div>
+              <div class="col-12 col-md-3">
+                <app-input-text
+                  size="sm"
+                  label="Número de documento"
+                  [requerido]="true"
+                  [formField]="admision_form.numero_documento"
+                  [maxlength]="45"
+                  [error]="error_campo('numero_documento', 'numero_documento')"
+                />
+              </div>
+              <div class="col-12 col-md-3">
+                <app-select
+                  size="sm"
+                  label="Sexo"
+                  [requerido]="true"
+                  placeholder="-- Seleccione --"
+                  [options]="sexo_options"
+                  [showEmptyOption]="true"
+                  emptyOptionLabel="-- Seleccione --"
+                  [formField]="admision_form.sexo"
+                  [invalid]="!!error_campo('sexo', 'sexo_codigo')"
+                  [error]="error_campo('sexo', 'sexo_codigo')"
+                />
+              </div>
+              <div class="col-12 col-md-3">
+                <app-input-text
+                  size="sm"
+                  label="Fecha de nacimiento"
+                  type="date"
+                  [formField]="admision_form.fecha_nacimiento"
+                  [error]="error_campo('fecha_nacimiento', 'fecha_nacimiento')"
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <app-input-text
+                  size="sm"
+                  label="Nombres"
+                  [requerido]="true"
+                  [formField]="admision_form.nombres"
+                  [maxlength]="60"
+                  [error]="error_campo('nombres', 'nombres')"
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <app-input-text
+                  size="sm"
+                  label="Apellido paterno"
+                  [requerido]="true"
+                  [formField]="admision_form.apellido_paterno"
+                  [maxlength]="60"
+                  [error]="error_campo('apellido_paterno', 'apellido_paterno')"
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <app-input-text
+                  size="sm"
+                  label="Apellido materno"
+                  [requerido]="true"
+                  [formField]="admision_form.apellido_materno"
+                  [maxlength]="60"
+                  [error]="error_campo('apellido_materno', 'apellido_materno')"
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <app-input-text
+                  size="sm"
+                  label="Celular"
+                  type="tel"
+                  [formField]="admision_form.celular"
+                  [maxlength]="45"
+                  [error]="error_campo('celular', 'celular')"
+                />
+              </div>
+              <div class="col-12 col-md-4">
+                <app-input-text
+                  size="sm"
+                  label="Correo electrónico"
+                  type="email"
+                  [formField]="admision_form.correo_electronico"
+                  [maxlength]="100"
+                  [error]="error_campo('correo_electronico', 'correo_electronico')"
+                />
+              </div>
+            </div>
+          }
+        } @else {
+          <div class="row g-3 align-items-end">
+            <div class="col-12 col-md-3">
+              <app-select
+                size="sm"
+                label="Sexo"
+                [requerido]="true"
+                placeholder="-- Seleccione --"
+                [options]="sexo_options"
+                [showEmptyOption]="true"
+                emptyOptionLabel="-- Seleccione --"
+                [formField]="admision_form.sexo"
+                [invalid]="!!error_campo('sexo', 'sexo_codigo')"
+                [error]="error_campo('sexo', 'sexo_codigo')"
+              />
+            </div>
+            <div class="col-12 col-md-auto">
+              <fieldset class="priority-fieldset">
+                <legend class="priority-legend">Prioridad</legend>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <div
+                    class="priority-options"
+                    role="radiogroup"
+                    aria-label="Nivel de Prioridad de Triaje"
+                  >
+                    @for (priority of prioridades_nn(); track priority.value) {
+                      <label
+                        class="priority-option"
+                        [class]="'priority-option priority-option--' + priority.color"
+                      >
+                        <input
+                          type="radio"
+                          [formField]="admision_form.prioridad"
+                          [value]="priority.value"
+                          (change)="actualizar_prioridad(priority.value)"
+                        />
+                        <span [title]="priority.label">{{ priority.value }}</span>
+                      </label>
+                    }
+                  </div>
+                  <span
+                    class="priority-badge-info"
+                    [class]="'priority-badge-info--' + prioridad_actual().color"
+                  >
+                    {{ prioridad_actual().value }} - {{ prioridad_actual().label }}
+                  </span>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+        }
+
+        @if (paciente_seleccionado(); as paciente) {
+          <section class="patient-record" aria-label="Información del paciente seleccionado">
+            <div class="d-flex align-items-center justify-content-between gap-2 mb-2 flex-wrap">
+              <app-patient-identity
+                [identificador]="paciente.codigo_afiliado || ''"
+                [codigoAfiliado]="paciente.codigo_afiliado || null"
+                [codSitu]="paciente.cod_situ ?? null"
+                [nombre]="nombre_paciente_seleccionado()"
+                [parentesco]="paciente.parentesco || null"
+                [situacion]="paciente.situacion || null"
+              />
+              @if (es_derechohabiente(paciente.parentesco)) {
+                <app-button
+                  text="Ver datos"
+                  icon="fa-solid fa-address-book"
+                  size="sm"
+                  color="primary"
+                  (clicked)="abrir_modal_datos_titular()"
+                />
+              }
+            </div>
+            <app-summary-card-group minWidth="9rem">
+              <app-summary-card
+                etiqueta="DNI"
+                [valor]="paciente.numero_documento || 'No registrado'"
+                icon="fa-regular fa-address-card"
+              />
+              @if (paciente.nsa) {
+                <app-summary-card
+                  etiqueta="NSA"
+                  [valor]="paciente.nsa"
+                  icon="fa-regular fa-address-card"
+                />
+              }
+              <app-summary-card
+                etiqueta="Sexo"
+                [valor]="paciente.sexo || 'No registrado'"
+                icon="fa-solid fa-venus-mars"
+              />
+              <app-summary-card
+                etiqueta="Edad"
+                [valor]="paciente.edad === null ? 'No registrada' : paciente.edad + ' años'"
+                icon="fa-regular fa-calendar"
+              />
+              @if (!es_derechohabiente(paciente.parentesco)) {
+                <app-summary-card
+                  etiqueta="Situación"
+                  [valor]="paciente.situacion || 'No registrada'"
+                  icon="fa-solid fa-circle-check"
+                  [color]="color_situacion(paciente.situacion)"
+                  [iconColor]="color_situacion(paciente.situacion)"
+                />
+              }
+              <app-summary-card
+                etiqueta="Celular"
+                [valor]="paciente.celular || 'No registrado'"
+                icon="fa-solid fa-phone"
+                actionIcon="fa-solid fa-pen-to-square"
+                actionText="Actualizar"
+                actionColor="info"
+                actionAriaLabel="Actualizar celular"
+                (actionClicked)="abrir_modal_contacto('celular')"
+              />
+              <app-summary-card
+                class="patient-email-card"
+                etiqueta="Correo electrónico"
+                [valor]="paciente.correo_electronico || 'No registrado'"
+                icon="fa-regular fa-envelope"
+                actionIcon="fa-solid fa-pen-to-square"
+                actionText="Actualizar"
+                actionColor="info"
+                actionAriaLabel="Actualizar correo electrónico"
+                (actionClicked)="abrir_modal_contacto('correo_electronico')"
+              />
+            </app-summary-card-group>
+          </section>
+        }
+      </app-card-general>
+
+      <app-card-general title="Atención">
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <app-select
+              size="sm"
+              label="Procedencia"
+              [requerido]="true"
+              placeholder="-- Seleccione --"
+              [options]="procedencia_options()"
+              [showEmptyOption]="true"
+              emptyOptionLabel="-- Seleccione --"
+              [selectedValue]="admision_model().procedencia_id"
+              (selectedValueChange)="actualizar_procedencia($event)"
+              [formField]="admision_form.procedencia_id"
+              [invalid]="!!error_campo('procedencia_id', 'atencion.procedencia_id')"
+              [error]="error_campo('procedencia_id', 'atencion.procedencia_id')"
+            />
+          </div>
+        </div>
+        @if (error_campo('especialidad_id', 'atencion.especialidad_id')) {
+          <div class="text-danger small mt-2" role="alert">
+            {{ error_campo('especialidad_id', 'atencion.especialidad_id') }}
+          </div>
+        }
+        @if (error_campo('tipo_paciente_id', 'atencion.tipo_paciente_id')) {
+          <div class="text-danger small mt-2" role="alert">
+            {{ error_campo('tipo_paciente_id', 'atencion.tipo_paciente_id') }}
+          </div>
+        }
+      </app-card-general>
+
+      <footer class="admission-actions">
+        <app-button
+          text="Registrar  admisión"
+          icon="fa-solid fa-floppy-disk"
+          color="primary"
+          type="submit"
+          [loading]="guardando()"
+        />
+      </footer>
+    </form>
+
+    <app-modal
+      #contacto_modal
+      [title]="contacto_titulo()"
+      [icon]="contacto_campo() === 'celular' ? 'fa-solid fa-phone' : 'fa-regular fa-envelope'"
+      size="md"
+      [keyboard]="false"
+      [ignoreBackdropClick]="true"
+      [showFooter]="true"
+      [showCloseButton]="!guardando_contacto()"
+      (closed)="limpiar_modal_contacto()"
+    >
+      <app-input-text
+        size="sm"
+        [label]="contacto_campo() === 'celular' ? 'Teléfono' : 'Correo'"
+        [type]="contacto_campo() === 'celular' ? 'tel' : 'email'"
+        [formField]="contacto_form.valor"
+        [maxlength]="contacto_campo() === 'celular' ? 45 : 100"
+        [error]="error_contacto()"
+      />
+      <div modal-footer>
+        <app-button
+          action="save"
+          size="sm"
+          color="primary"
+          [loading]="guardando_contacto()"
+          (clicked)="guardar_contacto()"
+        />
+        <app-button
+          action="close"
+          size="sm"
+          [disabled]="guardando_contacto()"
+          (clicked)="contacto_modal.close()"
+        />
+      </div>
+    </app-modal>
+
+    <app-modal
+      #datos_titular_modal
+      title="Información del Afiliado"
+      icon="fa-solid fa-address-book"
+      size="lg"
+      [keyboard]="true"
+      [showFooter]="true"
+      [showCloseButton]="true"
+    >
+      @if (paciente_seleccionado(); as pac) {
+        <div class="affiliate-modal-content">
+          <section class="affiliate-section">
+            <h6 class="affiliate-section-title">
+              <i class="fa-solid fa-user-shield" aria-hidden="true"></i> Datos del Titular
+            </h6>
+            <app-summary-card-group minWidth="9rem">
+              <app-summary-card
+                etiqueta="Titular"
+                [valor]="nombre_titular_completo()"
+                icon="fa-solid fa-user-shield"
+                [wide]="true"
+              />
+            </app-summary-card-group>
+          </section>
+
+          <section class="affiliate-section">
+            <h6 class="affiliate-section-title">
+              <i class="fa-solid fa-user" aria-hidden="true"></i> Datos del Paciente
+            </h6>
+            <app-summary-card-group minWidth="9rem">
+              <app-summary-card
+                etiqueta="Nombre"
+                [valor]="nombre_paciente_seleccionado()"
+                icon="fa-solid fa-user"
+                [wide]="true"
+              />
+              <app-summary-card
+                etiqueta="Parentesco"
+                [valor]="pac.parentesco || 'No registrado'"
+                icon="fa-solid fa-people-roof"
+              />
+              @if (pac.codigo_afiliado) {
+                <app-summary-card
+                  etiqueta="Código Afiliado"
+                  [valor]="pac.codigo_afiliado"
+                  icon="fa-solid fa-id-badge"
+                />
+              }
+              <app-summary-card
+                etiqueta="DNI"
+                [valor]="pac.numero_documento || 'No registrado'"
+                icon="fa-regular fa-address-card"
+              />
+              <app-summary-card
+                etiqueta="Sexo"
+                [valor]="pac.sexo || 'No registrado'"
+                icon="fa-solid fa-venus-mars"
+              />
+              <app-summary-card
+                etiqueta="Edad"
+                [valor]="pac.edad === null ? 'No registrada' : pac.edad + ' años'"
+                icon="fa-regular fa-calendar"
+              />
+            </app-summary-card-group>
+          </section>
+        </div>
+      }
+      <div modal-footer>
+        <app-button
+          action="close"
+          size="sm"
+          color="primary"
+          (clicked)="datos_titular_modal.close()"
+        />
+      </div>
+    </app-modal>
+
+    <app-acompanante-modal
+      #acompanante_modal
+      [pacienteId]="paciente_seleccionado_id()"
+      [tipoDocumentoOptions]="tipo_documento_options()"
+      [sexoOptions]="sexo_acompanante_options()"
+      [parentescoOptions]="parentesco_options()"
+    />
+</section>

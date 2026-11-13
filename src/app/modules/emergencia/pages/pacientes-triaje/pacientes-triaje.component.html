@@ -1,0 +1,210 @@
+<section class="triage-patients-page">
+  <app-card-general title="Datos de Consulta" headerClass="patients-filter-header">
+    <div card-header-actions>
+      <app-button
+        text="Nueva admisión"
+        icon="fa-solid fa-plus"
+        color="primary"
+        (clicked)="nueva_admision()"
+      />
+    </div>
+
+    <form class="filters-grid" (submit)="consultar($event)">
+      <app-select
+        size="sm"
+        label="Estado"
+        placeholder="-- Seleccione --"
+        [options]="estadoOptions"
+        [showEmptyOption]="true"
+        emptyOptionLabel="-- Seleccione --"
+        [formField]="filtros_form.estado"
+      />
+      <app-select
+        size="sm"
+        label="Prioridad"
+        placeholder="-- Seleccione --"
+        [options]="prioridadOptions()"
+        [showEmptyOption]="true"
+        emptyOptionLabel="-- Seleccione --"
+        [formField]="filtros_form.prioridad"
+      />
+      <app-input-text
+        size="sm"
+        label="Documento / Historia / NSA"
+        placeholder="Buscar por documento, historia o NSA"
+        [formField]="filtros_form.documento"
+      />
+      <app-select
+        size="sm"
+        label="Médico / Personal"
+        placeholder="-- Seleccione --"
+        [options]="personalOptions()"
+        [showEmptyOption]="true"
+        emptyOptionLabel="-- Seleccione --"
+        [formField]="filtros_form.personal"
+      />
+      <div class="filter-action">
+        <app-button
+          action="search"
+          text="Buscar"
+          color="primary"
+          size="sm"
+          type="submit"
+          [disabled]="cargando() || !puede_buscar()"
+          [loading]="buscando()"
+        />
+        <app-button
+          action="clear"
+          size="sm"
+          [disabled]="cargando()"
+          (clicked)="limpiar_consulta()"
+        />
+      </div>
+    </form>
+  </app-card-general>
+
+  <app-card-general title="Detalle de Triaje">
+    <div class="triage-table-region">
+      <app-table
+        size="sm"
+        selectionKey="atencion_id"
+        [scrollHeight]="null"
+        [columns]="columns"
+        [rows]="seguimientos()"
+        [actions]="actions"
+        [loading]="cargando()"
+        (action)="ejecutar_accion($event)"
+        emptyMessage="No se encontraron atenciones de Emergencia."
+      />
+    </div>
+  </app-card-general>
+</section>
+
+@if (mostrar_modal_triaje() && atencion_en_triaje(); as atencion) {
+  <app-modal
+    #modal_triaje
+    [title]="titulo_modal_triaje(atencion)"
+    icon="fa-solid fa-stethoscope"
+    size="xl"
+    [scrollable]="true"
+    [fitContent]="true"
+    [ignoreBackdropClick]="true"
+    [keyboard]="false"
+    [showCloseButton]="!registro_triaje_guardando()"
+    (closed)="cerrar_modal_triaje()"
+  >
+    <app-registro-triaje
+      #registro_triaje
+      [atencion_id]="atencion.atencion_id"
+      [embebido]="true"
+      (triaje_registrado)="completar_triaje($event)"
+      (cerrado)="modal_triaje.close()"
+    />
+  </app-modal>
+}
+
+@if (mostrar_modal_ticket() && ticket_triaje(); as ticket) {
+  <app-modal
+    #modal_ticket
+    title="Ticket de Triaje"
+    icon="fa-solid fa-ticket"
+    size="md"
+    [fitContent]="true"
+    [showFooter]="true"
+    (closed)="cerrar_modal_ticket()"
+  >
+    <article #ticket_impresion class="triage-ticket" aria-label="Ticket de triaje">
+      <header class="triage-ticket__header">
+        <div class="triage-ticket__logo" aria-hidden="true">FAP</div>
+        <div>
+          <strong>Sistema de Salud FAP</strong>
+          <span>IPRESS Hospital Central FAP</span>
+        </div>
+        <div class="triage-ticket__logo" aria-hidden="true">IPRESS</div>
+      </header>
+
+      <dl class="triage-ticket__grid">
+        <div class="triage-ticket__wide">
+          <dt>N° Registro</dt>
+          <dd>{{ ticket.numero_registro }}</dd>
+        </div>
+        <div class="triage-ticket__wide">
+          <dt>IPRESS</dt>
+          <dd>
+            {{ ticket.ipress || '-'
+            }}{{ ticket.ipress_sigla ? ' (' + ticket.ipress_sigla + ')' : '' }}
+          </dd>
+        </div>
+        <div class="triage-ticket__wide triage-ticket__section">
+          <dt>Paciente</dt>
+          <dd>{{ paciente_ticket() || '-' }}</dd>
+        </div>
+        <div>
+          <dt>NSA</dt>
+          <dd>{{ ticket.nsa ?? '-' }}</dd>
+        </div>
+        <div>
+          <dt>DNI</dt>
+          <dd>{{ ticket.documento ?? '-' }}</dd>
+        </div>
+        <div class="triage-ticket__wide">
+          <dt>Acompañante</dt>
+          <dd>{{ ticket.acompanante || 'Sin acompañante' }}</dd>
+        </div>
+        <div class="triage-ticket__wide">
+          <dt>Destino</dt>
+          <dd>{{ ticket.destino ?? ticket.area }}</dd>
+        </div>
+        <div class="triage-ticket__wide">
+          <dt>Prioridad</dt>
+          <dd>{{ prioridad_ticket(ticket.prioridad_codigo, ticket.prioridad_nombre) }}</dd>
+        </div>
+      </dl>
+
+      <section class="triage-ticket__section-block">
+        <h3>Signos vitales</h3>
+        <div class="triage-ticket__vitals">
+          <span>PA</span
+          ><strong>{{ valor_ticket('PA', 'PAS') }}/{{ valor_ticket('PA', 'PAD') }}</strong
+          ><small>mmHg</small> <span>Sat.</span><strong>{{ valor_ticket('SATO2') }}</strong
+          ><small>%</small> <span>FC</span><strong>{{ valor_ticket('FC') }}</strong
+          ><small>lpm</small> <span>Temp.</span><strong>{{ valor_ticket('TEMP') }}</strong
+          ><small>°C</small> <span>FR</span><strong>{{ valor_ticket('FR') }}</strong
+          ><small>rpm</small> <span>EVA</span><strong>{{ valor_ticket('EVA') }}</strong
+          ><small>/ 10</small>
+        </div>
+      </section>
+
+      <section class="triage-ticket__section-block">
+        <h3>Motivo de consulta</h3>
+        <p>{{ ticket.motivo_consulta }}</p>
+      </section>
+
+      <dl class="triage-ticket__grid triage-ticket__footer-data">
+        <div class="triage-ticket__wide">
+          <dt>Triado por</dt>
+          <dd>{{ ticket.triado_por || '-' }}</dd>
+        </div>
+        <div>
+          <dt>Fecha de triaje</dt>
+          <dd>{{ fecha_ticket(ticket.fecha_hora) }}</dd>
+        </div>
+        <div>
+          <dt>Hora de triaje</dt>
+          <dd>{{ hora_ticket(ticket.fecha_hora) }}</dd>
+        </div>
+      </dl>
+    </article>
+
+    <div modal-footer>
+      <app-button action="print" size="sm" color="primary" (clicked)="imprimir_ticket()" />
+      <app-button
+        action="close"
+        size="sm"
+        variant="outline"
+        color="secondary"
+        (clicked)="modal_ticket.close()"
+      />
+    </div>
+  </app-modal>
+}

@@ -1,0 +1,220 @@
+:host {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.triage-patients-page {
+  display: grid;
+  gap: 1rem;
+  max-width: 100%;
+  min-width: 0;
+}
+.triage-patients-page h1 {
+  color: var(--palette-primary-fap-text);
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.triage-patients-page app-card-general,
+.triage-table-region,
+.triage-table-region app-table {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+}
+.filters-grid {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.filters-grid app-select,
+.filters-grid app-input-text {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+.filter-action {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+  min-height: 2.45rem;
+  padding-bottom: 2px;
+}
+.triage-table-region {
+  overflow: hidden;
+}
+
+:host ::ng-deep .triage-patients-page .app-card-general,
+:host ::ng-deep .triage-patients-page .app-card-general__body {
+  max-width: 100%;
+  min-width: 0;
+}
+:host ::ng-deep .triage-table-region .table-container {
+  max-width: 100%;
+  overscroll-behavior-inline: contain;
+  width: 100%;
+}
+:host ::ng-deep .triage-table-region .app-table {
+  width: 100%;
+}
+:host ::ng-deep .triage-table-region .priority-badge-solid {
+  border-color: transparent !important;
+  color: var(--palette-white) !important;
+  font-weight: 700;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+}
+:host ::ng-deep .triage-table-region .priority-badge-solid.danger {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+:host ::ng-deep .triage-table-region .priority-badge-solid.orange {
+  background-color: #f97316 !important;
+  color: #ffffff !important;
+}
+:host ::ng-deep .triage-table-region .priority-badge-solid.warning {
+  background-color: #facc15 !important;
+  color: #1e293b !important;
+  text-shadow: none;
+}
+:host ::ng-deep .triage-table-region .priority-badge-solid.success {
+  background-color: #16a34a !important;
+  color: #ffffff !important;
+}
+:host ::ng-deep .triage-table-region .priority-badge-solid.primary {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+:host ::ng-deep .triage-table-region .priority-badge-solid.secondary {
+  background-color: var(--palette-secondary) !important;
+}
+:host ::ng-deep .patients-filter-header {
+  flex-wrap: wrap;
+}
+
+.triage-ticket {
+  border: 1px solid var(--palette-gray-400);
+  color: var(--palette-gray-900);
+  font-size: 0.8rem;
+  margin: 0 auto;
+  max-width: 34rem;
+}
+.triage-ticket__header {
+  align-items: center;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 4rem 1fr 4rem;
+  padding: 0.75rem;
+  text-align: center;
+}
+.triage-ticket__header strong,
+.triage-ticket__header span {
+  display: block;
+}
+.triage-ticket__header strong {
+  font-size: 1rem;
+}
+.triage-ticket__logo {
+  align-items: center;
+  border: 1px solid var(--palette-gray-300);
+  border-radius: 50%;
+  display: flex;
+  font-size: 0.65rem;
+  height: 3rem;
+  justify-content: center;
+  margin: auto;
+  width: 3rem;
+}
+.triage-ticket dl,
+.triage-ticket dd,
+.triage-ticket p {
+  margin: 0;
+}
+.triage-ticket__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.triage-ticket__grid > div {
+  border-top: 1px solid var(--palette-gray-300);
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 0.4fr) 1fr;
+  min-width: 0;
+}
+.triage-ticket__grid > div:nth-child(2n):not(.triage-ticket__wide) {
+  border-left: 1px solid var(--palette-gray-300);
+}
+.triage-ticket__grid dt,
+.triage-ticket__grid dd {
+  padding: 0.35rem 0.5rem;
+}
+.triage-ticket__grid dt {
+  background: var(--palette-gray-100);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.triage-ticket__wide {
+  grid-column: 1 / -1;
+}
+.triage-ticket__section-block {
+  border-top: 1px solid var(--palette-gray-300);
+}
+.triage-ticket__section-block h3 {
+  background: var(--palette-gray-100);
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin: 0;
+  padding: 0.35rem 0.5rem;
+  text-transform: uppercase;
+}
+.triage-ticket__section-block p {
+  min-height: 2.25rem;
+  padding: 0.5rem;
+}
+.triage-ticket__vitals {
+  display: grid;
+  grid-template-columns: 3rem 1fr 3rem 3rem 1fr 3rem;
+}
+.triage-ticket__vitals > * {
+  border-right: 1px solid var(--palette-gray-300);
+  border-top: 1px solid var(--palette-gray-300);
+  padding: 0.35rem 0.45rem;
+}
+.triage-ticket__vitals > :nth-child(6n) {
+  border-right: 0;
+}
+.triage-ticket__vitals span {
+  background: var(--palette-gray-100);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.triage-ticket__footer-data dd {
+  min-height: 2rem;
+}
+
+@media (max-width: 700px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+  .filter-action app-button {
+    width: 100%;
+  }
+  :host ::ng-deep .filter-action .app-button {
+    width: 100%;
+  }
+  :host ::ng-deep .patients-filter-header .app-card-general__header-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+  :host ::ng-deep .patients-filter-header .app-card-general__header-actions app-button,
+  :host ::ng-deep .patients-filter-header .app-card-general__header-actions .app-button {
+    width: 100%;
+  }
+  .triage-ticket__vitals {
+    grid-template-columns: 2.75rem 1fr 2.75rem;
+  }
+  .triage-ticket__vitals > :nth-child(3n) {
+    border-right: 0;
+  }
+}

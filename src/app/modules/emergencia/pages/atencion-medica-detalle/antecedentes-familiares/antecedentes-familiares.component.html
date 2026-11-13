@@ -1,0 +1,128 @@
+<section class="family-history">
+    <form class="family-form" (submit)="$event.preventDefault(); guardar()">
+      <h4>Registrar antecedente familiar</h4>
+
+      <div class="family-form__grid">
+        <div class="family-form__diagnostico position-relative">
+          <label class="form-label">Diagnóstico (CIE-10)</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            placeholder="Buscar por código o descripción..."
+            aria-describedby="familiar-diagnostico-ayuda"
+            [formControl]="diagnosticoBusquedaControl"
+            [disabled]="diagnosticoSeleccionado() !== null"
+          />
+          <small id="familiar-diagnostico-ayuda" class="family-diagnostico-status">
+            @if (buscandoDiagnostico()) {
+              Buscando diagnósticos...
+            } @else if (diagnosticoSeleccionado()) {
+              Diagnóstico seleccionado.
+            } @else if (terminoDiagnostico().trim().length < 2) {
+              Escriba al menos 2 caracteres para buscar.
+            } @else if (resultadosDiagnostico().length === 0) {
+              No se encontraron coincidencias.
+            } @else {
+              Seleccione un diagnóstico de la lista.
+            }
+          </small>
+          @if (!diagnosticoSeleccionado() && resultadosDiagnostico().length > 0) {
+            <div class="family-diagnostico-results">
+              @for (resultado of resultadosDiagnostico(); track resultado.cie10_id) {
+                <button
+                  type="button"
+                  class="family-diagnostico-result"
+                  (click)="seleccionarDiagnostico(resultado)"
+                >
+                  <strong>{{ resultado.codigo }}</strong
+                  ><span>{{ resultado.descripcion }}</span>
+                </button>
+              }
+            </div>
+          }
+          @if (diagnosticoSeleccionado()) {
+            <div class="family-diagnostico-selected">
+              <strong>{{ diagnosticoSeleccionado()!.codigo }}</strong
+              ><span>{{ diagnosticoSeleccionado()!.descripcion }}</span
+              ><button
+                type="button"
+                class="btn-close"
+                aria-label="Quitar diagnóstico seleccionado"
+                (click)="limpiarDiagnostico()"
+              ></button>
+            </div>
+          }
+        </div>
+
+        <app-select
+          label="Parentesco"
+          size="sm"
+          [required]="true"
+          [apiItems]="parentescos()"
+          valueField="value"
+          labelField="label"
+          [selectedValue]="formulario().parentesco_id"
+          (selectedValueChange)="actualizarSeleccion('parentesco_id', $event)"
+        />
+
+        <app-select
+          label="Estado"
+          size="sm"
+          [required]="true"
+          [disabled]="contexto().estados.length === 0"
+          [apiItems]="contexto().estados"
+          valueField="estado_id"
+          labelField="nombre"
+          [selectedValue]="formulario().estado_id"
+          (selectedValueChange)="actualizarSeleccion('estado_id', $event)"
+        />
+
+        <app-input-group
+          label="Edad del familiar al diagnóstico"
+          type="number"
+          size="sm"
+          [min]="0"
+          [value]="formulario().edad_fam"
+          (input)="actualizarTexto('edad_fam', $event)"
+        />
+
+        <app-input-group
+          label="Comentario"
+          size="sm"
+          [maxlength]="200"
+          [value]="formulario().comentario"
+          (input)="actualizarTexto('comentario', $event)"
+        />
+      </div>
+
+      <div class="family-form__actions">
+        <app-button
+          texto="Registrar antecedente"
+          action="save"
+          color="primary"
+          size="sm"
+          [disabled]="!habilitado() || !formularioValido() || guardando()"
+          [loading]="guardando()"
+          (clicked)="guardar()"
+        />
+      </div>
+    </form>
+
+    <header class="family-history__header">
+      <div>
+        <h4>Antecedentes familiares registrados</h4>
+        <p>
+          Estos antecedentes pertenecen al paciente y estarán disponibles en futuras atenciones.
+        </p>
+      </div>
+    </header>
+
+    <app-table
+      size="xs"
+      [scrollHeight]="null"
+      [columns]="columnas"
+      [rows]="familiares()"
+      [loading]="cargando()"
+      emptyMessage="No hay antecedentes familiares registrados para este paciente."
+    />
+</section>

@@ -1,0 +1,250 @@
+
+<div class="reserva-citas">
+  <div class="reserva-citas__alert-principal">
+    <app-alert
+      subtitulo="RESERVA DE CITAS"
+      titulo="Programa una nueva atención"
+      texto="Completa los pasos para encontrar una cita disponible."
+      color="info"
+      size="md"
+      icon=""
+      rounded="lg"
+      [destacarTitulo]="true">
+    </app-alert>
+  </div>
+  <app-tabs
+     variant="stepper-line"
+    [tabs]="pasos()"
+    [activeTabId]="pasoActual().toString()"
+    [completedTabIds]="pasosCompletados()"
+    (tabSelected)="seleccionarPaso($event)">
+  </app-tabs>
+
+  <section class="reserva-citas__contenido">
+
+    <span class="reserva-citas__paso">
+      PASO {{ pasoActual() }}
+    </span>
+
+    @switch (pasoActual()) {
+      @case (1) {
+       <div class="reserva-citas__encabezado-paso">
+          <app-label texto="Selecciona al afiliado"></app-label>
+
+          <div class="reserva-citas__alert-indicacion">
+            <app-alert
+              texto="ELIGE LA PERSONA PARA QUIEN DESEAS RESERVAR LA CITA."
+              color="primary"
+              size="xs"
+              icon="fa-solid fa-user"
+              rounded="lg">
+            </app-alert>
+          </div>
+        </div>
+
+        <div class="reserva-citas__afiliados">
+          @for (afiliado of afiliados(); track afiliado.codigo) {
+            <div class="reserva-citas__afiliado">
+              <app-card-persona
+                [nombre]="afiliado.nombreCompleto"
+                [documento]="afiliado.dni"
+                [imagen]="afiliado.fotoUrl ?? ''"
+                textoBoton="Reservar"
+                iconoBoton="fa-solid fa-calendar-plus"
+                [botonAnchoCompleto]="false"
+                (seleccionar)="seleccionarAfiliado(afiliado)">
+              </app-card-persona>
+            </div>
+          } @empty {
+            <p class="reserva-citas__sin-afiliados">
+              No hay afiliados disponibles para mostrar.
+            </p>
+          }
+        </div>
+
+
+      }
+      @case (2) {
+          <div class="reserva-citas__encabezado-paso">
+            <app-label texto="Tipo de atención"></app-label>
+
+            <div class="reserva-citas__alert-indicacion">
+              <app-alert
+                texto="SELECCIONA LA MODALIDAD QUE NECESITAS."
+                color="primary"
+                size="xs"
+                icon="fa-solid fa-clipboard-list"
+                rounded="lg">
+              </app-alert>
+            </div>
+          </div>
+
+          @if (resumenSelecciones().length > 0) {
+            <app-breadcrumb
+              [items]="resumenSelecciones()"
+              variant="resumen"
+              size="sm"
+              ariaLabel="Resumen de selecciones">
+            </app-breadcrumb>
+          }
+
+            <div class="reserva-citas__modalidades">
+
+              <div class="reserva-citas__modalidad">
+                <app-card
+                  title="Consulta Presencial"
+                  imageSrc="assets/svg/presencial.png"
+                  altText="Consulta Presencial"
+                  variant="modalidad"
+                  [elevacion]="true"
+                  [mostrarSeleccionar]="true"
+                  [useClick]="true"
+                  (clickEvent)="seleccionarTipoAtencion('PRESENCIAL')">
+                </app-card>
+              </div>
+
+              <div class="reserva-citas__modalidad">
+                <app-card
+                  title="Consulta Virtual"
+                  imageSrc="assets/svg/virtual.png"
+                  altText="Consulta Virtual"
+                  variant="modalidad"
+                  [elevacion]="true"
+                  [mostrarSeleccionar]="true"
+                  [useClick]="true"
+                  (clickEvent)="seleccionarTipoAtencion('VIRTUAL')">
+                </app-card>
+              </div>
+
+            </div>
+      }
+      @case (3) {
+         <div class="reserva-citas__encabezado-paso">
+
+            <app-label texto="Selecciona la IPRESS"></app-label>
+
+            <div class="reserva-citas__alert-indicacion">
+              <app-alert
+                texto="ELIGE LA SEDE DONDE DESEAS ATENDERTE."
+                color="primary"
+                size="xs"
+                icon="fa-solid fa-hospital"
+                rounded="lg">
+              </app-alert>
+            </div>
+
+          </div>
+
+            @if (resumenSelecciones().length > 0) {
+              <app-breadcrumb
+                [items]="resumenSelecciones()"
+                variant="resumen"
+                size="sm"
+                ariaLabel="Resumen de selecciones">
+              </app-breadcrumb>
+            }
+
+          <div class="reserva-citas__ipress-lista">
+
+            @for (sede of ipress(); track sede.codigo) {
+
+              <div class="reserva-citas__ipress-item">
+
+                  <app-card-ipress
+                    [title]="sede.nombre"
+                    [imageSrc]="sede.imagen"
+                    [altText]="sede.nombre"
+                    variant="reserva"
+                    [mostrarSeleccionar]="true"
+                    [elevacion]="true"
+                    [useClick]="true"
+                    (clickEvent)="seleccionarIpress(sede)">
+                  </app-card-ipress>
+
+               </div>
+
+          } @empty {
+            <p>No hay IPRESS disponibles.</p>
+          }
+
+</div>
+      }
+      @case (4) {
+        <div class="reserva-citas__encabezado-paso">
+
+          <app-label texto="Selecciona la especialidad"></app-label>
+
+          <div class="reserva-citas__alert-indicacion">
+            <app-alert
+              texto="BUSCA Y SELECCIONA LA ESPECIALIDAD EN LA QUE DESEAS ATENDERTE."
+              color="primary"
+              size="xs"
+              icon="fa-solid fa-stethoscope"
+              rounded="lg">
+            </app-alert>
+          </div>
+
+        </div>
+
+        @if (resumenSelecciones().length > 0) {
+          <app-breadcrumb
+            [items]="resumenSelecciones()"
+            variant="resumen"
+            size="sm"
+            ariaLabel="Resumen de selecciones">
+          </app-breadcrumb>
+        }
+
+        <div class="reserva-citas__buscador-especialidad">
+
+          <app-input-filter
+            placeholder="Buscar especialidad..."
+            size="md"
+            color="primary"
+            [value]="busquedaEspecialidad()"
+            (valueChange)="busquedaEspecialidad.set($event)">
+          </app-input-filter>
+
+        </div>
+
+        <div class="reserva-citas__especialidades-lista">
+
+          @for (especialidad of especialidadesFiltradas(); track especialidad.codigo) {
+
+            <div class="reserva-citas__especialidad-item">
+              <app-card
+                [title]="especialidad.nombre"
+                [imageSrc]="especialidad.imagen"
+                [altText]="especialidad.nombre"
+                variant="especialidad"
+                [elevacion]="true"
+                [mostrarSeleccionar]="true"
+                [useClick]="true"
+                (clickEvent)="seleccionarEspecialidad(especialidad)">
+              </app-card>
+            </div>
+
+          } @empty {
+            <p class="reserva-citas__sin-especialidades">
+              No se encontraron especialidades.
+            </p>
+          }
+
+        </div>
+
+      }
+      @case (5) {
+        <app-label texto="Selecciona el médico"></app-label>
+      }
+      @case (6) {
+        <app-label texto="Selecciona la fecha y horario"></app-label>
+      }
+      @case (7) {
+        <app-label texto="Confirmación e impresión"></app-label>
+      }
+    }
+
+  </section>
+
+</div>
+

@@ -18,6 +18,8 @@ import { MenuItem } from '../../../interfaces/menu.interface';
 import { Last_activity_component } from '../../../components/last-activity/last-activity.component';
 import { ButtonComponent } from '../../../components/button/button.component';
 import { ModalComponent } from '../../../components/modal/modal.component';
+import { mergeLocalFeatureMenu } from './local-feature-menu';
+import { SidebarService } from '../../../services/sidebar.service';
 
 @Component({
   selector: 'app-dashboard-layout',
@@ -33,6 +35,7 @@ export class DashboardLayoutComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private menuService = inject(MenuService);
+  private sidebarService = inject(SidebarService);
 
   isSidebarOpen = false;
   isSidebarCollapsed = false;
@@ -151,6 +154,7 @@ export class DashboardLayoutComponent implements OnInit {
     }
 
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
+    this.sidebarService.setCollapsed(this.isSidebarCollapsed);
   }
 
   closeSidebarOnMobile(): void {
@@ -260,7 +264,7 @@ export class DashboardLayoutComponent implements OnInit {
     this.menuService.loadMenu().subscribe({
       next: (menu) => {
         // 🔹 Sanitizamos recursivamente los enlaces antes de asignarlos al estado
-        this.menuItems = this.sanitizarEnlacesMenu(menu);
+        this.menuItems = this.sanitizarEnlacesMenu(mergeLocalFeatureMenu(menu));
         this.isMenuLoading = false;
         this.syncActiveMenuGroup();
       },

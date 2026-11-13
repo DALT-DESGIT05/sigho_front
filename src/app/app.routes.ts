@@ -13,6 +13,13 @@ export const routes: Routes = [
     loadChildren: () => import('./modules/home/home.routes').then((m) => m.homeRoutes),
   },
   {
+    path: 'citas',
+    component: DashboardLayoutComponent,
+    canActivate: [isAuthenticatedGuard],
+    canActivateChild: [isAuthenticatedGuard],
+    loadChildren: () => import('./modules/citas/citas.routes').then((m) => m.citasRoutes),
+  },
+  {
     path: 'auth',
     component: LoginLayoutComponent,
     canActivate: [isNotAuthenticatedGuard],

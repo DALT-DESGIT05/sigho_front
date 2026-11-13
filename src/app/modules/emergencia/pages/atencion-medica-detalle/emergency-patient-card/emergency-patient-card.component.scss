@@ -1,0 +1,96 @@
+:host {
+  display: block;
+}
+
+.patient-header-iafas-text {
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  display: inline-flex;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  opacity: 0.95;
+  padding: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.patient-record {
+  background-color: var(--palette-info-10, #f0f7ff);
+  border: 1px solid var(--palette-primary-subtle, #b6d4fe);
+  border-radius: 1rem;
+  display: block;
+  padding: 1rem;
+
+  app-summary-card {
+    flex: 0 1 11.5rem !important;
+    max-width: 13rem !important;
+  }
+
+  .patient-email-card {
+    flex: 0 1 12rem !important;
+    max-width: 13rem !important;
+  }
+}
+
+.patient-allergy-alert {
+  align-items: center;
+  background: var(--palette-danger-50);
+  border: 1px solid var(--palette-danger-300);
+  border-left: 4px solid var(--palette-danger);
+  border-radius: 0.5rem;
+  color: var(--palette-danger-800);
+  display: flex;
+  gap: 0.55rem;
+  margin-bottom: 0.75rem;
+  padding: 0.35rem 0.65rem;
+  max-width: 28rem;
+  animation: allergy-pulse 1.8s infinite ease-in-out;
+}
+
+@keyframes allergy-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.02);
+    box-shadow: 0 0 10px 3px rgba(220, 53, 69, 0.35);
+  }
+}
+
+.patient-allergy-alert--danger {
+  background: var(--palette-danger-50);
+  border-color: var(--palette-danger-300);
+  border-left-color: var(--palette-danger);
+  color: var(--palette-danger-800);
+}
+
+.patient-allergy-alert i {
+  flex: 0 0 auto;
+}
+
+.patient-allergy-alert div {
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.patient-allergy-alert span {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.patient-allergy-alert strong {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

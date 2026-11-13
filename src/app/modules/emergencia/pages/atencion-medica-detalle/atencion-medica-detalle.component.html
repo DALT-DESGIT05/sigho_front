@@ -1,0 +1,189 @@
+<section class="medical-attention-detail-page">
+  @let detalle = detalle_vista();
+  <app-menu-flotante
+    [codigo]="'HCE - Emergencia'"
+    [etiqueta]="'Atención médica'"
+    [topOffset]="'0px'"
+    [bottomOffset]="'0px'"
+    [sidebarWidth]="'260px'"
+    [abierto]="true"
+    [mostrarBotonColapsar]="false"
+    [opciones]="acciones_clinicas"
+    (seleccionar)="seleccionar_accion($event)"
+  ></app-menu-flotante>
+  <app-emergency-patient-card [paciente]="detalle.paciente" [alergias]="alergias()" />
+  @if (atencion()) {
+    <app-antecedentes
+      #antecedentes
+      [atencionId]="detalle.atencion_id"
+      [habilitado]="!!detalle.fecha_hora_llamada_med"
+      (alergiasChange)="alergias.set($event)"
+      (familiaresChange)="antecedentes_familiares.set($event)"
+      (habitosChange)="antecedentes_habitos.set($event)"
+      (repSexChange)="antecedente_rep_sex.set($event)"
+    />
+  }
+  <app-signos-vitales-historial
+    [historial]="signos_vitales()"
+    [edad]="detalle.paciente.edad"
+    [cargando]="cargandoSignosVitales()"
+    [guardando]="guardandoSignosVitales()"
+    [habilitado]="!!detalle.fecha_hora_llamada_med"
+    [errorGuardado]="errorGuardadoSignosVitales()"
+    (registrar)="guardar_signos_vitales($event)"
+  />
+  <main class="clinical-main">
+    <app-medical-tabs
+      [(pestana_activa)]="pestana_activa"
+      [detalle]="detalle"
+      [formulario]="evaluacion_form()"
+      [evaluacion_registrada]="evaluacion_regional_registrada()"
+      [funciones_biologicas]="funciones_biologicas()"
+      [cargando_funciones_biologicas]="cargandoFuncionesBiologicas()"
+      [examenes_regionales]="examenes_regionales()"
+      [estados_examen_regional]="estados_examen_regional()"
+      [cargando_examenes_regionales]="cargandoExamenesRegionales()"
+      [diagnosticos]="diagnosticos()"
+      [tipos_diagnostico]="tipos_diagnostico()"
+      [resultados_diagnostico]="resultados_diagnostico()"
+      [cargando_diagnosticos]="cargandoDiagnosticos()"
+      [buscando_diagnostico]="buscandoDiagnostico()"
+      [guardando_diagnostico]="guardandoDiagnostico()"
+      [ordenes_imagen]="ordenes_imagen()"
+      [prioridades_orden]="prioridades_orden()"
+      [resultados_servicio_imagen]="resultados_servicio_imagen()"
+      [cargando_apoyos_diagnosticos]="cargandoApoyosDiagnosticos()"
+      [buscando_servicio_imagen]="buscandoServicioImagen()"
+      [guardando_apoyo_diagnostico]="guardandoApoyoDiagnostico()"
+      [ordenes_laboratorio]="ordenes_laboratorio()"
+      [catalogo_laboratorio]="catalogo_laboratorio()"
+      [cargando_laboratorio]="cargandoLaboratorio()"
+      [guardando_laboratorio]="guardandoLaboratorio()"
+      [historial_laboratorio]="historial_laboratorio()"
+      [resultados_laboratorio]="resultados_laboratorio()"
+      [cargando_historial_laboratorio]="cargandoHistorialLaboratorio()"
+      [cargando_resultados_laboratorio]="cargandoResultadosLaboratorio()"
+      [ordenes_proced_enf]="ordenes_proced_enf()"
+      [catalogo_proced_enf]="catalogo_proced_enf()"
+      [cargando_proced_enf]="cargandoProcedEnf()"
+      [guardando_proced_enf]="guardandoProcedEnf()"
+      [ordenes_hospitalizacion]="ordenes_hospitalizacion()"
+      [motivos_hospitalizacion]="motivos_hospitalizacion()"
+      [cargando_hospitalizacion]="cargandoHospitalizacion()"
+      [guardando_hospitalizacion]="guardandoHospitalizacion()"
+      [ordenes_interconsulta]="ordenes_interconsulta()"
+      [areas_interconsulta]="areas_interconsulta()"
+      [especialidades_interconsulta]="especialidades_interconsulta()"
+      [personal_interconsulta]="personal_interconsulta()"
+      [cargando_interconsultas]="cargandoInterconsultas()"
+      [guardando_interconsulta]="guardandoInterconsulta()"
+      [guardando]="guardandoEvaluacion()"
+      [cargando]="cargandoEvaluacion()"
+      (campoActualizado)="actualizar_evaluacion($event.campo, $event.event)"
+      (tipoRegionalActualizado)="actualizar_tipo_regional($event)"
+      (buscarDiagnostico)="buscar_diagnosticos($event)"
+      (guardarDiagnostico)="guardar_diagnostico($event)"
+      (eliminarDiagnostico)="eliminar_diagnostico($event)"
+      (buscarServicioImagen)="buscar_servicios_imagen($event)"
+      (guardarApoyoImagen)="guardar_apoyo_imagen($event)"
+      (guardarLaboratorio)="guardar_laboratorio($event)"
+      (eliminarLaboratorio)="eliminar_laboratorio($event)"
+      (cargarHistorialLaboratorio)="cargar_historial_laboratorio()"
+      (cargarResultadosLaboratorio)="cargar_resultados_laboratorio()"
+      (guardarProcedEnf)="guardar_procedimiento_enfermeria($event)"
+      (eliminarProcedEnf)="eliminar_procedimiento_enfermeria($event)"
+      (guardarHospitalizacion)="guardar_hospitalizacion($event)"
+      (eliminarHospitalizacion)="eliminar_hospitalizacion($event)"
+      (guardarInterconsulta)="guardar_interconsulta($event)"
+      (eliminarInterconsulta)="eliminar_interconsulta($event)"
+      (guardarEnfermedad)="guardar_enfermedad_actual($event)"
+      (guardarEvaluacion)="guardar_evaluacion_clinica($event)"
+      (guardar)="guardar_evaluacion($event)"
+    ></app-medical-tabs>
+  </main>
+  @if (cargando()) {
+    <p class="clinical-loading-indicator" role="status">Consultando información clínica...</p>
+  }
+  @if (iniciando_atencion()) {
+    <p class="clinical-loading-indicator" role="status">Iniciando atención médica...</p>
+  }
+</section>
+
+<app-modal
+  #modalFinalizacion
+  [title]="paso_finalizacion() === 'alta' ? 'Alta médica' : 'Finalizar atención'"
+  [icon]="
+    paso_finalizacion() === 'alta'
+      ? 'fa-solid fa-house-medical-circle-check'
+      : 'fa-solid fa-circle-check'
+  "
+  size="xxl"
+  [scrollable]="true"
+>
+  @if (paso_finalizacion() === 'destino') {
+    <section class="finalizacion-atencion" aria-label="Selección del destino del paciente">
+      <header class="finalizacion-atencion__encabezado">
+        <span class="finalizacion-atencion__icono" aria-hidden="true">
+          <i class="fa-solid fa-route"></i>
+        </span>
+        <div>
+          <h2>Definir destino del paciente</h2>
+          <p>
+            Seleccione el desenlace clínico para continuar con el flujo que corresponda. Esta acción
+            todavía no cerrará la atención.
+          </p>
+        </div>
+      </header>
+
+      <div class="finalizacion-atencion__contenido">
+        <app-select
+          label="Destino"
+          placeholder="Seleccione el destino del paciente"
+          size="sm"
+          [required]="true"
+          [options]="opciones_destino_finalizacion"
+          [selectedValue]="destino_finalizacion()"
+          (selectedValueChange)="destino_finalizacion.set($event)"
+        />
+
+        @if (destino_finalizacion() === 'DOMICILIO') {
+          <div class="finalizacion-atencion__aviso finalizacion-atencion__aviso--alta">
+            <i class="fa-solid fa-house-medical-circle-check" aria-hidden="true"></i>
+            <div>
+              <strong>Alta médica</strong>
+              <span>Se abrirá el formulario de Alta para completar los datos de egreso.</span>
+            </div>
+          </div>
+        } @else if (destino_finalizacion()) {
+          <div class="finalizacion-atencion__aviso">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <div>
+              <strong>Flujo independiente</strong>
+              <span>Este destino continuará en su módulo clínico correspondiente.</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <footer class="finalizacion-atencion__acciones">
+        <app-button
+          texto="Continuar"
+          icon="fa-solid fa-arrow-right"
+          color="primary"
+          size="sm"
+          [disabled]="!destino_finalizacion()"
+          (clicked)="continuar_finalizacion()"
+        />
+        <app-button action="close" size="sm" (clicked)="modalFinalizacion.close()" />
+      </footer>
+    </section>
+  } @else {
+    <app-alta-paciente
+      [detalle]="detalle"
+      [formulario]="evaluacion_form()"
+      [diagnosticos]="diagnosticos()"
+      (guardar)="informar_alta_sin_persistencia()"
+      (cerrar)="modalFinalizacion.close()"
+    />
+  }
+</app-modal>

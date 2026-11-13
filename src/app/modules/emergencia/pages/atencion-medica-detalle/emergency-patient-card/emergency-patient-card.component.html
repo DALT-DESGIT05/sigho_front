@@ -1,0 +1,211 @@
+<app-card-general title="Paciente">
+  <div card-header>
+    @if (badge_iafas_header(); as badgeText) {
+      <span class="patient-header-iafas-text" [title]="badgeText">
+        {{ badgeText }}
+      </span>
+    }
+  </div>
+  @if (paciente().es_nn) {
+    <div card-header-actions>
+      <span class="badge bg-secondary">Paciente NN</span>
+    </div>
+  }
+
+  <section class="patient-record" aria-label="Información del paciente seleccionado">
+    <div class="d-flex align-items-center justify-content-between gap-2 mb-2 flex-wrap">
+      <app-patient-identity
+        [identificador]="paciente().codigo_afiliado || paciente().numero_documento || ''"
+        [codigoAfiliado]="paciente().codigo_afiliado || null"
+        [codSitu]="paciente().cod_situ ?? null"
+        [nombre]="nombre_paciente()"
+        [parentesco]="paciente().parentesco || null"
+        [situacion]="paciente().situacion || null"
+      />
+      <div class="d-flex align-items-center gap-2 ms-auto">
+        @if (alergias().length > 0) {
+          <div
+            class="patient-allergy-alert patient-allergy-alert--danger mb-0"
+            role="alert"
+            [attr.title]="resumenAlergias()"
+          >
+            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+            <div>
+              <span>Alerta de alergia</span>
+              <strong>{{ resumenAlergias() }}</strong>
+            </div>
+          </div>
+        }
+        @if (es_derechohabiente(paciente().parentesco)) {
+          <app-button
+            text="Ver datos"
+            icon="fa-solid fa-address-book"
+            size="sm"
+            color="primary"
+            (clicked)="abrir_modal_datos_titular()"
+          />
+        }
+      </div>
+    </div>
+    <app-summary-card-group minWidth="9rem">
+      <app-summary-card
+        etiqueta="DNI"
+        [valor]="paciente().numero_documento || 'No registrado'"
+        icon="fa-regular fa-address-card"
+      />
+      @if (paciente().nsa) {
+        <app-summary-card
+          etiqueta="NSA"
+          [valor]="paciente().nsa!"
+          icon="fa-regular fa-address-card"
+        />
+      }
+      <app-summary-card
+        etiqueta="Sexo"
+        [valor]="paciente().sexo || 'No registrado'"
+        icon="fa-solid fa-venus-mars"
+      />
+      <app-summary-card
+        etiqueta="Edad"
+        [valor]="paciente().edad === null ? 'No registrada' : paciente().edad + ' años'"
+        icon="fa-regular fa-calendar"
+      />
+      @if (!es_derechohabiente(paciente().parentesco)) {
+        <app-summary-card
+          etiqueta="Situación"
+          [valor]="paciente().situacion || 'No registrada'"
+          icon="fa-solid fa-circle-check"
+          [color]="color_situacion(paciente().situacion)"
+          [iconColor]="color_situacion(paciente().situacion)"
+        />
+      }
+      <app-summary-card
+        etiqueta="Celular"
+        [valor]="contactPhone() || 'No registrado'"
+        icon="fa-solid fa-phone"
+        actionIcon="fa-solid fa-pen-to-square"
+        actionText="Actualizar"
+        actionColor="info"
+        actionAriaLabel="Actualizar celular"
+        (actionClicked)="abrir_modal_contacto('celular')"
+      />
+      <app-summary-card
+        class="patient-email-card"
+        etiqueta="Correo electrónico"
+        [valor]="contactEmail() || 'No registrado'"
+        icon="fa-regular fa-envelope"
+        actionIcon="fa-solid fa-pen-to-square"
+        actionText="Actualizar"
+        actionColor="info"
+        actionAriaLabel="Actualizar correo electrónico"
+        (actionClicked)="abrir_modal_contacto('correo_electronico')"
+      />
+    </app-summary-card-group>
+  </section>
+</app-card-general>
+
+<app-modal
+  #contacto_modal
+  [title]="contacto_titulo()"
+  [icon]="contacto_campo() === 'celular' ? 'fa-solid fa-phone' : 'fa-regular fa-envelope'"
+  size="md"
+  [keyboard]="false"
+  [ignoreBackdropClick]="true"
+  [showFooter]="true"
+  [showCloseButton]="!guardando_contacto()"
+  (closed)="limpiar_modal_contacto()"
+>
+  <app-input-text
+    size="sm"
+    [label]="contacto_campo() === 'celular' ? 'Teléfono' : 'Correo'"
+    [type]="contacto_campo() === 'celular' ? 'tel' : 'email'"
+    [formField]="contacto_form.valor"
+    [maxlength]="contacto_campo() === 'celular' ? 45 : 100"
+    [error]="error_contacto()"
+  />
+  <div modal-footer>
+    <app-button
+      action="save"
+      size="sm"
+      color="primary"
+      [loading]="guardando_contacto()"
+      (clicked)="guardar_contacto()"
+    />
+    <app-button
+      action="close"
+      size="sm"
+      [disabled]="guardando_contacto()"
+      (clicked)="contacto_modal.close()"
+    />
+  </div>
+</app-modal>
+
+<app-modal
+  #datos_titular_modal
+  title="Información del Afiliado"
+  icon="fa-solid fa-address-book"
+  size="lg"
+  [keyboard]="true"
+  [showFooter]="true"
+  [showCloseButton]="true"
+>
+  <div class="affiliate-modal-content">
+    <div class="card affiliate-detail-section mb-3">
+      <div class="card-body">
+        <h6 class="affiliate-section-title">
+          <i class="fa-solid fa-user-shield me-2"></i> Datos del Titular
+        </h6>
+        <div class="affiliate-detail-grid affiliate-detail-grid--holder">
+          <div>
+            <small>Titular</small>
+            <span class="fw-semibold text-uppercase">{{ nombre_titular_completo() }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card affiliate-detail-section">
+      <div class="card-body">
+        <h6 class="affiliate-section-title">
+          <i class="fa-solid fa-user me-2"></i> Datos del Paciente
+        </h6>
+        <div class="affiliate-detail-grid affiliate-detail-grid--patient">
+          <div>
+            <small>Nombre</small>
+            <span class="fw-semibold">{{ nombre_paciente() }}</span>
+          </div>
+          <div>
+            <small>Parentesco</small>
+            <span class="fw-semibold">{{ paciente().parentesco || 'No registrado' }}</span>
+          </div>
+          @if (paciente().codigo_afiliado) {
+            <div>
+              <small>Código Afiliado</small>
+              <span class="fw-semibold">{{ paciente().codigo_afiliado }}</span>
+            </div>
+          }
+          <div>
+            <small>DNI</small>
+            <span class="fw-semibold">{{ paciente().numero_documento || 'No registrado' }}</span>
+          </div>
+          <div>
+            <small>Sexo</small>
+            <span class="fw-semibold">{{ paciente().sexo || 'No registrado' }}</span>
+          </div>
+          <div>
+            <small>Edad</small>
+            <span class="fw-semibold">{{ paciente().edad === null ? 'No registrada' : paciente().edad + ' años' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div modal-footer>
+    <app-button
+      action="close"
+      size="sm"
+      color="primary"
+      (clicked)="datos_titular_modal.close()"
+    />
+  </div>
+</app-modal>

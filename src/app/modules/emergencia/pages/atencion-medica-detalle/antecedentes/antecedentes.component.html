@@ -1,0 +1,53 @@
+<app-modal #modal title="Antecedentes" icon="fa-solid fa-clipboard-list" size="xl" [scrollable]="true" (closed)="cerrar()">
+  <div class="antecedentes">
+    <ul class="nav nav-pills border-bottom border-2">
+      @for (pestana of pestanas; track pestana[0]) {
+        <li class="nav-item">
+          <button
+            type="button"
+            class="nav-link text-primary fw-semibold"
+            [class.active]="pestanaActiva() === pestana[0]"
+            (click)="seleccionarPestana(pestana[0])"
+          >
+            {{ pestana[1] }}
+          </button>
+        </li>
+      }
+    </ul>
+
+    <div class="antecedentes__contenido">
+      @if (modalAbierto()) {
+        @switch (pestanaActiva()) {
+          @case ('familiares') {
+            <app-antecedentes-familiares
+              [atencionId]="atencionId()"
+              [habilitado]="habilitado()"
+              (familiaresChange)="familiaresChange.emit($event)"
+            />
+          }
+          @case ('habitos') {
+            <app-antecedentes-habitos
+              [atencionId]="atencionId()"
+              [habilitado]="habilitado()"
+              (habitosChange)="habitosChange.emit($event)"
+            />
+          }
+          @case ('rep_sex') {
+            <app-antecedentes-rep-sex
+              [atencionId]="atencionId()"
+              [habilitado]="habilitado()"
+              (perfilChange)="repSexChange.emit($event)"
+            />
+          }
+          @case ('alergicos') {
+            <app-antecedentes-alergias
+              [atencionId]="atencionId()"
+              [habilitado]="habilitado()"
+              (alergiasChange)="alergiasChange.emit($event)"
+            />
+          }
+        }
+      }
+    </div>
+  </div>
+</app-modal>

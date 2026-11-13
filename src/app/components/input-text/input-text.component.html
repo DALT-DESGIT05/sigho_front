@@ -1,6 +1,6 @@
 <div [class]="'app-input-text app-input-text--' + color() + ' app-input-text--' + size() + ' ' + cssClass()">
   @if (showExternalLabel()) {
-    <app-label class="text-truncate" [texto]="visibleLabel()" [title]="label_title()" [forId]="id()" [required]="required()" [color]="color()" [size]="size() === 'xs' ? 'sm' : 'md'" (click)="on_label_click($event)"></app-label>
+    <app-label class="text-truncate" [texto]="visibleLabel()" [title]="label_title()" [forId]="id()" [required]="required() || requerido()" [color]="color()" [size]="size() === 'xs' ? 'sm' : 'md'" (click)="on_label_click($event)"></app-label>
   }
 
   <div [class.form-floating]="useFloatingLabel()">

@@ -1,0 +1,98 @@
+:host { display: contents; }
+.menu-flotante {
+  bottom: 0;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: var(--menu-flotante-width);
+  z-index: 1025;
+  transition: transform 220ms ease;
+}
+.menu-flotante__panel {
+  background: linear-gradient(180deg, #003d79 0%, #00589d 50%, #00447e 100%);
+  border-radius: 0;
+  box-shadow: 4px 0 18px rgba(0, 36, 79, .18);
+  color: var(--palette-white);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+.menu-flotante--cerrado { bottom: auto; width: fit-content; }
+.menu-flotante--sidebar-oculto {
+  pointer-events: none;
+  transform: translateX(-100%);
+}
+
+.sidebar-brand {
+  align-items: center;
+  background: rgba(0, 31, 72, .42);
+  border-bottom: 1px solid rgba(120, 130, 140, .13);
+  display: flex;
+  flex: 0 0 86px;
+  justify-content: space-between;
+  padding: 14px;
+}
+.sidebar-brand-link { align-items: center; color: #fff; display: flex; flex: 1; min-width: 0; text-decoration: none; }
+.sidebar-brand-link img { height: 58px; margin-right: 9px; object-fit: contain; width: 58px; }
+.sidebar-brand-copy { display: flex; flex-direction: column; min-width: 0; }
+.sidebar-brand-copy strong { color: #fff; font-size: 15px; letter-spacing: .2px; line-height: 1.25; white-space: nowrap; }
+.sidebar-brand-copy small { color: rgba(255,255,255,.74); font-size: 9px; line-height: 1.35; white-space: nowrap; }
+
+.menu-flotante__single-header {
+  background-color: rgba(0, 31, 72, .25);
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 16px;
+}
+.menu-flotante__single-title {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.menu-flotante__single-subtitle {
+  color: rgba(255, 255, 255, .78);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .3px;
+  text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-flotante__toggle, .menu-flotante__reopen { align-items: center; background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .25); color: var(--palette-white); cursor: pointer; display: inline-flex; justify-content: center; }
+.menu-flotante__toggle { border-radius: .45rem; flex: 0 0 2rem; height: 2rem; width: 2rem; }
+.menu-flotante__toggle:hover, .menu-flotante__reopen:hover { background: rgba(255, 255, 255, .22); }
+.menu-flotante__options {
+  background-color: transparent;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: .35rem;
+  margin: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 10px;
+}
+.menu-flotante__option { align-items: center; background: transparent; border: 1px solid transparent; border-radius: .55rem; color: var(--palette-white); cursor: pointer; display: flex; font-size: .84rem; gap: .7rem; min-height: 2.65rem; padding: .55rem .75rem; text-align: left; width: 100%; transition: all .15s ease; }
+.menu-flotante__option:hover:not(:disabled) { background: rgba(255, 255, 255, .1); color: #fff; transform: translateX(.18rem); }
+.menu-flotante__option:disabled { color: rgba(255, 255, 255, .45); cursor: not-allowed; }
+.menu-flotante__option-icon { flex: 0 0 1.25rem; font-size: 1rem; text-align: center; }
+.menu-flotante__option--destacada { background: rgba(15, 111, 184, .96); border-color: rgba(255, 255, 255, .3); box-shadow: 0 4px 12px rgba(0, 35, 75, .2); font-weight: 700; }
+.menu-flotante__option--advertencia { background: var(--palette-warning); color: var(--palette-primary-fap-950); font-weight: 700; }
+.menu-flotante__option--inferior { flex-shrink: 0; margin-top: auto; }
+.menu-flotante__reopen { border-radius: 0 .6rem .6rem 0; gap: .55rem; min-height: 2.8rem; padding: .55rem .8rem; }
+.menu-flotante__reopen-label { font-size: .72rem; font-weight: 700; max-width: 9rem; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+@media (max-width: 991.98px) {
+  .sidebar-brand { flex: 0 0 70px; padding: 6px 10px; }
+  .menu-flotante { width: min(var(--menu-flotante-width), calc(100vw - 1rem)); }
+  .menu-flotante--cerrado { width: fit-content; }
+}

@@ -1,1 +1,23 @@
-<p>input-filter works!</p>
+<div
+  class="app-input-filter"
+  [class]="'app-input-filter app-input-filter--' + size() +
+           ' app-input-filter--' + color()"
+  [class.app-input-filter--disabled]="disabled()">
+
+  <i
+    class="app-input-filter__icon"
+    [class]="icon()"
+    aria-hidden="true">
+  </i>
+
+  <input
+    class="app-input-filter__input"
+    type="search"
+    [value]="value()"
+    [placeholder]="placeholder()"
+    [disabled]="disabled()"
+    [attr.aria-label]="placeholder()"
+    (input)="onInput($event)"
+  />
+
+</div>

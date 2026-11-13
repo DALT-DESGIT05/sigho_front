@@ -20,6 +20,7 @@ export class CheckComponent implements ControlValueAccessor {
   readonly id = input(`check-${nextCheckId++}`);
   readonly color = input<PaletteColor>('primary');
   readonly size = input<ComponentSize>('md');
+  readonly label_position = input<'left' | 'right'>('right');
   readonly font_size = input<string | number | null>(null);
   readonly required = input(false);
   readonly ariaLabel = input('');

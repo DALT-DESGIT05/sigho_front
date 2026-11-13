@@ -20,3 +20,21 @@
 .app-check--md { font-size: var(--app-size-md-font-size, .875rem); }
 .app-check--md .form-check-input { height: 1rem; margin-top: .18rem; width: 1rem; }
 
+.app-check--label-left {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 0;
+  gap: 0.5rem;
+
+  .form-check-input {
+    float: none;
+    margin-left: 0;
+    margin-top: 0;
+  }
+
+  .form-check-label {
+    order: -1;
+    margin-bottom: 0;
+  }
+}
+

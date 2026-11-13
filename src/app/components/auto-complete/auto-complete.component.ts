@@ -35,7 +35,7 @@ export class AutoCompleteComponent<T extends object = any> implements ControlVal
   readonly displayWith = input<(option: T) => string>();
   readonly placeholder = input('Buscar...');
   readonly minLength = input(0);
-  readonly debounceTime = input(300);
+  readonly debounceTime = input(450);
   readonly emptyMessage = input('No se encontraron resultados.');
   readonly loadingMessage = input('Buscando...');
   readonly clearable = input(true);
@@ -71,14 +71,35 @@ export class AutoCompleteComponent<T extends object = any> implements ControlVal
 
   ngOnInit(): void {
     this.searchControl.valueChanges.pipe(
-      debounceTime(this.debounceTime()), distinctUntilChanged(),
+      debounceTime(this.debounceTime()),
+      distinctUntilChanged(),
       switchMap((term) => {
-        this.searchText.set(term); this.searchChange.emit(term); this.selectedOption.set(null); this.onChange(null); this.hasError.set(false);
-        if (term.trim().length < this.minLength()) { this.isLoading.set(false); return of([] as readonly T[]); }
+        const cleanTerm = term.trim();
+        this.searchText.set(cleanTerm);
+        this.searchChange.emit(cleanTerm);
+        this.selectedOption.set(null);
+        this.onChange(null);
+        this.hasError.set(false);
+
+        if (cleanTerm.length < this.minLength()) {
+          this.isLoading.set(false);
+          return of([] as readonly T[]);
+        }
+
         this.isLoading.set(true);
-        return this.dataSource()(term.trim()).pipe(catchError(() => { this.hasError.set(true); return of([] as readonly T[]); }), finalize(() => this.isLoading.set(false)));
-      }), takeUntilDestroyed(this.destroyRef),
-    ).subscribe((options) => { this.options.set(options); this.activeIndex.set(options.length ? 0 : -1); });
+        return this.dataSource()(cleanTerm).pipe(
+          catchError(() => {
+            this.hasError.set(true);
+            return of([] as readonly T[]);
+          }),
+          finalize(() => this.isLoading.set(false)),
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe((options) => {
+      this.options.set(options);
+      this.activeIndex.set(options.length ? 0 : -1);
+    });
   }
 
   writeValue(value: unknown): void {

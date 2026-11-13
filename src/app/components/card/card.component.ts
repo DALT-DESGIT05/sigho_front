@@ -14,6 +14,9 @@ export class CardComponent {
   readonly routerLink = input<string | null>(null);
   readonly useClick = input(false);
   readonly clickEvent = output<void>();
+  readonly variant = input<'default' | 'modalidad' | 'especialidad'>('default');
+  readonly mostrarSeleccionar = input(false);
+  readonly elevacion = input(false);
 
   onCardClick(): void {
     if (this.useClick()) this.clickEvent.emit();

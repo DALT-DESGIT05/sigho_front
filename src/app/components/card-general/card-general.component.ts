@@ -17,6 +17,6 @@ export class CardGeneralComponent {
   readonly headerClass = input('');
   readonly bodyClass = input('');
   readonly footerClass = input('');
-
+  readonly elevacion = input(false);
   readonly resolvedTitle = computed(() => this.titulo() || this.title());
 }

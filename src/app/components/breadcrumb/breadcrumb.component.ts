@@ -16,6 +16,8 @@ export interface BreadcrumbItem {
 
 export type BreadcrumbSeparator = '/' | '>' | '|' | '•' | string;
 
+export type BreadcrumbVariant = 'default' | 'resumen';
+
 @Component({
   selector: 'app-breadcrumb',
   standalone: true,
@@ -24,19 +26,24 @@ export type BreadcrumbSeparator = '/' | '>' | '|' | '•' | string;
   styleUrl: './breadcrumb.component.scss'
 })
 export class BreadcrumbComponent {
+
   readonly items = input<BreadcrumbItem[]>([]);
   readonly size = input<ComponentSize>('md');
-  /** Separador de texto. Se usa `/` si no se configura. */
+  readonly variant = input<BreadcrumbVariant>('default');
   readonly separator = input<BreadcrumbSeparator>('/');
-  /** Clase de icono para el separador, por ejemplo `fa-solid fa-chevron-right`. */
   readonly separatorIcon = input('');
   readonly ariaLabel = input('Migas de pan');
-
   itemColor(item: BreadcrumbItem): PaletteColor {
     return item.color ?? 'primary';
   }
 
   isActive(item: BreadcrumbItem, index: number): boolean {
+
+    if (this.variant() === 'resumen') {
+      return false;
+    }
+
     return item.active ?? index === this.items().length - 1;
   }
+
 }

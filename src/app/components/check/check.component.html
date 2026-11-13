@@ -1,4 +1,11 @@
-<div class="form-check app-check" [class]="'form-check app-check app-check--' + color() + ' app-check--' + size()" [style.font-size]="font_size_value()">
+<div
+  class="form-check app-check"
+  [class]="'form-check app-check app-check--' + color() + ' app-check--' + size()"
+  [class.app-check--label-left]="label_position() === 'left'"
+  [style.font-size]="font_size_value()">
+  @if (visibleLabel() && label_position() === 'left') {
+    <label class="form-check-label" [for]="id()" [style.font-size]="font_size_value()">{{ visibleLabel() }}</label>
+  }
   <input
     class="form-check-input"
     type="checkbox"
@@ -11,7 +18,7 @@
     [attr.aria-label]="ariaLabel() || visibleLabel() || null"
     (change)="handleChange($event)"
     (blur)="handleBlur()">
-  @if (visibleLabel()) {
+  @if (visibleLabel() && label_position() === 'right') {
     <label class="form-check-label" [for]="id()" [style.font-size]="font_size_value()">{{ visibleLabel() }}</label>
   }
 </div>

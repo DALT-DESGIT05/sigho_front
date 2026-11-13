@@ -23,10 +23,8 @@ export class FichaAfiliadoComponent {
 
   cod_afiliado = input.required<string>();
 
-  // Evento para avisar al componente padre que debe cerrar la ventana
   cerrar = output<void>();
 
-  // Estado interno del componente
   readonly ficha = signal<Ficha_afiliado | null>(null);
   readonly cargando = signal(false);
   readonly error = signal('');

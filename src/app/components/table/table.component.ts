@@ -28,7 +28,7 @@ export class TableComponent<T extends object = object> {
   /** Plantillas de celda por clave de columna. Permite renderizar cualquier contenido Angular. */
   readonly cellTemplates = input<Record<string, TemplateRef<TableCellContext<T>>>>({});
   readonly headerRows = input<TableHeaderCell[][]>([]);
-  readonly rows = input<T[]>([]);
+  readonly rows = input<readonly T[]>([]);
   readonly page = input<Paginado<T> | null>(null);
   readonly actions = input<TableRowAction<T>[]>([]);
   readonly loading = input(false);
@@ -61,6 +61,11 @@ export class TableComponent<T extends object = object> {
   constructor() { effect(() => this.selectedKeySet.set(new Set(this.selectedKeys().map(key => String(key))))); }
 
   readonly tableRows = computed(() => this.page()?.data ?? this.rows());
+
+  rowTrack(index: number, row: T): unknown {
+    const key = this.rowSelectionKey(row);
+    return key ? key : index;
+  }
 
   readonly resolvedColumns = computed<TableColumn<T>[]>(() => {
     if (this.columns().length > 0) {
@@ -243,7 +248,33 @@ progressWidth(column: TableColumn<T>, row: T): string | number {
   }
 
   rowSelectionKey(row: T): string {
-    return String(this.valueFor(row, this.selectionKey()) ?? '');
+    const specified = this.valueFor(row, this.selectionKey());
+    if (specified !== undefined && specified !== null && specified !== '') {
+      return String(specified);
+    }
+    const fallbackKeys = [
+      'atencion_id',
+      'id_aten',
+      'id',
+      'codigo_episodio',
+      'imagen_id',
+      'id_orden_imag',
+      'laboratorio_id',
+      'orden_id',
+      'id_orden_medica',
+      'diagnostico_id',
+      'id_diagnostico',
+      'personal_id',
+      'id_persona',
+    ];
+    const record = row as Record<string, unknown>;
+    for (const key of fallbackKeys) {
+      const val = record[key];
+      if (val !== undefined && val !== null && val !== '') {
+        return String(val);
+      }
+    }
+    return '';
   }
 
   isSelected(row: T): boolean {

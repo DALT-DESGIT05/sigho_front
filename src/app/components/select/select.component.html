@@ -1,5 +1,5 @@
 <div class="app-select" [class.is-open]="isOpen()" [class.is-disabled]="isDisabled()" [class.is-invalid]="hasError()" [class.has-floating-label]="useFloatingLabel()" [class.size-xs]="size() === 'xs'" [class.size-sm]="size() === 'sm'" [class.size-lg]="size() === 'lg'">
-  @if (showExternalLabel()) { <app-label class="text-truncate" [texto]="visibleLabel()" [title]="label_title()" [forId]="id()" [required]="required()" [color]="color()" [size]="size() === 'xs' ? 'sm' : 'md'" (click)="on_label_click($event)"></app-label> }
+  @if (showExternalLabel()) { <app-label class="text-truncate" [texto]="visibleLabel()" [title]="label_title()" [forId]="id()" [required]="required() || requerido()" [color]="color()" [size]="size() === 'xs' ? 'sm' : 'md'" (click)="on_label_click($event)"></app-label> }
   @if (useFloatingLabel()) { <label class="app-select__floating-label" [for]="id()">{{ visibleLabel() }}</label> }
   <button type="button" class="select-trigger" [id]="id() || null" [disabled]="isDisabled()" [attr.aria-expanded]="isOpen()" [attr.aria-label]="ariaLabel() || visibleLabel() || placeholder()" (click)="toggle()">
     @if (selectedOption(); as selected) {

@@ -8,6 +8,7 @@
 .app-patient-identity__label { color: var(--palette-secondary-700); display: block; font-size: .55rem; letter-spacing: .06em; line-height: 1.2; text-transform: uppercase; }
 .app-patient-identity__data { align-items: center; display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .2rem; min-width: 0; }
 .app-patient-identity__name { color: var(--palette-primary-fap-text); font-size: .75rem; font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.app-patient-identity__kinship { background: var(--palette-primary-10, #ebf5ff); border: 1px solid var(--palette-primary-200, #b6d4fe); border-radius: 999px; color: var(--palette-primary-fap-text); font-size: .6rem; font-weight: 700; letter-spacing: .03em; line-height: 1; padding: .3rem .5rem; text-transform: uppercase; white-space: nowrap; }
 .app-patient-identity__identifiers { align-items: center; display: inline-flex; flex: 0 0 auto; gap: .65rem; white-space: nowrap; }
 .app-patient-identity__history { border: 1px solid var(--palette-primary-200); border-radius: 999px; color: var(--palette-primary-fap-text); font-size: .65rem; line-height: 1; padding: .32rem .55rem; white-space: nowrap; }
 

@@ -1,0 +1,129 @@
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+// ==========================================
+// ESTILOS BASE
+// ==========================================
+
+.card-custom {
+  height: 100%;
+}
+
+// ==========================================
+// VARIANTE RESERVA DE CITAS
+// ==========================================
+
+.card-custom--reserva {
+  display: flex;
+  flex-direction: column;
+
+  min-height: 135px;
+  height: 100%;
+
+  border: 1px solid var(--palette-gray-200, #dce5ef);
+  border-radius: 12px;
+  background: var(--palette-white, #fff);
+
+  box-shadow: 0 2px 6px rgba(16, 24, 40, 0.04);
+
+  .card-body {
+    flex: 1 1 auto;
+    padding: .75rem;
+  }
+
+  .img-custom-ipress {
+    display: block;
+    width: 75px;
+    height: 75px;
+    max-width: 100%;
+    object-fit: contain;
+  }
+
+  .span-color {
+    color: var(--palette-primary-700, #275b99);
+    font-size: .8rem !important;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .card-custom__seleccionar {
+    margin-top: auto;
+    padding: .25rem 0 .4rem;
+
+    color: var(--palette-primary-600, #2878d0);
+    font-size: .7rem;
+    font-weight: 500;
+    text-align: center;
+  }
+}
+
+// ==========================================
+// TARJETA CLICKEABLE
+// ==========================================
+
+.card-custom--clickable {
+  cursor: pointer;
+}
+// ==========================================
+// EFECTO 3D + FONDO AZUL TENUE
+// ==========================================
+
+.card-custom.card-custom--elevacion {
+  position: relative;
+  top: 0;
+
+  background-color: var(--palette-white, #fff);
+  border: 1px solid var(--palette-gray-200, #dce5ef);
+
+  box-shadow: 0 3px 10px rgba(16, 24, 40, 0.08);
+
+  transition:
+    top 200ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+
+  &:hover {
+    top: -5px;
+
+    // Azul muy tenue de nuestra paleta
+    background-color: var(--palette-primary-50, #f4f9ff);
+
+    border-color: var(--palette-primary-200, #c9def5);
+
+    box-shadow: 0 12px 24px rgba(16, 24, 40, 0.14);
+  }
+}
+// ==========================================
+// RESPONSIVE
+// ==========================================
+
+@media (max-width: 767.98px) {
+  .card-custom--reserva {
+    .card-body {
+      padding: .75rem;
+    }
+
+    .img-custom-ipress {
+      width: 70px;
+      height: 70px;
+    }
+  }
+}
+
+// ==========================================
+// ACCESIBILIDAD
+// ==========================================
+
+@media (prefers-reduced-motion: reduce) {
+  .card-custom.card-custom--elevacion {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}

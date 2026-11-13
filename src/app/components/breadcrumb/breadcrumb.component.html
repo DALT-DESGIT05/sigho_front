@@ -1,37 +1,93 @@
 @if (items().length > 0) {
-  <nav class="app-breadcrumb" [class]="'app-breadcrumb app-breadcrumb--' + size()" [attr.aria-label]="ariaLabel()">
+  <nav
+    class="app-breadcrumb"
+    [class.app-breadcrumb--resumen]="variant() === 'resumen'"
+    [class]="'app-breadcrumb app-breadcrumb--' + size()"
+    [attr.aria-label]="ariaLabel()"
+  >
     <ol class="app-breadcrumb__list">
       @for (item of items(); track item.label + $index; let isLast = $last) {
         <li class="app-breadcrumb__entry">
-          @if (!isActive(item, $index)) {
+
+          @if (variant() === 'resumen') {
+
+            <span
+              class="app-breadcrumb__item"
+              [class]="'app-breadcrumb__item--' + itemColor(item)"
+              [title]="item.title || item.label"
+            >
+              @if (item.icon) {
+                <i [class]="item.icon" aria-hidden="true"></i>
+              }
+              <span>{{ item.label }}</span>
+            </span>
+
+          } @else if (!isActive(item, $index)) {
+
             @if (item.href) {
-              <a class="app-breadcrumb__item" [class]="'app-breadcrumb__item--' + itemColor(item)" [href]="item.href" [title]="item.title || item.label">
-                @if (item.icon) { <i [class]="item.icon" aria-hidden="true"></i> }
+              <a
+                class="app-breadcrumb__item"
+                [class]="'app-breadcrumb__item--' + itemColor(item)"
+                [href]="item.href"
+                [title]="item.title || item.label"
+              >
+                @if (item.icon) {
+                  <i [class]="item.icon" aria-hidden="true"></i>
+                }
                 <span>{{ item.label }}</span>
               </a>
             } @else if (item.link) {
-              <a class="app-breadcrumb__item" [class]="'app-breadcrumb__item--' + itemColor(item)" [routerLink]="item.link" [title]="item.title || item.label">
-                @if (item.icon) { <i [class]="item.icon" aria-hidden="true"></i> }
+              <a
+                class="app-breadcrumb__item"
+                [class]="'app-breadcrumb__item--' + itemColor(item)"
+                [routerLink]="item.link"
+                [title]="item.title || item.label"
+              >
+                @if (item.icon) {
+                  <i [class]="item.icon" aria-hidden="true"></i>
+                }
                 <span>{{ item.label }}</span>
               </a>
             } @else {
-              <span class="app-breadcrumb__item" [class]="'app-breadcrumb__item--' + itemColor(item)">
-                @if (item.icon) { <i [class]="item.icon" aria-hidden="true"></i> }
+              <span
+                class="app-breadcrumb__item"
+                [class]="'app-breadcrumb__item--' + itemColor(item)"
+              >
+                @if (item.icon) {
+                  <i [class]="item.icon" aria-hidden="true"></i>
+                }
                 <span>{{ item.label }}</span>
               </span>
             }
+
           } @else {
-            <span class="app-breadcrumb__item app-breadcrumb__item--current" [class]="'app-breadcrumb__item--' + itemColor(item)" aria-current="page" [title]="item.title || item.label">
-              @if (item.icon) { <i [class]="item.icon" aria-hidden="true"></i> }
+
+            <span
+              class="app-breadcrumb__item app-breadcrumb__item--current"
+              [class]="'app-breadcrumb__item--' + itemColor(item)"
+              aria-current="page"
+              [title]="item.title || item.label"
+            >
+              @if (item.icon) {
+                <i [class]="item.icon" aria-hidden="true"></i>
+              }
               <span>{{ item.label }}</span>
             </span>
+
           }
 
           @if (!isLast) {
             <span class="app-breadcrumb__separator" aria-hidden="true">
-              @if (separatorIcon()) { <i [class]="separatorIcon()"></i> } @else { {{ separator() }} }
+              @if (separatorIcon()) {
+                <i [class]="separatorIcon()"></i>
+              } @else if (variant() === 'resumen') {
+                <i class="fa-solid fa-chevron-right"></i>
+              } @else {
+                {{ separator() }}
+              }
             </span>
           }
+
         </li>
       }
     </ol>

@@ -10,3 +10,32 @@
 .app-card-general__footer { background-color: var(--palette-gray-50); border-top-color: var(--palette-gray-100); color: var(--palette-primary-fap-text); }
 .app-card-general__footer-content { align-items: center; display: flex; flex-wrap: wrap; justify-content: flex-end; width: 100%; }
 
+// ==========================================
+// EFECTO 3D OPCIONAL
+// ==========================================
+
+:host .app-card-general.app-card-general--elevacion {
+  position: relative;
+  transform: translateY(0);
+
+  transition:
+    transform 250ms ease,
+    box-shadow 250ms ease;
+}
+
+:host .app-card-general.app-card-general--elevacion:hover {
+  transform: translateY(-8px) !important;
+
+  box-shadow:
+    0 0.75rem 1.5rem rgba(16, 24, 40, 0.18);
+}
+
+// ==========================================
+// ACCESIBILIDAD
+// ==========================================
+
+@media (prefers-reduced-motion: reduce) {
+  :host .app-card-general.app-card-general--elevacion {
+    transition: none;
+  }
+}

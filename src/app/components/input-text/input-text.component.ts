@@ -26,6 +26,7 @@ export class InputTextComponent implements ControlValueAccessor {
   readonly allowNegative = input(true);
   readonly autocomplete = input('off');
   readonly required = input(false);
+  readonly requerido = input(false);
   readonly readonly = input(false);
   readonly invalid = input(false);
   readonly cssClass = input('');

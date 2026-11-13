@@ -1,0 +1,19 @@
+<nav class="app-stepper" [attr.aria-label]="ariaLabel()">
+  @for (step of steps(); track $index) {
+    <div
+      class="app-stepper__step"
+      [class.app-stepper__step--active]="currentStep() === $index + 1"
+      [class.app-stepper__step--completed]="currentStep() > $index + 1"
+      [attr.aria-current]="currentStep() === $index + 1 ? 'step' : null">
+      <span class="app-stepper__number">{{ $index + 1 }}</span>
+      <span>{{ step.label }}</span>
+    </div>
+
+    @if (!$last) {
+      <span
+        class="app-stepper__connector"
+        [class.app-stepper__connector--done]="currentStep() > $index + 1"
+        aria-hidden="true"></span>
+    }
+  }
+</nav>

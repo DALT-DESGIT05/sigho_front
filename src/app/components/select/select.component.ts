@@ -11,7 +11,7 @@ export interface SelectChangeEvent { value: SelectValue; option: SelectOption | 
 @Component({ selector: 'app-select', imports: [CommonModule, LabelComponent], templateUrl: './select.component.html', styleUrl: './select.component.scss', providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SelectComponent), multi: true }], host: { '(document:click)': 'closeWhenClickingOutside($event.target)' } })
 export class SelectComponent implements ControlValueAccessor {
   readonly label = input(''); readonly title = input(''); readonly nombre = input(''); readonly helpText = input(''); readonly error = input(''); readonly id = input('');
-  readonly required = input(false); readonly invalid = input(false); readonly ariaLabel = input(''); readonly color = input<PaletteColor>('primary');
+  readonly required = input(false); readonly requerido = input(false); readonly invalid = input(false); readonly ariaLabel = input(''); readonly color = input<PaletteColor>('primary');
   /** Muestra el label externo. */ readonly showLabel = input(true);
   /** Muestra el label dentro del selector. */ readonly showFloatingLabel = input(false);
   /** Atajo: en xs oculta el label externo y muestra el flotante. */ readonly responsiveFloatingLabel = input(false);

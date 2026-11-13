@@ -1,0 +1,153 @@
+<app-modal
+  #modalReceta
+  [title]="modo_edicion() ? 'Editar prescripción médica' : 'Nueva prescripción médica'"
+  [icon]="modo_edicion() ? 'fa-solid fa-pen-to-square' : 'fa-solid fa-pills'"
+  size="md"
+  [centered]="true"
+  [scrollable]="true"
+  [keyboard]="false"
+  [ignoreBackdropClick]="true"
+  [showFooter]="false"
+  (closed)="limpiar_formulario()">
+
+  <div class="receta-formulario">
+    <fieldset class="receta-fieldset">
+      <legend>SELECCIÓN DEL MEDICAMENTO</legend>
+      <div class="receta-contenido">
+        <app-auto-complete
+          label="Medicamento"
+          placeholder="Buscar medicamento por nombre..."
+          [dataSource]="buscar_medicamentos"
+          valueKey="codigo_medicamento"
+          labelKey="nombre_medicamento"
+          [minLength]="3"
+          [debounceTime]="500"
+          [required]="true"
+          [(ngModel)]="codigo_medicamento"
+          (optionSelected)="seleccionar_medicamento($event)">
+        </app-auto-complete>
+      </div>
+    </fieldset>
+
+    <fieldset class="receta-fieldset">
+      <legend>POSOLOGÍA Y ADMINISTRACIÓN</legend>
+      <div class="row g-2">
+        <div class="col-12 col-md-6">
+          <app-select
+            label="Frecuencia"
+            placeholder="Seleccione frecuencia"
+            [apiItems]="data_frecuencia()"
+            valueField="codigo"
+            labelField="nombre"
+            size="sm"
+            [required]="true"
+            [(ngModel)]="codigo_frecuencia">
+          </app-select>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <app-input-text
+            label="Duración (días)"
+            type="number"
+            placeholder="Ingrese días"
+            size="sm"
+            [allowNegative]="false"
+            [required]="true"
+            [(ngModel)]="duracion">
+          </app-input-text>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <app-select
+            label="Dosis"
+            placeholder="Seleccione dosis"
+            [apiItems]="data_dosis()"
+            valueField="codigo"
+            labelField="nombre"
+            size="sm"
+            [required]="true"
+            [(ngModel)]="codigo_dosis">
+          </app-select>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <app-input-text
+            label="Cantidad"
+            type="number"
+            placeholder="Ingrese cantidad"
+            size="sm"
+            [allowNegative]="false"
+            [required]="true"
+            [(ngModel)]="cantidad">
+          </app-input-text>
+        </div>
+
+        <div class="col-12">
+          <app-select
+            label="Vía de administración"
+            placeholder="Seleccione vía"
+            [apiItems]="data_via_administracion()"
+            valueField="codigo"
+            labelField="nombre"
+            size="sm"
+            [required]="true"
+            [(ngModel)]="codigo_via_administracion">
+          </app-select>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="receta-fieldset">
+      <legend>INDICACIONES Y DIAGNÓSTICO</legend>
+      <div class="row g-2">
+        <div class="col-12">
+          <app-select
+            label="Diagnóstico"
+            placeholder="Seleccione diagnóstico"
+            [apiItems]="diagnosticos_opciones()"
+            valueField="codigo"
+            labelField="nombre"
+            size="sm"
+            [required]="true"
+            [(ngModel)]="codigo_diagnostico">
+          </app-select>
+        </div>
+
+        <div class="col-12">
+          <app-text-area
+            label="Indicaciones"
+            placeholder="Ingrese las indicaciones del medicamento..."
+            size="sm"
+            [rows]="3"
+            [maxlength]="1000"
+            resize="vertical"
+            [required]="true"
+            [(ngModel)]="indicacion">
+          </app-text-area>
+        </div>
+      </div>
+    </fieldset>
+
+    <div modal-footer class="d-flex justify-content-between align-items-center w-100 mt-3">
+      <app-button
+        color="danger"
+        size="sm"
+        icon="fa-solid fa-xmark"
+        texto="Cancelar"
+        [disabled]="guardando()"
+        (clicked)="cerrar()">
+      </app-button>
+
+      <app-button
+        class="ms-auto"
+        color="primary"
+        size="sm"
+        icon="fa-solid fa-floppy-disk"
+        [texto]="guardando() ? 'Guardando...' : (modo_edicion() ? 'Actualizar medicamento' : 'Guardar medicamento')"
+        [loading]="guardando()"
+        [disabled]="!formulario_valido() || cargando_edicion()"
+        (clicked)="guardar_medicamento()">
+      </app-button>
+    </div>
+  </div>
+</app-modal>

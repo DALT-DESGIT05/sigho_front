@@ -1,0 +1,142 @@
+<div class="tab-pane-content">
+  <div class="clinical-list-header prescription-header">
+    <div class="clinical-title-actions">
+      <h3 class="clinical-list-title">Receta médica</h3>
+      @if (codigo_farmacia() && !existe_receta_imprimir()) {
+        <button
+          type="button"
+          class="clinical-add-button"
+          (click)="abrir_nueva_receta()"
+          title="Agregar medicamento"
+          [disabled]="!detalle().fecha_hora_llamada_med"
+        >
+          <i class="fas fa-plus"></i>
+        </button>
+        <button
+          type="button"
+          class="prescription-history-button"
+          (click)="abrir_modal_historial_recetas()"
+          title="Historial de recetas"
+        >
+          <i class="fas fa-clock-rotate-left"></i>
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="row prescription-toolbar align-items-end">
+    <div class="col-12 col-md-6 col-lg-4 mt-2 mb-2">
+      <app-select
+        label="Farmacia"
+        placeholder="-- Seleccione --"
+        [options]="farmaciasOptions()"
+        [showEmptyOption]="true"
+        emptyOptionLabel="-- Seleccione --"
+        size="sm"
+        [selectedValue]="codigo_farmacia()"
+        (selectedValueChange)="actualizar_farmacia_valor($event)"
+      />
+    </div>
+    <div class="col-12 col-md-6 col-lg-6 mt-2 mb-2">
+      @if (existe_receta_imprimir()) {
+        <div class="d-flex gap-2">
+          <app-button
+            action="print"
+            texto="Imprimir Receta"
+            size="sm"
+            [disabled]="imprimiendo_receta()"
+            (clicked)="imprimir_receta_medica()"
+          />
+          <app-button
+            action="edit"
+            color="warning"
+            texto="Habilitar edición"
+            size="sm"
+            [disabled]="imprimiendo_receta()"
+            (clicked)="habilitar_edicion_receta()"
+          />
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="row prescription-indications">
+    <div class="col-12 mt-1 mb-1">
+      <app-text-area
+        label="Indicaciones Generales"
+        [rows]="3"
+        [maxlength]="1000"
+        [disabled]="existe_receta_imprimir() || !codigo_farmacia()"
+        [value]="indicaciones_generales()"
+        (valueChange)="actualizar_indicaciones_generales($event)"
+        (blur)="guardar_indicacion_general()"
+      />
+    </div>
+  </div>
+
+  <div class="row prescription-table-section mt-2">
+    <div class="col-12">
+      <app-table
+        size="sm"
+        [scrollHeight]="null"
+        [columns]="columnasReceta"
+        [cellTemplates]="plantillasCelda()"
+        [rows]="data_receta()"
+        [loading]="cargando_receta()"
+        emptyMessage="No se han agregado medicamentos a la receta."
+      />
+    </div>
+  </div>
+
+  <ng-template #accionesTpl let-fila>
+    <div class="d-flex justify-content-center gap-2">
+      @if (!existe_receta_imprimir()) {
+        <app-button
+          action="edit"
+          size="sm"
+          [soloIcono]="true"
+          title="Editar medicamento"
+          (clicked)="abrir_edicion_receta(+fila.idtemrec, $event)"
+        />
+        <app-button
+          action="delete"
+          size="sm"
+          [soloIcono]="true"
+          title="Eliminar medicamento"
+          (clicked)="eliminar_medicamento_receta(+fila.idtemrec, $event)"
+        />
+      }
+    </div>
+  </ng-template>
+
+  <div class="row mt-3 mb-4 prescription-actions">
+    <div class="col-12">
+      @if (data_receta().length > 0 && !existe_receta_imprimir()) {
+        <app-button
+          action="save"
+          color="primary"
+          texto="Generar receta"
+          [disabled]="generando_receta()"
+          (clicked)="generar_receta()"
+        />
+      }
+    </div>
+  </div>
+
+  <app-formulario-receta-medicamento
+    #formularioReceta
+    [atencion_id]="detalle().atencion_id"
+    [codigo_farmacia]="codigo_farmacia()"
+    [diagnosticos]="diagnosticos()"
+    (recetaGuardada)="listar_receta()"
+  />
+
+  @if (codigo_farmacia()) {
+    <app-historial-recetas-modal
+      #modalHistorialRecetas
+      [atencion_id]="detalle().atencion_id"
+      [codigo_farmacia]="+codigo_farmacia()"
+      (recetaImportada)="listar_receta()"
+    />
+  }
+</div>

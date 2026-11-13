@@ -1,0 +1,58 @@
+<app-modal
+  #modalHistorial
+  title="Historial de Recetas"
+  icon="fa-solid fa-clock-rotate-left"
+  size="lg"
+  [centered]="true"
+  [scrollable]="true"
+  [keyboard]="false"
+  [ignoreBackdropClick]="true"
+  [showFooter]="false"
+  (closed)="cerrar()">
+
+  <div class="historial-recetas-body">
+    <div class="row g-2 mb-3">
+      <div class="col-12 col-md-6">
+        <app-select
+          label="Recetas previas (Fecha)"
+          placeholder="-- Seleccione receta --"
+          [options]="recetasOptions()"
+          [showEmptyOption]="true"
+          emptyOptionLabel="-- Seleccione receta --"
+          size="sm"
+          (selectedValueChange)="seleccionar_receta_valor($event)"
+        />
+      </div>
+    </div>
+
+    <app-table
+      size="sm"
+      scrollHeight="320px"
+      [columns]="columnasDetalle"
+      [rows]="data_historial_receta_detalle()"
+      [loading]="cargando()"
+      emptyMessage="Seleccione una receta previa para visualizar sus medicamentos."
+    />
+
+    <div modal-footer class="d-flex justify-content-between align-items-center w-100 mt-3">
+      <app-button
+        color="danger"
+        size="sm"
+        icon="fa-solid fa-xmark"
+        texto="Cerrar"
+        (clicked)="cerrar()">
+      </app-button>
+
+      <app-button
+        class="ms-auto"
+        color="primary"
+        size="sm"
+        icon="fa-solid fa-file-import"
+        texto="Importar receta"
+        [loading]="cargando()"
+        [disabled]="codigo_receta_seleccionada === 0 || cargando()"
+        (clicked)="importar_receta()">
+      </app-button>
+    </div>
+  </div>
+</app-modal>

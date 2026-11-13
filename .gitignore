@@ -47,3 +47,7 @@ Thumbs.db
 src/environments/environments.ts
 # Local npm cache (configured in .npmrc)
 .npm-cache/
+
+# Docker development files
+Dockerfile
+compose.yaml

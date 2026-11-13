@@ -1,0 +1,150 @@
+<div class="tab-pane-content examen-medico">
+  <div class="evaluation-type-selector d-flex align-items-center gap-3 flex-wrap">
+    <strong>Tipo de evaluación:</strong>
+    <app-radio
+      name="tipoExamenRegional"
+      label="Estructurado"
+      size="sm"
+      [checked]="formulario().tipo_reg_evaluac === 1"
+      [disabled]="!detalle().fecha_hora_llamada_med || evaluacion_registrada()"
+      (checkedChange)="seleccionar_tipo_regional(1)"
+    />
+    <app-radio
+      name="tipoExamenRegional"
+      label="Texto"
+      size="sm"
+      [checked]="formulario().tipo_reg_evaluac === 2"
+      [disabled]="!detalle().fecha_hora_llamada_med || evaluacion_registrada()"
+      (checkedChange)="seleccionar_tipo_regional(2)"
+    />
+  </div>
+
+  <fieldset class="clinical-section-card">
+    <legend>Examen clínico <span class="required-mark">*</span></legend>
+    <app-text-area
+      [required]="true"
+      [invalid]="campo_invalido('signos_y_sintomas')"
+      [error]="campo_invalido('signos_y_sintomas') ? 'Ingrese el examen clínico.' : ''"
+      [rows]="3"
+      [maxlength]="200"
+      [value]="formulario().signos_y_sintomas"
+      [disabled]="!detalle().fecha_hora_llamada_med"
+      [showLabel]="false"
+      (valueChange)="actualizar_valor_campo('signos_y_sintomas', $event)"
+    />
+  </fieldset>
+  @if (formulario().tipo_reg_evaluac === 1) {
+    <fieldset class="clinical-section-card clinical-section-card--regional">
+      <legend>Examen regional</legend>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered table-hover align-middle">
+          <thead>
+            <tr class="table-light">
+              <th>EXAMEN</th>
+              <th class="text-center toggle-all-header" (click)="alternar_todos_regional('CONSERVADO')">
+                CONSERVADO
+              </th>
+              <th class="text-center toggle-all-header" (click)="alternar_todos_regional('PATOLOGICO')">
+                PATOLÓGICO
+              </th>
+              <th class="text-center toggle-all-header" (click)="alternar_todos_regional('NO_EVALUADO')">
+                NO EVALUADO
+              </th>
+              <th>OBSERVACIONES</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (cargando_examenes_regionales()) {
+              <tr>
+                <td colspan="5" class="text-center text-muted">
+                  Consultando examen regional...
+                </td>
+              </tr>
+            } @else {
+              @for (examen of examenes_regionales(); track examen.examen_id) {
+                <tr [class.regional-row--invalid]="clasificacion_regional_invalida(examen)">
+                  <td>{{ examen.nombre }}</td>
+                  <td class="text-center">
+                    <app-check-toggle
+                      color="success"
+                      size="sm"
+                      [showInactiveColor]="false"
+                      [checked]="examen.estado_tipo === 'CONSERVADO'"
+                      [disabled]="!detalle().fecha_hora_llamada_med"
+                      (change)="seleccionar_estado_regional(examen, 'CONSERVADO', $event)"
+                    />
+                  </td>
+                  <td class="text-center">
+                    <app-check-toggle
+                      color="danger"
+                      size="sm"
+                      [showInactiveColor]="false"
+                      [checked]="examen.estado_tipo === 'PATOLOGICO'"
+                      [disabled]="!detalle().fecha_hora_llamada_med"
+                      (change)="seleccionar_estado_regional(examen, 'PATOLOGICO', $event)"
+                    />
+                  </td>
+                  <td class="text-center">
+                    <app-check-toggle
+                      color="secondary"
+                      size="sm"
+                      [showInactiveColor]="false"
+                      [checked]="examen.estado_tipo === 'NO_EVALUADO'"
+                      [disabled]="!detalle().fecha_hora_llamada_med"
+                      (change)="seleccionar_estado_regional(examen, 'NO_EVALUADO', $event)"
+                    />
+                  </td>
+                  <td>
+                    <input
+                      class="form-control"
+                      [class.is-invalid]="observacion_regional_invalida(examen)"
+                      maxlength="200"
+                      [value]="examen.observacion ?? ''"
+                      [disabled]="
+                        !detalle().fecha_hora_llamada_med ||
+                        !examen.estado_tipo ||
+                        examen.estado_tipo === 'NO_EVALUADO'
+                      "
+                      (input)="actualizar_observacion_regional(examen, $event)"
+                    />
+                    @if (clasificacion_regional_invalida(examen)) {
+                      <div class="regional-field-error">Seleccione una clasificación.</div>
+                    } @else if (observacion_regional_invalida(examen)) {
+                      <div class="invalid-feedback">
+                        Ingrese la observación clínica.
+                      </div>
+                    }
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </fieldset>
+  } @else {
+    <fieldset class="clinical-section-card">
+      <legend>Examen regional <span class="required-mark">*</span></legend>
+      <app-text-area
+        [required]="true"
+        [invalid]="campo_invalido('examen_regional')"
+        [error]="campo_invalido('examen_regional') ? 'Describa el examen físico regional.' : ''"
+        [rows]="5"
+        [maxlength]="200"
+        [value]="formulario().examen_regional"
+        [disabled]="!detalle().fecha_hora_llamada_med"
+        [showLabel]="false"
+        (valueChange)="actualizar_valor_campo('examen_regional', $event)"
+      />
+    </fieldset>
+  }
+  <div class="legacy-actions">
+    <app-button
+      text="Guardar"
+      action="save"
+      [loading]="guardando()"
+      [disabled]="!detalle().fecha_hora_llamada_med || guardando()"
+      (clicked)="solicitarGuardado.emit($event)"
+    />
+  </div>
+</div>

@@ -1,0 +1,134 @@
+<div class="tab-pane-content motivo-consulta">
+  <div class="row">
+    <div class="col-12 table-responsive">
+      <table class="table table-sm table-bordered table-hover align-middle">
+        <thead>
+          <tr class="table-light">
+            <th>FUNCIONES BIOLÓGICAS</th>
+            <th class="text-center toggle-all-header" (click)="alternar_todos_funcion('CONSER')">
+              CONSERVADO
+            </th>
+            <th class="text-center toggle-all-header" (click)="alternar_todos_funcion('AUMEN')">
+              AUMENTADO
+            </th>
+            <th class="text-center toggle-all-header" (click)="alternar_todos_funcion('DISMIN')">
+              DISMINUIDO
+            </th>
+            <th>OBSERVACIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (cargando_funciones_biologicas()) {
+            <tr>
+              <td colspan="5" class="text-center text-muted">
+                Consultando funciones biológicas...
+              </td>
+            </tr>
+          } @else {
+            @for (funcion of funciones_biologicas(); track funcion.funcion_id) {
+              <tr>
+                <td>{{ funcion.nombre }}</td>
+                <td class="text-center">
+                  <app-check-toggle
+                    color="success"
+                    size="sm"
+                    [showInactiveColor]="false"
+                    [checked]="funcion.estado_codigo === 'CONSER'"
+                    [disabled]="!detalle().fecha_hora_llamada_med"
+                    (change)="seleccionar_estado(funcion, 'CONSER', $event)"
+                  />
+                </td>
+                <td class="text-center">
+                  <app-check-toggle
+                    color="warning"
+                    size="sm"
+                    [showInactiveColor]="false"
+                    [checked]="funcion.estado_codigo === 'AUMEN'"
+                    [disabled]="!detalle().fecha_hora_llamada_med"
+                    (change)="seleccionar_estado(funcion, 'AUMEN', $event)"
+                  />
+                </td>
+                <td class="text-center">
+                  <app-check-toggle
+                    color="danger"
+                    size="sm"
+                    [showInactiveColor]="false"
+                    [checked]="funcion.estado_codigo === 'DISMIN'"
+                    [disabled]="!detalle().fecha_hora_llamada_med"
+                    (change)="seleccionar_estado(funcion, 'DISMIN', $event)"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    class="form-control"
+                    maxlength="200"
+                    [value]="funcion.observacion ?? ''"
+                    [disabled]="
+                      !detalle().fecha_hora_llamada_med ||
+                      !funcion.estado_codigo ||
+                      funcion.estado_codigo === 'CONSER'
+                    "
+                    (input)="actualizar_observacion(funcion, $event)"
+                  />
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="row mt-4 legacy-field-row">
+    <div class="col-12 col-lg-8">
+      <app-input-text
+        label="Tiempo Enfermedad"
+        [requerido]="true"
+        [invalid]="campo_invalido('tiempo_enfermedad')"
+        [error]="campo_invalido('tiempo_enfermedad') ? 'Ingrese el tiempo de enfermedad o desde el evento.' : ''"
+        [value]="formulario().tiempo_enfermedad"
+        [disabled]="!detalle().fecha_hora_llamada_med"
+        (valueChange)="actualizar_valor_campo('tiempo_enfermedad', $event)"
+      />
+    </div>
+  </div>
+  <div class="row mt-3 legacy-field-row">
+    <div class="col-12">
+      <app-text-area
+        label="Motivo de la Consulta"
+        [required]="true"
+        [invalid]="campo_invalido('motivo_consulta')"
+        [error]="campo_invalido('motivo_consulta') ? 'Ingrese el motivo de consulta.' : ''"
+        [rows]="2"
+        [maxlength]="200"
+        [value]="formulario().motivo_consulta"
+        [disabled]="!detalle().fecha_hora_llamada_med"
+        (valueChange)="actualizar_valor_campo('motivo_consulta', $event)"
+      />
+    </div>
+  </div>
+  <div class="row mt-3 legacy-field-row">
+    <div class="col-12">
+      <app-text-area
+        label="Síntomas principales"
+        [required]="true"
+        [invalid]="campo_invalido('anamnesis')"
+        [error]="campo_invalido('anamnesis') ? 'Ingrese los síntomas principales o la enfermedad actual.' : ''"
+        [rows]="4"
+        [maxlength]="500"
+        [value]="formulario().anamnesis"
+        [disabled]="!detalle().fecha_hora_llamada_med"
+        (valueChange)="actualizar_valor_campo('anamnesis', $event)"
+      />
+    </div>
+  </div>
+  <div class="legacy-actions">
+    <app-button
+      text="Guardar"
+      action="save"
+      [loading]="guardando()"
+      [disabled]="!detalle().fecha_hora_llamada_med || guardando()"
+      (clicked)="solicitarGuardado.emit($event)"
+    />
+  </div>
+</div>

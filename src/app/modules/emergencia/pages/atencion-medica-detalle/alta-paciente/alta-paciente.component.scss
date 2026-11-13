@@ -1,0 +1,248 @@
+:host {
+  display: block;
+}
+
+.alta-paciente {
+  color: var(--palette-gray-text);
+  display: grid;
+  gap: 1rem;
+}
+
+.alta-paciente__encabezado,
+.alta-paciente__seccion {
+  background: var(--palette-white);
+  border: 1px solid var(--palette-primary-fap-100);
+  border-radius: 0.7rem;
+}
+
+.alta-paciente__encabezado {
+  overflow: hidden;
+}
+
+.alta-paciente__titulo {
+  align-items: center;
+  background: var(--palette-primary-fap);
+  color: var(--palette-white);
+  display: flex;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+}
+
+.alta-paciente__titulo h2 {
+  font-size: 1.05rem;
+  margin: 0.1rem 0 0;
+}
+
+.alta-paciente__eyebrow {
+  color: var(--palette-primary-fap-100);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.alta-paciente__estado {
+  background: var(--palette-white);
+  border-radius: 999px;
+  color: var(--palette-primary-fap);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.3rem 0.65rem;
+}
+
+.alta-paciente__resumen {
+  display: grid;
+  grid-template-columns: 1.35fr repeat(3, minmax(0, 1fr));
+}
+
+.alta-paciente__paciente,
+.alta-paciente__dato {
+  min-width: 0;
+  padding: 0.85rem 1rem;
+}
+
+.alta-paciente__paciente {
+  align-items: center;
+  border-right: 1px solid var(--palette-primary-fap-100);
+  display: flex;
+  gap: 0.8rem;
+}
+
+.alta-paciente__avatar {
+  align-items: center;
+  background: var(--palette-primary-fap-50);
+  border: 1px solid var(--palette-primary-fap-100);
+  border-radius: 50%;
+  color: var(--palette-primary-fap);
+  display: flex;
+  flex: 0 0 3.2rem;
+  font-size: 1.25rem;
+  height: 3.2rem;
+  justify-content: center;
+}
+
+.alta-paciente__paciente > div:last-child,
+.alta-paciente__dato {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.alta-paciente__paciente strong,
+.alta-paciente__dato strong {
+  color: var(--palette-gray-900);
+  font-size: 0.82rem;
+}
+
+.alta-paciente__paciente span:not(.alta-paciente__dato-label),
+.alta-paciente__dato span:not(.alta-paciente__dato-label) {
+  color: var(--palette-gray-600);
+  font-size: 0.72rem;
+}
+
+.alta-paciente__dato {
+  border-right: 1px solid var(--palette-primary-fap-100);
+}
+
+.alta-paciente__dato:last-child {
+  border-right: 0;
+}
+
+.alta-paciente__dato-label,
+.alta-paciente__control-label {
+  color: var(--palette-primary-fap-text);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.alta-paciente__dato-label i {
+  margin-right: 0.3rem;
+}
+
+.alta-paciente__seccion {
+  margin: 0;
+  padding: 1.25rem 1rem 1rem;
+}
+
+.alta-paciente__seccion > legend {
+  background: var(--palette-white);
+  color: var(--palette-primary-fap);
+  float: none;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: -1.8rem 0 0.85rem;
+  padding: 0 0.45rem;
+  text-transform: uppercase;
+  width: auto;
+}
+
+.alta-paciente__grid {
+  display: grid;
+  gap: 0.85rem 1rem;
+}
+
+.alta-paciente__grid--egreso {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.alta-paciente__medico {
+  grid-column: span 2;
+}
+
+.alta-paciente__actividad {
+  align-self: end;
+  display: grid;
+  gap: 0.45rem;
+  min-height: 3.5rem;
+}
+
+.alta-paciente__radios {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  min-height: 2rem;
+}
+
+.alta-paciente__grid--diagnosticos {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 1rem;
+}
+
+.alta-paciente__grid--textos {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.alta-paciente__acciones {
+  align-items: center;
+  background: var(--palette-gray-50);
+  border: 1px solid var(--palette-gray-200);
+  border-radius: 0.6rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.7rem 0.85rem;
+}
+
+.alta-paciente__acciones > span {
+  color: var(--palette-gray-600);
+  font-size: 0.75rem;
+}
+
+.alta-paciente__acciones > span i {
+  color: var(--palette-primary-fap);
+  margin-right: 0.3rem;
+}
+
+.alta-paciente__acciones > div {
+  display: flex;
+  gap: 0.5rem;
+}
+
+@media (max-width: 1199.98px) {
+  .alta-paciente__resumen,
+  .alta-paciente__grid--egreso {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .alta-paciente__paciente,
+  .alta-paciente__dato:nth-child(2) {
+    border-bottom: 1px solid var(--palette-primary-fap-100);
+  }
+
+  .alta-paciente__dato:nth-child(2) {
+    border-right: 0;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .alta-paciente__resumen,
+  .alta-paciente__grid--egreso,
+  .alta-paciente__grid--diagnosticos,
+  .alta-paciente__grid--textos {
+    grid-template-columns: 1fr;
+  }
+
+  .alta-paciente__paciente,
+  .alta-paciente__dato {
+    border-bottom: 1px solid var(--palette-primary-fap-100);
+    border-right: 0;
+  }
+
+  .alta-paciente__dato:last-child {
+    border-bottom: 0;
+  }
+
+  .alta-paciente__medico {
+    grid-column: auto;
+  }
+
+  .alta-paciente__acciones {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .alta-paciente__acciones > div {
+    justify-content: flex-end;
+  }
+}

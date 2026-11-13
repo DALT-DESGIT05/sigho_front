@@ -1,0 +1,116 @@
+<section class="allergy-history">
+    <form class="allergy-form" (submit)="$event.preventDefault(); guardar()">
+      <h4>Registrar alergia</h4>
+
+      <div class="allergy-form__grid">
+        <app-select
+          label="Tipo de alérgeno"
+          size="sm"
+          [required]="true"
+          [apiItems]="contexto().tipos"
+          valueField="tipo_id"
+          labelField="nombre"
+          [selectedValue]="formulario().tipo_id"
+          (selectedValueChange)="actualizarSeleccion('tipo_id', $event)"
+        />
+
+        <app-select
+          label="Sustancia"
+          size="sm"
+          [required]="true"
+          [disabled]="formulario().tipo_id === null"
+          [apiItems]="sustanciasFiltradas()"
+          valueField="sustancia_id"
+          labelField="nombre"
+          [selectedValue]="formulario().sustancia_id"
+          (selectedValueChange)="actualizarSeleccion('sustancia_id', $event)"
+        />
+
+        <app-select
+          label="Gravedad"
+          size="sm"
+          [required]="true"
+          [apiItems]="contexto().gravedades"
+          valueField="gravedad_id"
+          labelField="nombre"
+          [selectedValue]="formulario().gravedad_id"
+          (selectedValueChange)="actualizarSeleccion('gravedad_id', $event)"
+        />
+
+        <app-select
+          label="Vía de exposición"
+          size="sm"
+          [disabled]="contexto().vias.length === 0"
+          [apiItems]="contexto().vias"
+          valueField="via_administracion_id"
+          labelField="nombre"
+          [selectedValue]="formulario().via_administracion_id"
+          (selectedValueChange)="actualizarSeleccion('via_administracion_id', $event)"
+        />
+
+        <app-input-group
+          label="Reacción producida"
+          size="sm"
+          [required]="true"
+          [maxlength]="200"
+          [value]="formulario().reaccion"
+          (input)="actualizarTexto('reaccion', $event)"
+        />
+
+        <app-input-group
+          label="Edad al momento de la reacción"
+          type="number"
+          size="sm"
+          [min]="0"
+          [value]="formulario().edad_reaccion"
+          (input)="actualizarTexto('edad_reaccion', $event)"
+        />
+
+        <app-input-group
+          label="Fecha de última reacción"
+          type="date"
+          size="sm"
+          [value]="formulario().fecha_ultima_reaccion"
+          (input)="actualizarTexto('fecha_ultima_reaccion', $event)"
+        />
+
+        <app-input-group
+          label="Descripción adicional"
+          size="sm"
+          [maxlength]="500"
+          [value]="formulario().descripcion_adicional"
+          (input)="actualizarTexto('descripcion_adicional', $event)"
+        />
+      </div>
+
+      <div class="allergy-form__actions">
+        <app-button
+          texto="Registrar alergia"
+          action="save"
+          color="primary"
+          size="sm"
+          [disabled]="!habilitado() || !formularioValido() || guardando()"
+          [loading]="guardando()"
+          (clicked)="guardar()"
+        />
+      </div>
+    </form>
+
+    <header class="allergy-history__header">
+      <div>
+        <h4>Alergias registradas</h4>
+        <p>
+          Estos antecedentes pertenecen al paciente y estarán disponibles en futuras atenciones.
+        </p>
+      </div>
+    </header>
+
+    <app-table
+      size="xs"
+      [scrollHeight]="null"
+      [columns]="columnas"
+      [rows]="alergias()"
+      [loading]="cargando()"
+      emptyMessage="No hay alergias registradas para este paciente."
+    />
+</section>

@@ -1,0 +1,382 @@
+<section class="triage-page" [class.triage-page--embedded]="embebido()">
+  @if (detalle_atencion() && triaje_bloqueado()) {
+    <p class="alert alert-warning mb-0" role="alert">
+      Esta atención ya tiene un triaje registrado y no admite otro registro.
+    </p>
+  }
+  <form class="triage-form" (submit)="guardar_triaje(); $event.preventDefault()" novalidate>
+    <app-card-general title="Valorización">
+      <div class="row g-2">
+        <div class="col-12 col-lg-6">
+          <app-select
+            size="sm"
+            label="Condición de Llegada"
+            [required]="true"
+            placeholder="-- Seleccione --"
+            [options]="condicionLlegadaOptions()"
+            [showEmptyOption]="true"
+            emptyOptionLabel="-- Seleccione --"
+            [selectedValue]="triaje_model().condicionLlegada"
+            [invalid]="!!error_de_campo('condicionLlegada')"
+            [error]="error_de_campo('condicionLlegada')"
+            (selectedValueChange)="actualizar_seleccion_requerida('condicionLlegada', $event)"
+          />
+        </div>
+        <div class="col-12 col-lg-6">
+          <app-select
+            size="sm"
+            label="Motivo de Ingreso"
+            [required]="true"
+            placeholder="-- Seleccione --"
+            [options]="motivoIngresoOptions()"
+            [showEmptyOption]="true"
+            emptyOptionLabel="-- Seleccione --"
+            [selectedValue]="triaje_model().motivoIngreso"
+            [invalid]="!!error_de_campo('motivoIngreso')"
+            [error]="error_de_campo('motivoIngreso')"
+            (selectedValueChange)="actualizar_seleccion_requerida('motivoIngreso', $event)"
+          />
+        </div>
+      </div>
+    </app-card-general>
+
+    <app-card-general title="Signos Vitales y Datos Antropométricos">
+      <div class="row g-2">
+        @for (vital of vitalSignFields; track vital.control) {
+          <div [class]="'vital-sign-card ' + vital.colClass">
+            @if (vital.control === 'pa') {
+              <div class="row g-2">
+                <div class="col-6">
+                  <app-input-text
+                    label="PAS (mmHg)"
+                    title="Presión Sistólica"
+                    ariaLabel="Presión sistólica en milímetros de mercurio"
+                    type="number"
+                    [allowNegative]="false"
+                    [formField]="triajeForm.paSistolica"
+                  />
+                  <app-progress-bars
+                    [clases]="progress_bar_classes(pressure_status('sistolica'))"
+                    size="sm"
+                    [porcentaje]="100"
+                    [color]="pressure_status('sistolica')"
+                    ariaLabel="Estado de la presión sistólica"
+                  />
+                </div>
+                <div class="col-6">
+                  <app-input-text
+                    label="PAD (mmHg)"
+                    title="Presión Diastólica"
+                    ariaLabel="Presión diastólica en milímetros de mercurio"
+                    type="number"
+                    [allowNegative]="false"
+                    [formField]="triajeForm.paDiastolica"
+                  />
+                  <app-progress-bars
+                    [clases]="progress_bar_classes(pressure_status('diastolica'))"
+                    size="sm"
+                    [porcentaje]="100"
+                    [color]="pressure_status('diastolica')"
+                    ariaLabel="Estado de la presión diastólica"
+                  />
+                </div>
+              </div>
+            } @else if (vital.control === 'peso' || vital.control === 'talla') {
+              @if (vital.control === 'peso') {
+                <app-input-group
+                  [label]="vital.label"
+                  [suffix]="vital.unit"
+                  type="number"
+                  [value]="triaje_model().peso"
+                  (valueChange)="actualizar_signo_vital('peso', $event)"
+                />
+              } @else {
+                <app-input-group
+                  [label]="vital.label"
+                  [suffix]="vital.unit"
+                  type="number"
+                  [value]="triaje_model().talla"
+                  (valueChange)="actualizar_signo_vital('talla', $event)"
+                />
+              }
+            } @else if (vital.control === 'imc') {
+              <div class="imc-control">
+                <app-input-group
+                  [label]="vital.label"
+                  [suffix]="vital.unit"
+                  [value]="triaje_model().imc"
+                  [readonly]="true"
+                >
+                  <i prefix class="fa-solid fa-weight-scale" aria-hidden="true"></i>
+                </app-input-group>
+                <div class="imc-classification">
+                  <span class="imc-classification__label">Clasificación IMC</span>
+                  <output
+                    [class]="
+                      'imc-classification__value imc-classification__value--' + vital_status('imc')
+                    "
+                    aria-live="polite"
+                  >
+                    {{ imc_classification() }}
+                  </output>
+                </div>
+              </div>
+            } @else {
+              @switch (vital.control) {
+                @case ('temperatura') {
+                  <app-input-text
+                    [label]="vital.label + ' (' + vital.unit + ')'"
+                    [title]="vital.title"
+                    [ariaLabel]="vital.title + ' (' + vital.unit + ')'"
+                    [type]="vital.type"
+                    [allowNegative]="false"
+                    [formField]="triajeForm.temperatura"
+                  />
+                }
+                @case ('saturacion') {
+                  <app-input-text
+                    [label]="vital.label + ' (' + vital.unit + ')'"
+                    [title]="vital.title"
+                    [ariaLabel]="vital.title + ' (' + vital.unit + ')'"
+                    [type]="vital.type"
+                    [allowNegative]="false"
+                    [formField]="triajeForm.saturacion"
+                  />
+                }
+                @case ('fc') {
+                  <app-input-text
+                    [label]="vital.label + ' (' + vital.unit + ')'"
+                    [title]="vital.title"
+                    [ariaLabel]="vital.title + ' (' + vital.unit + ')'"
+                    [type]="vital.type"
+                    [allowNegative]="false"
+                    [formField]="triajeForm.fc"
+                  />
+                }
+                @case ('fr') {
+                  <app-input-text
+                    [label]="vital.label + ' (' + vital.unit + ')'"
+                    [title]="vital.title"
+                    [ariaLabel]="vital.title + ' (' + vital.unit + ')'"
+                    [type]="vital.type"
+                    [allowNegative]="false"
+                    [formField]="triajeForm.fr"
+                  />
+                }
+              }
+              <app-progress-bars
+                [clases]="progress_bar_classes(vital_status(vital.control))"
+                size="sm"
+                [porcentaje]="100"
+                [color]="vital_status(vital.control)"
+                [ariaLabel]="'Estado de ' + vital.label"
+              />
+            }
+          </div>
+        }
+      </div>
+      @if (alertasCriticasSignosVitales().length > 0) {
+        <div
+          class="triage-critical-alert alert alert-danger d-flex align-items-center gap-2 mt-2 mb-0 py-2"
+          role="alert"
+        >
+          <i class="fa-solid fa-triangle-exclamation fa-lg text-danger" aria-hidden="true"></i>
+          <div>
+            <strong>Alerta asistencial - Signos vitales críticos:</strong>
+            @for (alerta of alertasCriticasSignosVitales(); track alerta.parametro) {
+              <span class="badge bg-danger ms-1">{{ alerta.parametro }}: {{ alerta.valor }}</span>
+            }
+            <span class="ms-1"
+              >El sistema sugiere <strong>Prioridad I (Resucitación / Crítico)</strong>.</span
+            >
+          </div>
+        </div>
+      }
+      @if (error_signos_vitales()) {
+        <div class="text-danger small mt-2" role="alert">{{ error_signos_vitales() }}</div>
+      }
+
+      <div class="row g-2 mt-0">
+        <div class="col-12 col-lg-4">
+          <div class="eva-control">
+            <label for="eva-range">Escala de Dolor (EVA)</label>
+            <div class="eva-layout">
+              <div class="eva-scale-track">
+                <input
+                  id="eva-range"
+                  class="eva-slider"
+                  type="range"
+                  min="0"
+                  max="10"
+                  step="1"
+                  [value]="triaje_model().eva || '0'"
+                  (input)="actualizar_eva($event)"
+                />
+                <app-progress-bars
+                  [clases]="progress_bar_classes(eva_status())"
+                  size="sm"
+                  [porcentaje]="100"
+                  [color]="eva_status()"
+                  ariaLabel="Estado de la escala de dolor"
+                />
+                <app-label
+                  [texto]="eva_description()"
+                  [color]="eva_status()"
+                  size="xs"
+                  [truncate]="true"
+                />
+              </div>
+              <div class="eva-input-box">
+                <app-input-text
+                  type="number"
+                  size="sm"
+                  min="0"
+                  max="10"
+                  [allowNegative]="false"
+                  [showLabel]="false"
+                  align="center"
+                  title="Valor Escala de Dolor (0 a 10)"
+                  ariaLabel="Valor numérico de la escala de dolor"
+                  [value]="triaje_model().eva || '0'"
+                  (input)="actualizar_eva_desde_input($event)"
+                  (blur)="normalizar_eva_al_salir()"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </app-card-general>
+
+    <app-card-general title="Atención">
+      <div class="row g-2 triage-attention-grid">
+        <div class="col-12 col-lg-4">
+          <fieldset
+            class="priority-fieldset"
+            [class.priority-fieldset--invalid]="
+              !!error_atencion('prioridad', 'triaje.nivel_triaje_codigo')
+            "
+          >
+            <legend>Prioridad <span class="text-danger">*</span></legend>
+            <div class="priority-options">
+              @for (priority of prioridadesVisibles(); track priority.value) {
+                <label
+                  class="priority-option"
+                  [class]="'priority-option priority-option--' + priority.color"
+                >
+                  <input
+                    type="radio"
+                    [formField]="triajeForm.prioridad"
+                    [value]="priority.value"
+                    (change)="update_priority(priority.value)"
+                  />
+                  <span [title]="priority.label">{{ priority.value }}</span>
+                </label>
+              }
+            </div>
+          </fieldset>
+          @if (error_atencion('prioridad', 'triaje.nivel_triaje_codigo')) {
+            <div class="text-danger small mt-1" role="alert">
+              {{ error_atencion('prioridad', 'triaje.nivel_triaje_codigo') }}
+            </div>
+          }
+        </div>
+
+        <div class="col-12 col-lg-3">
+          <app-input-text
+            size="sm"
+            label="Motivo de Consulta"
+            [required]="true"
+            [value]="triaje_model().motivoConsulta"
+            [error]="error_atencion('motivoConsulta', 'triaje.motivo_consulta')"
+            (input)="actualizar_motivo_consulta($event)"
+          />
+        </div>
+        <div class="col-6 col-lg-2">
+          <app-select
+            size="sm"
+            label="Área"
+            [required]="true"
+            placeholder="-- Seleccione --"
+            [options]="areasEmergenciaOptionsVisibles()"
+            [showEmptyOption]="true"
+            emptyOptionLabel="-- Seleccione --"
+            [selectedValue]="triaje_model().destinoAreaId"
+            [disabled]="esPacienteNn()"
+            [invalid]="!!error_atencion('destinoAreaId', 'triaje.destino_area_id')"
+            (selectedValueChange)="actualizar_seleccion_requerida('destinoAreaId', $event)"
+          />
+          @if (error_atencion('destinoAreaId', 'triaje.destino_area_id')) {
+            <div class="text-danger small mt-1" role="alert">
+              {{ error_atencion('destinoAreaId', 'triaje.destino_area_id') }}
+            </div>
+          }
+        </div>
+        @if (esAreaConsultorioEmergencia() && !esPacienteNn()) {
+          <div class="col-6 col-lg-2">
+            <app-select
+              size="sm"
+              label="Destino"
+              [required]="true"
+              placeholder="-- Seleccione --"
+              [options]="destinosConsultorioOptionsVisibles()"
+              [showEmptyOption]="true"
+              emptyOptionLabel="-- Seleccione --"
+              [selectedValue]="triaje_model().destinoEspecialidadId"
+              [invalid]="
+                !!error_atencion('destinoEspecialidadId', 'triaje.destino_especialidad_id')
+              "
+              (selectedValueChange)="
+                actualizar_seleccion_requerida('destinoEspecialidadId', $event)
+              "
+            />
+            @if (error_atencion('destinoEspecialidadId', 'triaje.destino_especialidad_id')) {
+              <div class="text-danger small mt-1" role="alert">
+                {{ error_atencion('destinoEspecialidadId', 'triaje.destino_especialidad_id') }}
+              </div>
+            }
+          </div>
+        }
+        <div class="col-12 col-lg-3">
+          <app-select
+            size="sm"
+            label="Médico de Turno"
+            [required]="true"
+            [placeholder]="cargandoMedicos() ? 'Cargando médicos...' : '-- Seleccione Médico --'"
+            [options]="medicosProgramadosOptions()"
+            [showEmptyOption]="true"
+            emptyOptionLabel="-- Seleccione Médico --"
+            [selectedValue]="triaje_model().programacionPersonalId"
+            [disabled]="cargandoMedicos() || medicosProgramadosOptions().length === 0"
+            [invalid]="!!error_atencion('programacionPersonalId', 'triaje.programacion_personal_id')"
+            (selectedValueChange)="actualizar_seleccion_requerida('programacionPersonalId', $event)"
+          />
+          @if (error_atencion('programacionPersonalId', 'triaje.programacion_personal_id')) {
+            <div class="text-danger small mt-1" role="alert">
+              {{ error_atencion('programacionPersonalId', 'triaje.programacion_personal_id') }}
+            </div>
+          }
+        </div>
+      </div>
+    </app-card-general>
+
+    <footer class="triage-actions">
+      <app-button
+        text="Cerrar"
+        icon="fa-solid fa-xmark"
+        color="secondary"
+        variant="outline"
+        [disabled]="guardando()"
+        (clicked)="cerrar()"
+      />
+      <app-button
+        text="Registrar triaje"
+        icon="fa-solid fa-floppy-disk"
+        color="primary"
+        type="submit"
+        [loading]="guardando()"
+        [disabled]="registroGuardado() || triaje_bloqueado()"
+      />
+    </footer>
+  </form>
+</section>

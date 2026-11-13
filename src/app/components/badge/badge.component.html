@@ -1,3 +1,23 @@
+
 @if (shouldRender()) {
-  <span class="badge app-badge" [class]="clases()" [class.app-badge--xs]="size() === 'xs'" [class.app-badge--sm]="size() === 'sm'" [class.app-badge--md]="size() === 'md'" [class.app-badge--lg]="size() === 'lg'" [title]="title()">{{ texto() }}</span>
+  <span
+    class="badge app-badge"
+    [class]="clases()"
+    [class.app-badge--xs]="size() === 'xs'"
+    [class.app-badge--sm]="size() === 'sm'"
+    [class.app-badge--md]="size() === 'md'"
+    [class.app-badge--lg]="size() === 'lg'"
+    [title]="title()">
+
+    @if (icon()) {
+      <i
+        [class]="icon()"
+        class="me-1"
+        aria-hidden="true">
+      </i>
+    }
+
+    {{ texto() }}
+
+  </span>
 }

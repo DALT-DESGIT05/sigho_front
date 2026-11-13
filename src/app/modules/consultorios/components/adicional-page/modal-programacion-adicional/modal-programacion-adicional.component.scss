@@ -1,0 +1,200 @@
+
+:host {
+  display: block;
+}
+
+// El modal se renderiza fuera del host mediante ngx-bootstrap.
+// La clase de la tabla limita estas reglas a este modal.
+::ng-deep .modal-dialog:has(.programacion-modal__tabla) {
+  .modal-content {
+  height: auto;
+  min-height: 0;
+
+  .modal-body {
+    display: flex;
+    flex-direction: column;
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow: hidden;
+
+    > .programacion-resumen {
+      flex-shrink: 0;
+    }
+
+    > .programacion-modal__tabla {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      flex: 0 1 auto;
+
+      > .table-container {
+        min-height: 0;
+        overflow: auto;
+      }
+    }
+  }
+}
+}
+
+/* =========================================
+   RESUMEN SUPERIOR
+========================================= */
+
+.programacion-resumen {
+  margin-top: 0;
+}
+
+/* CONSULTORIO + ACTIVIDAD MÉDICA */
+
+.programacion-resumen__grupo {
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--palette-primary-200);
+  border-radius: 0.875rem;
+  background-color: var(--palette-primary-50);
+}
+
+.programacion-resumen__item {
+  display: block;
+  height: 100%;
+}
+
+/* ELIMINAR EL ASPECTO DE TARJETAS INDEPENDIENTES */
+
+:host ::ng-deep .programacion-resumen__grupo .resumen-item {
+  height: 100%;
+  min-height: 5.5rem;
+  padding: 1rem 1.25rem !important;
+  border: none;
+  border-radius: 0 !important;
+  background: transparent;
+}
+
+/* DIVISOR CENTRAL */
+
+@media (min-width: 768px) {
+  .programacion-resumen__grupo .col-md-6:first-child {
+    position: relative;
+  }
+
+  .programacion-resumen__grupo .col-md-6:first-child::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 20%;
+    width: 1px;
+    height: 60%;
+    background-color: var(--palette-primary-300);
+  }
+}
+
+/* ICONOS */
+
+:host ::ng-deep .programacion-resumen__grupo .resumen-item__visual {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0 !important;
+  background-color: transparent;
+  color: var(--palette-primary-fap);
+}
+
+:host ::ng-deep .programacion-resumen__grupo .resumen-item__visual i {
+  font-size: 2rem !important;
+}
+
+/* TEXTOS */
+
+:host ::ng-deep .programacion-resumen .resumen-item__titulo {
+  margin-bottom: 0.35rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  color: var(--palette-primary-fap-text);
+}
+
+:host ::ng-deep .programacion-resumen .resumen-item__valor {
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  line-height: 1.35;
+  color: var(--palette-primary-fap);
+}
+
+/* =========================================
+   TOTAL DE PROGRAMACIONES
+========================================= */
+
+.programacion-resumen__total {
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--palette-success-200);
+  border-radius: 0.875rem;
+  background-color: var(--palette-success-100);
+}
+
+:host ::ng-deep .programacion-resumen__total .resumen-item {
+  min-height: 5.5rem;
+  padding: 1rem !important;
+  border: none;
+  background: transparent;
+}
+
+:host ::ng-deep .programacion-resumen__total .resumen-item__visual {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0 !important;
+  background: transparent;
+  color: var(--palette-success-text);
+}
+
+:host ::ng-deep .programacion-resumen__total .resumen-item__visual i {
+  font-size: 2rem !important;
+}
+
+:host ::ng-deep .programacion-resumen__total .resumen-item__valor {
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  color: var(--palette-success-text);
+}
+
+:host ::ng-deep .programacion-resumen__total .resumen-item__titulo {
+  color: var(--palette-success-text);
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 767.98px) {
+  .programacion-resumen__grupo .col-md-6:first-child {
+    border-bottom: 1px solid var(--palette-primary-200);
+  }
+
+  :host ::ng-deep .programacion-resumen__grupo .resumen-item {
+    min-height: 4.5rem;
+  }
+}
+/* SUBTÍTULO DEL ENCABEZADO */
+
+.programacion-modal__subtitulo {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--palette-white);
+  opacity: 0.85;
+}
+
+/* PIE DEL MODAL */
+
+.programacion-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1rem;
+}
+
+.programacion-modal__contador {
+  font-size: 0.8rem;
+  color: var(--palette-gray-text);
+}

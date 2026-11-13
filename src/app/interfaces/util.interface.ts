@@ -72,6 +72,7 @@ export type TableCellValueResolver<T, TValue> = TValue | ((value: unknown, row: 
 export interface TableBadgeColumn<T> {
   texto?: TableCellValueResolver<T, string>;
   clases?: TableCellValueResolver<T, string>;
+  icon?: TableCellValueResolver<T, string>;
   title?: TableCellValueResolver<T, string>;
   size?: ComponentSize;
 }
@@ -155,6 +156,7 @@ export interface TableIconLinkColumn<T> {
 export interface TableColumn<T> {
   key: string;
   label?: string;
+  icon?: string;
   cssClass?: string;
   align?: TableColumnAlignment;
   headerCssClass?: string;
@@ -178,6 +180,10 @@ export interface TableColumn<T> {
   /** Renderiza un app-icon-link dentro de la celda. */
   iconLink?: TableIconLinkColumn<T>;
   template?: TemplateRef<TableCellContext<T>>;
+  /** Imagen que se muestra antes del valor de la celda. */
+  image?: string;
+  /** Tamaño de la imagen en píxeles. */
+  imageSize?: number;
 }
 
 export interface TableRowAction<T> {

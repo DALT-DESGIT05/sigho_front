@@ -1,7 +1,7 @@
 @if (cargando()) {
   <div class="image-skeleton" aria-label="Cargando imagen" role="status"></div>
 } @else if (!error()) {
-  <img [src]="imagenUrl()" [alt]="alt()" [class]="imageClass()" [style.object-fit]="objectFit()" (error)="cargarFallback()" />
+  <img [src]="imagenUrl() | imagen" [alt]="alt()" [class]="imageClass()" [style.object-fit]="objectFit()" (error)="cargarFallback()" />
 } @else {
-  <img [src]="fallbackSrc()" [alt]="alt()" [class]="imageClass()" [style.object-fit]="objectFit()" />
+  <img [src]="fallbackSrc() | imagen" [alt]="alt()" [class]="imageClass()" [style.object-fit]="objectFit()" />
 }

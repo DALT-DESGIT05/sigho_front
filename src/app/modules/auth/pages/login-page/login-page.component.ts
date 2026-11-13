@@ -1,3 +1,4 @@
+import { ImagenPipe } from '../../../../pipes/imagen.pipe';
 import { Component, inject, ViewChild, CUSTOM_ELEMENTS_SCHEMA, signal, OnDestroy, OnInit, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { FormField, email, form, minLength, required } from '@angular/forms/signals';
 import { LoginService } from '../../../../services/auth/login.service';
@@ -16,7 +17,7 @@ import { finalize } from 'rxjs';
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [
+  imports: [ImagenPipe,
     FormField, RecaptchaComponent, QRCodeComponent, ButtonComponent
   ],
   templateUrl: './login-page.component.html',

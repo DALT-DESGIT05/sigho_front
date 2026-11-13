@@ -1,6 +1,6 @@
 <main class="login-stage">
   <header class="login-header">
-    <img src="assets/images/escudo_fap.png" alt="Escudo FAP de la Fuerza Aérea del Perú" class="fap-logo">
+    <img [src]="'escudo_fap' | imagen" alt="Escudo FAP de la Fuerza Aérea del Perú" class="fap-logo">
     <div class="login-title">
       <h1>SISTEMA DE GESTIÓN HOSPITALARIA</h1>
       <strong>SIGHO WEB FAP</strong>
@@ -8,20 +8,20 @@
     </div>
   </header>
 
-  <div class="module module--pacientes"><img src="assets/images/bg/Pacientes.png" alt="Pacientes"></div>
-  <div class="module module--citas"><img src="assets/images/bg/Citas.png" alt="Citas"></div>
-  <div class="module module--historia"><img src="assets/images/bg/Hist. Clinica.png" alt="Historia clínica"></div>
-  <div class="module module--analitica"><img src="assets/images/bg/Analitica.png" alt="Analítica"></div>
-  <div class="module module--admision"><img src="assets/images/bg/Admision.png" alt="Admisión"></div>
-  <div class="module module--hospitalizacion"><img src="assets/images/bg/ChatGPT Image 17 jul 2026, 05_41_38 p.m..png" alt="Hospitalización"></div>
-  <div class="module module--emergencia"><img src="assets/images/bg/Emergencia.png" alt="Emergencia"></div>
-  <div class="module module--farmacia"><img src="assets/images/bg/Farmacia.png" alt="Farmacia"></div>
-  <div class="module module--finanzas"><img src="assets/images/bg/Finanzas.png" alt="Finanzas"></div>
+  <div class="module module--pacientes"><img [src]="'pacientes' | imagen" alt="Pacientes"></div>
+  <div class="module module--citas"><img [src]="'citas' | imagen" alt="Citas"></div>
+  <div class="module module--historia"><img [src]="'hist_clinica' | imagen" alt="Historia clínica"></div>
+  <div class="module module--analitica"><img [src]="'analitica' | imagen" alt="Analítica"></div>
+  <div class="module module--admision"><img [src]="'admision' | imagen" alt="Admisión"></div>
+  <div class="module module--hospitalizacion"><img [src]="'hospitalizacion' | imagen" alt="Hospitalización"></div>
+  <div class="module module--emergencia"><img [src]="'emergencia' | imagen" alt="Emergencia"></div>
+  <div class="module module--farmacia"><img [src]="'farmacia' | imagen" alt="Farmacia"></div>
+  <div class="module module--finanzas"><img [src]="'finanzas' | imagen" alt="Finanzas"></div>
 
   <div class="values" aria-label="Valores institucionales">
-    <img src="assets/images/bg/Integridad%20Personal.png" alt="Integridad personal">
-    <img src="assets/images/bg/Vocaci%C3%B3n%20Servicio.png" alt="Vocación de servicio">
-    <img src="assets/images/bg/Excelencia%20Profesional.png" alt="Excelencia profesional">
+    <img [src]="'integridad_personal' | imagen" alt="Integridad personal">
+    <img [src]="'vocacion_servicio' | imagen" alt="Vocación de servicio">
+    <img [src]="'excelencia_profesional' | imagen" alt="Excelencia profesional">
   </div>
 
   <section class="login-card" aria-label="Acceso al sistema">
@@ -128,10 +128,12 @@
           </div>
         </form>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer login-modal__footer--estandar">
+        <app-button modal-footer-close action="close" size="sm" (clicked)="close_modal()" />
+
         <button type="button" class="btn login-primary-button me-1 btn-sm" (click)="restablecer_by_correo()">Confirmar <i class="fa fa-check ml-4"
             aria-hidden="true"></i></button>
-        <app-button action="close" size="sm" (clicked)="close_modal()" />
+
       </div>
     </div>
   </div>
@@ -195,8 +197,9 @@
         </div>
       </div>
 
-      <div class="modal-footer">
-        <app-button action="close" size="sm" (clicked)="close_modal_2fa()" />
+      <div class="modal-footer login-modal__footer--estandar">
+        <app-button modal-footer-close action="close" size="sm" (clicked)="close_modal_2fa()" />
+
       </div>
     </div>
   </div>

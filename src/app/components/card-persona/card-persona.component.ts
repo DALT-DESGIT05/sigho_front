@@ -1,3 +1,4 @@
+import { ImagenPipe } from '../../pipes/imagen.pipe';
 import { Component, input, output } from '@angular/core';
 import { ButtonComponent } from '../button/button.component';
 import { ImageLazyComponent, TipoImagenLazy } from '../image-lazy/image-lazy.component';
@@ -5,7 +6,7 @@ import { ImageLazyComponent, TipoImagenLazy } from '../image-lazy/image-lazy.com
 @Component({
   selector: 'app-card-persona',
   standalone: true,
-  imports: [ButtonComponent, ImageLazyComponent],
+  imports: [ImagenPipe, ButtonComponent, ImageLazyComponent],
   templateUrl: './card-persona.component.html',
   styleUrl: './card-persona.component.scss',
 })
@@ -23,6 +24,7 @@ export class CardPersonaComponent {
   readonly seleccionar = output<void>();
   readonly iconoBoton = input('fa-solid fa-check');
   readonly botonAnchoCompleto = input(true);
+  readonly variante = input<'afiliado' | 'medico'>('afiliado');
 
   onSeleccionar(): void {
     this.seleccionar.emit();

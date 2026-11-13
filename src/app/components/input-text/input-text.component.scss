@@ -2,6 +2,16 @@
 :host ::ng-deep app-label.text-truncate .app-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .app-input-text__control { border-color: var(--palette-gray-300); color: var(--palette-gray-800); }
+.app-input-text__control[type='time'] {
+  &::-webkit-datetime-edit-hour-field,
+  &::-webkit-datetime-edit-minute-field,
+  &::-webkit-datetime-edit-second-field,
+  &::-webkit-datetime-edit-text {
+    font: inherit;
+    line-height: inherit;
+    padding-block: 0;
+  }
+}
 .app-input-text__control:hover:not(:disabled),
 .app-input-text__control:focus { border-color: var(--app-input-text-color); box-shadow: 0 0 0 .16rem var(--app-input-text-glow); }
 .app-input-text__control:disabled { background-color: var(--palette-gray-100); border-color: var(--palette-gray-200); color: var(--palette-gray-500); opacity: 1; }

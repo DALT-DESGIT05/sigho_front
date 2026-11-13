@@ -3,42 +3,69 @@
 .app-horario-button {
   align-items: center;
   border: 1px solid transparent;
-  color: var(--palette-white);
+  border-radius: .5rem;
+  cursor: default;
   display: flex;
-  flex-direction: column;
-  gap: .2rem;
+  gap: .35rem;
+  font-size: .75rem;
+  font-weight: 500;
   justify-content: center;
   line-height: 1.1;
-  min-height: 3.25rem;
+  min-height: 2.625rem;
+  padding: .5rem .35rem;
   width: 100%;
 }
 
 .app-horario-button--disponible {
-  background-color: var(--palette-success);
-  border-color: var(--palette-success);
+  background-color: var(--palette-success-50);
+  border-color: var(--palette-success-200);
+  color: var(--palette-success-700);
 }
 
-.app-horario-button--disponible:hover:not(:disabled) {
-  background-color: var(--palette-success-700);
-  border-color: var(--palette-success-700);
+.app-horario-button--disponible:not(:disabled) {
+  cursor: pointer;
+  transition: transform 250ms ease, box-shadow 250ms ease,
+    background-color 250ms ease, border-color 250ms ease;
+}
+
+@media (hover: hover) {
+  .app-horario-button--disponible:hover:not(:disabled) {
+    background-color: var(--palette-success-100);
+    border-color: var(--palette-success-400);
+    box-shadow: 0 .3rem .65rem color-mix(in srgb, var(--palette-success) 24%, transparent);
+    transform: translateY(-3px) scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-horario-button--disponible:not(:disabled) {
+    transition: none;
+  }
+
+  .app-horario-button--disponible:hover:not(:disabled) {
+    transform: none;
+  }
 }
 
 .app-horario-button--ocupado {
-  background-color: var(--palette-danger);
-  border-color: var(--palette-danger);
+  background-color: var(--palette-danger-50);
+  border-color: var(--palette-danger-200);
+  color: var(--palette-danger);
 }
 
-.app-horario-button--ocupado:disabled {
-  background-color: var(--palette-danger);
-  border-color: var(--palette-danger);
-  color: var(--palette-white);
-  cursor: not-allowed;
-  opacity: .72;
+.app-horario-button:disabled {
+  cursor: default;
+  opacity: 1;
+  box-shadow: none;
+  transform: none;
+  transition: none;
 }
 
-.app-horario-button img {
-  display: block;
-  height: 16px;
-  width: 16px;
+.app-horario-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+.app-horario-button i {
+  font-size: .65rem;
 }
 

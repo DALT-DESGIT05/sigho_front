@@ -1,0 +1,59 @@
+<dialog
+  #dialogo
+  [class]="'alert-dialog alert-dialog--' + configuracion().tipo + ' alert-dialog--' + configuracion().diseno + (en_salida() ? ' alert-dialog--saliendo' : '')"
+  [style.width]="configuracion().ancho"
+  role="alertdialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="id + '-titulo'"
+  [attr.aria-describedby]="id + '-mensaje'"
+  (cancel)="on_escape($event)"
+  (close)="on_cierre_nativo()"
+  (click)="on_fondo($event)">
+  @if (configuracion().diseno === 'horizontal') {
+    <header class="alert-dialog__encabezado text-center fw-medium">{{ configuracion().encabezado }}</header>
+  }
+
+  <div class="alert-dialog__cuerpo d-flex no-block align-items-center gap-2 p-3 pt-4" [class.flex-column]="configuracion().diseno === 'centrado'">
+    <div
+      class="alert-dialog__visual d-flex no-block align-items-center justify-content-center flex-shrink-0"
+      [class.rounded-3]="configuracion().diseno === 'horizontal'"
+      [class.rounded-circle]="configuracion().diseno === 'centrado'"
+      aria-hidden="true">
+      @if (configuracion().imagen && !imagen_fallida()) {
+        <img class="w-100 h-100 object-fit-contain" [src]="configuracion().imagen | imagen" alt="" (error)="on_error_imagen()" />
+      } @else {
+        <i [class]="configuracion().icono"></i>
+      }
+    </div>
+    <div class="alert-dialog__texto">
+      <h2 class="alert-dialog__titulo fw-semibold mb-2" [id]="id + '-titulo'">{{ configuracion().titulo }}</h2>
+      <p class="alert-dialog__mensaje mb-0" [id]="id + '-mensaje'">{{ configuracion().mensaje }}</p>
+    </div>
+  </div>
+
+  <div class="alert-dialog__acciones d-flex no-block flex-wrap justify-content-center gap-2 px-3 pb-3">
+    <app-button
+      data-confirmar
+      [texto]="configuracion().texto_confirmar"
+      [color]="configuracion().color_confirmar"
+      [variant]="configuracion().variante_confirmar"
+      size="md"
+      [clases]="configuracion().diseno === 'centrado' ? 'px-4 py-2 rounded-pill' : 'px-4'"
+      [disabled]="en_salida()"
+      (clicked)="confirmar()" />
+    @if (configuracion().mostrar_cancelar) {
+      <app-button
+        data-cancelar
+        [texto]="configuracion().texto_cancelar"
+        color="secondary"
+        [variant]="configuracion().variante_cancelar"
+        size="md"
+        [clases]="configuracion().diseno === 'centrado' ? 'px-4 py-2 rounded-pill' : 'px-4'"
+        [disabled]="en_salida()"
+        (clicked)="cancelar()" />
+    }
+  </div>
+  @if (configuracion().diseno === 'centrado') {
+    <footer class="alert-dialog__firma text-center px-3 pb-3">{{ configuracion().encabezado }}</footer>
+  }
+</dialog>

@@ -1,0 +1,104 @@
+
+<app-card-general
+  class="programacion-medicos__filtros"
+  titulo="Datos de Consulta"
+  bodyClass="py-2 px-3">
+
+  <form
+    [formGroup]="filtrosForm"
+    (ngSubmit)="consultar()">
+
+    <div class="row g-2">
+
+      <!-- ESPECIALIDADES -->
+      <div class="col-12 col-md-6 col-xl-3">
+        <app-select
+          label="ESPECIALIDADES"
+          placeholder="-- Seleccione especialidad --"
+          [options]="especialidades()"
+          formControlName="especialidad"
+        />
+      </div>
+
+      <!-- MÉDICOS -->
+      <div class="col-12 col-md-6 col-xl-3">
+        <app-select
+          label="MÉDICOS"
+          placeholder="-- Seleccione médico --"
+          [options]="medicos()"
+          formControlName="medico"
+        />
+      </div>
+
+      <!-- FECHA INICIO -->
+      <div class="col-12 col-md-6 col-xl-3">
+        <app-input-date
+          label="FECHA INICIO"
+          type="date"
+          [fechaCompacta]="true"
+          formControlName="fecha_inicio"
+        />
+      </div>
+
+      <!-- FECHA TÉRMINO -->
+      <div class="col-12 col-md-6 col-xl-3">
+        <app-input-date
+          label="FECHA TÉRMINO"
+          type="date"
+          [fechaCompacta]="true"
+          formControlName="fecha_termino"
+        />
+      </div>
+
+      <!-- BOTÓN CONSULTAR -->
+      <div class="d-flex justify-content-end mt-2">
+        <app-button
+          accion="search"
+          type="submit"
+        />
+      </div>
+
+    </div>
+  </form>
+
+</app-card-general>
+
+<div class="mt-3 programacion-medicos__resultados">
+  <app-card-general
+    titulo="Consulta de programación del Médico"
+    bodyClass="p-2">
+
+    <div card-header-actions>
+      @if (consultaRealizada()) {
+        <app-button
+          icon="fa-solid fa-plus"
+          color="primary"
+          variant="outline"
+          outlineHover="border"
+          clases="bg-white"
+          size="sm"
+          title="Agregar programación"
+          (clicked)="abrirModalProgramacion()">
+        </app-button>
+      }
+    </div>
+
+    <div class="programacion-medicos__tabla">
+      <app-table
+        [columns]="columnasProgramacion"
+        [rows]="programaciones()"
+        [actions]="accionesProgramacion"
+        scrollHeight="auto"
+        size="sm"
+        emptyMessage="No se encontraron programaciones para el médico seleccionado."
+        (action)="onAccionProgramacion($event)">
+      </app-table>
+    </div>
+
+  </app-card-general>
+</div>
+
+<!-- COMPONENTE HIJO -->
+<app-modal-programacion
+  #modalProgramacionHijo>
+</app-modal-programacion>

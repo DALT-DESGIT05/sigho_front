@@ -9,7 +9,7 @@
   isolation: isolate;
   min-height: 100vh;
   overflow: hidden;
-  background: #0759c5 url("/assets/images/fondo_login/fondo_login.png") center / cover no-repeat;
+  background: #0759c5 url("/images/fondo_login.png") center / cover no-repeat;
 }
 
 .login-stage::after {
@@ -287,4 +287,12 @@
   .login-title p { font-size: .86rem; }
   .login-card { position: relative; top: auto; left: auto; width: calc(100% - 28px); margin: 24px auto 36px; padding: 25px 20px; transform: none; }
   .module, .values { display: none; }
+}
+.login-modal__footer--estandar {
+  justify-content: flex-end;
+  gap: .75rem;
+
+  > [modal-footer-close] {
+    margin-inline-end: auto;
+  }
 }

@@ -36,7 +36,7 @@
       @if (loading()) {
         <tr>
           <td class="app-table__loading" [attr.colspan]="emptyColspan()">
-            <img src="assets/loaders/dot-chase.svg" alt="Cargando datos">
+            <img [src]="'dot_chase' | imagen" alt="Cargando datos">
           </td>
         </tr>
       } @else {
@@ -87,6 +87,7 @@
                   <app-badge
                     [texto]="badgeText(column, row)"
                     [clases]="badgeClasses(column, row)"
+                    [icon]="badgeIcon(column, row)"
                     [title]="badgeTitle(column, row)"
                     [size]="column.badge.size || 'md'">
                   </app-badge>
@@ -170,9 +171,37 @@
                     [disabled]="iconLinkDisabled(column, row)"
                     (clicked)="emitIconLinkClick(column, row, $event)">
                   </app-icon-link>
-                } @else {
-                  {{ displayValue(column, row) }}
-                }
+
+                    }  @else if (column.image) {
+                      <span class="d-inline-flex align-items-center gap-2">
+                        <img
+                          [src]="column.image | imagen"
+                          alt=""
+                          [width]="column.imageSize || 36"
+                          [height]="column.imageSize || 36"
+                          class="rounded-circle flex-shrink-0"
+                          style="object-fit: contain;">
+
+                        <span class="fw-semibold">
+                          {{ displayValue(column, row) }}
+                        </span>
+                      </span>
+
+                    } @else if (column.icon) {
+                      <span class="d-inline-flex align-items-center gap-2">
+                        <i
+                          [class]="column.icon"
+                          style="color: var(--palette-primary-fap);"
+                          aria-hidden="true">
+                        </i>
+
+                        <span>{{ displayValue(column, row) }}</span>
+                      </span>
+
+                    } @else {
+                      {{ displayValue(column, row) }}
+                    }
+
               </td>
             }
             @if (hasActions()) {

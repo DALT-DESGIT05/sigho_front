@@ -354,4 +354,67 @@
     grid-template-columns: 1fr;
   }
 }
+/* PASO 5: SELECCIÓN DE MÉDICO */
 
+.reserva-citas__medicos-lista {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+  align-items: stretch;
+
+  app-card-persona {
+    display: block;
+    min-width: 0;
+    height: 100%;
+  }
+}
+
+/* Tablet */
+@media (max-width: 1199.98px) {
+  .reserva-citas__medicos-lista {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Móvil */
+@media (max-width: 575.98px) {
+  .reserva-citas__medicos-lista {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ==========================================
+// PASO 5 - TARJETAS DE MÉDICOS
+// ==========================================
+
+:host ::ng-deep .reserva-citas__medicos-lista .card-persona {
+  min-height: 105px;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+// Fotografía: mismo tamaño que afiliados
+:host ::ng-deep .reserva-citas__medicos-lista .card-persona__photo {
+  flex: 0 0 90px;
+  width: 90px;
+  height: 90px;
+  border-radius: 12px;
+}
+
+// Ícono: mismo tamaño que afiliados
+:host ::ng-deep .reserva-citas__medicos-lista .card-persona__photo > .fa-user {
+  font-size: 3.5rem;
+}
+
+// Nombre del médico
+:host ::ng-deep .reserva-citas__medicos-lista .card-persona__name {
+  font-size: .875rem;
+  font-weight: 600;
+}
+
+// CMP
+:host ::ng-deep .reserva-citas__medicos-lista .card-persona__document {
+  font-size: .8rem;
+  margin-top: .5rem;
+}

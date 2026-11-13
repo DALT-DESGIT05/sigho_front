@@ -1,0 +1,78 @@
+
+:host {
+  display: block;
+}
+
+.horarios-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: .25rem 0;
+}
+
+/* Encabezado del contenido */
+.horarios-modal__resumen {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+.horarios-modal__turno {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  color: var(--palette-primary-fap);
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+/* Contador de horarios */
+.horarios-modal__contador {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  padding: .3rem .65rem;
+  border-radius: .5rem;
+  background-color: var(--palette-success-50);
+  border: 1px solid var(--palette-success-200);
+  color: var(--palette-success-700);
+  font-size: .75rem;
+  font-weight: 600;
+}
+
+/* Leyenda */
+.horarios-modal__leyenda {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  padding-top: .25rem;
+}
+
+.horarios-modal__estado {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  white-space: nowrap;
+  font-size: .75rem;
+  font-weight: 500;
+}
+
+.horarios-modal__icono-disponible {
+  color: var(--palette-success);
+}
+
+.horarios-modal__icono-ocupado {
+  color: var(--palette-danger);
+}
+
+/* Subtítulo del encabezado */
+.horarios-modal__subtitulo {
+  display: block;
+  font-size: .7rem;
+  line-height: 1.35;
+  opacity: .9;
+}

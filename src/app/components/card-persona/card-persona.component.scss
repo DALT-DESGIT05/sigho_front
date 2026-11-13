@@ -107,3 +107,11 @@
     align-self: center;
   }
 }
+.card-persona--medico {
+  .card-persona__photo {
+    flex: 0 0 90px;
+    width: 90px;
+    height: 90px;
+    border-radius: 0.75rem;
+  }
+}

@@ -1,8 +1,10 @@
+import { ImagenPipe } from '../../pipes/imagen.pipe';
 import { Component, computed, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-selection-card',
   standalone: true,
+  imports: [ImagenPipe],
   templateUrl: './selection-card.component.html',
   styleUrl: './selection-card.component.scss',
 })

@@ -1,0 +1,68 @@
+
+<app-modal
+  #modalHorarios
+  titulo="Horarios de Atención"
+  icon="fa-solid fa-clock"
+  size="md"
+  [headerDestacado]="true"
+  [fitContent]="true"
+  [scrollable]="true"
+  [showFooter]="true" [footerEstandar]="true"
+  [separateFromParent]="true"
+  [ignoreBackdropClick]="true"
+  [keyboard]="false">
+
+  <!-- SUBTÍTULO -->
+  <small modal-header class="horarios-modal__subtitulo">
+    Seleccione una hora para reservar
+  </small>
+
+  <!-- CONTENIDO -->
+  <div class="horarios-modal">
+
+    <div class="horarios-modal__resumen">
+      <div class="horarios-modal__turno">
+        <i class="fa-solid fa-clock"></i>
+        <span>Horarios disponibles</span>
+      </div>
+
+      <span class="horarios-modal__contador">
+        {{ totalDisponibles() }} libres
+      </span>
+    </div>
+
+    <!-- CUADRÍCULA REUTILIZABLE -->
+    <app-horario-grid
+      [horarios]="horarios()"
+      [disabled]="disabled()"
+      [hora_cargando]="hora_cargando()"
+      (horario_seleccionado)="seleccionar_horario($event)">
+    </app-horario-grid>
+
+    <!-- LEYENDA -->
+    <div class="horarios-modal__leyenda">
+      <span class="horarios-modal__estado">
+        <i class="fa-solid fa-circle-check horarios-modal__icono-disponible"></i>
+        Disponible
+      </span>
+
+      <span class="horarios-modal__estado">
+        <i class="fa-solid fa-lock horarios-modal__icono-ocupado"></i>
+        Ocupado
+      </span>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div modal-footer class="d-flex justify-content-end w-100">
+    <app-button modal-footer-close
+      texto="Cerrar"
+      color="danger"
+      icon="fa-solid fa-xmark"
+      (clicked)="cerrar()">
+    </app-button>
+
+  </div>
+
+</app-modal>

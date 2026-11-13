@@ -12,7 +12,7 @@ export class BadgeComponent {
   readonly clases = input.required<string | null | undefined>();
   readonly title = input('');
   readonly size = input<ComponentSize>('md');
-
+  readonly icon = input<string>('');
   readonly shouldRender = computed(() => {
     const texto = String(this.texto() ?? '').trim();
     const clases = String(this.clases() ?? '').trim();

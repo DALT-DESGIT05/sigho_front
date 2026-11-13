@@ -1,9 +1,10 @@
+import { ImagenPipe } from '../../pipes/imagen.pipe';
 import { Component, input, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-card',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [ImagenPipe, RouterLink, RouterLinkActive],
   templateUrl: './card.component.html',
   styleUrl: './card.component.scss',
 })

@@ -6,7 +6,12 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "imagenes:generar": "node scripts/generar-imagenes.mjs",
+    "prebuild": "npm run imagenes:generar",
+    "prestart": "npm run imagenes:generar",
+    "pretest": "npm run imagenes:generar",
+    "prewatch": "npm run imagenes:generar"
   },
   "private": true,
   "packageManager": "npm@12.2.0",

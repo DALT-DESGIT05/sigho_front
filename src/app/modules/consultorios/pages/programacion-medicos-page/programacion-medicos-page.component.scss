@@ -1,0 +1,19 @@
+:host {
+  display: block;
+}
+
+.programacion-medicos__filtros {
+  position: relative;
+  z-index: 3;
+}
+
+// El section pertenece a CardGeneralComponent: permitir que los menús
+// salgan de esta tarjeta sin cambiar el overflow de las demás tarjetas.
+:host ::ng-deep .programacion-medicos__filtros > .app-card-general {
+  overflow: visible;
+}
+
+.programacion-medicos__tabla {
+  max-height: 60vh;
+  overflow: auto;
+}

@@ -1,5 +1,7 @@
 
 <div class="menu-reservas">
+
+  <!-- Encabezado -->
   <div class="mb-3">
     <app-alert
       subtitulo="GESTIÓN DE CITAS"
@@ -12,13 +14,16 @@
     </app-alert>
   </div>
 
+  <!-- Opciones de Gestión de Citas -->
   <div class="row g-3">
+
+    <!-- Reserva de Citas -->
     <div class="col-12 col-md-6 col-xl-3 menu-reservas__reserva">
       <app-card-general [showHeader]="false" [showFooter]="false" [elevacion]="true">
         <div class="menu-reservas__card menu-reservas__card--reserva">
           <div class="menu-reservas__icon">
             <img
-              src="/assets/svg/agendar cita.png"
+              [src]="'agendar_cita' | imagen"
               alt="Reserva de Citas"
               class="menu-reservas__icon-img"
             />
@@ -34,12 +39,13 @@
       </app-card-general>
     </div>
 
+    <!-- Anulación de Citas -->
     <div class="col-12 col-md-6 col-xl-3 menu-reservas__anulacion">
       <app-card-general [showHeader]="false" [showFooter]="false" [elevacion]="true">
         <div class="menu-reservas__card menu-reservas__card--anulacion">
           <div class="menu-reservas__icon">
             <img
-              src="/assets/svg/anular citas.png"
+              [src]="'anular_citas' | imagen"
               alt="Anulación de Citas"
               class="menu-reservas__icon-img"
             />
@@ -55,12 +61,13 @@
       </app-card-general>
     </div>
 
+    <!-- Historial de Citas -->
     <div class="col-12 col-md-6 col-xl-3 menu-reservas__historial">
       <app-card-general [showHeader]="false" [showFooter]="false" [elevacion]="true">
         <div class="menu-reservas__card menu-reservas__card--historial">
           <div class="menu-reservas__icon">
             <img
-              src="/assets/svg/historial.png"
+              [src]="'historial' | imagen"
               alt="Historial de Citas"
               class="menu-reservas__icon-img"
             />
@@ -76,12 +83,13 @@
       </app-card-general>
     </div>
 
+    <!-- Teleconsulta -->
     <div class="col-12 col-md-6 col-xl-3 menu-reservas__teleconsulta">
       <app-card-general [showHeader]="false" [showFooter]="false" [elevacion]="true">
         <div class="menu-reservas__card menu-reservas__card--teleconsulta">
           <div class="menu-reservas__icon">
             <img
-              src="/assets/svg/telemedicina.png"
+              [src]="'telemedicina' | imagen"
               alt="Telemedicina"
               class="menu-reservas__icon-img"
             />

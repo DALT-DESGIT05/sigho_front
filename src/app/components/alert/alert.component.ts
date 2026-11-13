@@ -33,6 +33,7 @@ export class AlertComponent {
 
   constructor() {
     effect(() => {
+      // Un cambio explícito del padre a visible=true restablece la alerta descartada.
       if (this.visible()) this.descartada.set(false);
     });
   }

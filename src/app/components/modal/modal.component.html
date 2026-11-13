@@ -1,5 +1,5 @@
 <ng-template #modalTemplate>
-  <div class="modal-header app-modal__header">
+  <div class="modal-header app-modal__header"  [class.app-modal__header--destacado]="headerDestacado()">
     <div class="app-modal__header-content">
       @if (resolvedTitle() || icon()) {
         <div class="app-modal__title-row">
@@ -17,6 +17,6 @@
   <div class="modal-body"><ng-content></ng-content></div>
 
   @if (showFooter()) {
-    <div class="modal-footer app-modal__footer"><ng-content select="[modal-footer]"></ng-content></div>
+    <div class="modal-footer app-modal__footer" [class.app-modal__footer--estandar]="footer_estandar()"><ng-content select="[modal-footer]"></ng-content></div>
   }
 </ng-template>

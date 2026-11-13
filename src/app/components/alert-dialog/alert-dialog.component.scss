@@ -1,0 +1,188 @@
+﻿:host {
+  display: contents;
+}
+
+.alert-dialog {
+  box-sizing: border-box;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+
+  background: var(--palette-white);
+  color: var(--palette-black);
+
+  border: 1px solid var(--palette-gray-500);
+  border-radius: 1rem;
+
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+}
+.alert-dialog::backdrop {
+  background: color-mix(in srgb, var(--palette-black) 38%, transparent);
+}
+
+.alert-dialog[open] {
+  animation: alert-dialog-entrada 360ms cubic-bezier(.2, .8, .25, 1);
+}
+
+.alert-dialog[open]::backdrop {
+  animation: alert-dialog-fondo-entrada 220ms ease-out;
+}
+
+.alert-dialog[open] .alert-dialog__visual {
+  animation: alert-dialog-icono 420ms 60ms ease-out both;
+}
+
+.alert-dialog.alert-dialog--saliendo {
+  animation: alert-dialog-salida 140ms ease-in forwards;
+}
+
+.alert-dialog.alert-dialog--saliendo::backdrop {
+  animation: alert-dialog-fondo-salida 140ms ease-in forwards;
+}
+
+.alert-dialog.alert-dialog--saliendo .alert-dialog__visual {
+  animation: none;
+}
+
+.alert-dialog__encabezado {
+  padding: .5rem .75rem;
+  font-size: .6875rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  color: var(--palette-black);
+  background: var(--palette-gray-100);
+  border-bottom: 1px solid var(--palette-gray-100);
+}
+
+.alert-dialog__visual {
+  width: 3.75rem;
+  height: 3.75rem;
+  font-size: 1.25rem;
+  color: var(--palette-primary-fap);
+  background: var(--palette-primary-fap-50);
+}
+
+.alert-dialog--success .alert-dialog__visual {
+  color: var(--palette-success);
+  background: var(--palette-success-50);
+}
+
+.alert-dialog--error .alert-dialog__visual {
+  color: var(--palette-danger);
+  background: var(--palette-danger-50);
+}
+
+.alert-dialog--warning .alert-dialog__visual {
+  color: var(--palette-warning-text);
+  background: var(--palette-warning-50);
+}
+
+.alert-dialog__texto {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.alert-dialog__titulo {
+  font-size: .875rem;
+  text-align: center;
+  line-height: 1.4;
+  color: var(--palette-black);
+}
+
+.alert-dialog__mensaje {
+  text-align: center;
+  font-size: .8125rem;
+  line-height: 1.6;
+  white-space: pre-line;
+  color: var(--palette-gray-600);
+}
+
+@media (max-width: 575.98px) {
+  .alert-dialog__visual {
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.25rem;
+  }
+
+  .alert-dialog__titulo {
+    font-size: .875rem;
+  }
+
+  .alert-dialog__mensaje {
+    font-size: .75rem;
+  }
+}
+
+@media (max-width: 359.98px) {
+  .alert-dialog__visual {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.125rem;
+  }
+}
+
+.alert-dialog--centrado {
+  border: .75rem solid var(--palette-gray-200);
+  border-radius: 2rem;
+}
+
+.alert-dialog--centrado .alert-dialog__visual {
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: .75rem;
+  font-size: 2rem;
+  overflow: hidden;
+}
+
+.alert-dialog--centrado .alert-dialog__texto {
+  flex: 0 1 auto;
+  width: 100%;
+}
+
+.alert-dialog--centrado .alert-dialog__titulo {
+  font-size: 1rem;
+}
+
+.alert-dialog__firma {
+  color: var(--palette-gray-500);
+  font-size: .5625rem;
+  overflow-wrap: anywhere;
+}
+
+@keyframes alert-dialog-entrada {
+  0% { opacity: 0; transform: translateY(.5rem) scale(.9); }
+  65% { opacity: 1; transform: translateY(0) scale(1.025); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes alert-dialog-salida {
+  to { opacity: 0; transform: translateY(.25rem) scale(.95); }
+}
+
+@keyframes alert-dialog-icono {
+  0% { opacity: 0; transform: scale(.65); }
+  65% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes alert-dialog-fondo-entrada {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes alert-dialog-fondo-salida {
+  to { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alert-dialog[open],
+  .alert-dialog.alert-dialog--saliendo,
+  .alert-dialog[open]::backdrop,
+  .alert-dialog.alert-dialog--saliendo::backdrop,
+  .alert-dialog[open] .alert-dialog__visual {
+    animation: none;
+  }
+}

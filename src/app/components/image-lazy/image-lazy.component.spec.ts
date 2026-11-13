@@ -43,4 +43,12 @@ describe('ImageLazyComponent', () => {
     expect(imageError).toHaveBeenCalled();
     expect((fixture.nativeElement.querySelector('img') as HTMLImageElement).getAttribute('src')).toBe('assets/fallback.png');
   });
+
+  it('resuelve el alias de la foto por defecto', () => {
+    component.cargarFallback();
+    fixture.detectChanges();
+
+    expect(component.fallbackSrc()).toBe('foto_por_defecto');
+    expect(fixture.nativeElement.querySelector('img').getAttribute('src')).toBe('images/3305803.png');
+  });
 });

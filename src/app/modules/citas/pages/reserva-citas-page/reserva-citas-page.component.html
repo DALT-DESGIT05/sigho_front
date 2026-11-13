@@ -1,5 +1,7 @@
 
 <div class="reserva-citas">
+
+  <!-- Encabezado -->
   <div class="reserva-citas__alert-principal">
     <app-alert
       subtitulo="RESERVA DE CITAS"
@@ -12,6 +14,7 @@
       [destacarTitulo]="true">
     </app-alert>
   </div>
+  <!-- Stepper horizontal -->
   <app-tabs
      variant="stepper-line"
     [tabs]="pasos()"
@@ -20,6 +23,7 @@
     (tabSelected)="seleccionarPaso($event)">
   </app-tabs>
 
+  <!-- Contenido de la etapa -->
   <section class="reserva-citas__contenido">
 
     <span class="reserva-citas__paso">
@@ -93,7 +97,7 @@
               <div class="reserva-citas__modalidad">
                 <app-card
                   title="Consulta Presencial"
-                  imageSrc="assets/svg/presencial.png"
+                  [imageSrc]="'svg_presencial' | imagen"
                   altText="Consulta Presencial"
                   variant="modalidad"
                   [elevacion]="true"
@@ -106,7 +110,7 @@
               <div class="reserva-citas__modalidad">
                 <app-card
                   title="Consulta Virtual"
-                  imageSrc="assets/svg/virtual.png"
+                  [imageSrc]="'svg_virtual' | imagen"
                   altText="Consulta Virtual"
                   variant="modalidad"
                   [elevacion]="true"
@@ -135,6 +139,8 @@
 
           </div>
 
+          <!-- RESUMEN DE SELECCIONES ANTERIORES -->
+
             @if (resumenSelecciones().length > 0) {
               <app-breadcrumb
                 [items]="resumenSelecciones()"
@@ -144,6 +150,8 @@
               </app-breadcrumb>
             }
 
+
+          <!-- LISTADO DE IPRESS -->
           <div class="reserva-citas__ipress-lista">
 
             @for (sede of ipress(); track sede.codigo) {
@@ -170,6 +178,8 @@
 </div>
       }
       @case (4) {
+
+        <!-- ENCABEZADO -->
         <div class="reserva-citas__encabezado-paso">
 
           <app-label texto="Selecciona la especialidad"></app-label>
@@ -186,6 +196,7 @@
 
         </div>
 
+        <!-- RESUMEN DE SELECCIONES ANTERIORES -->
         @if (resumenSelecciones().length > 0) {
           <app-breadcrumb
             [items]="resumenSelecciones()"
@@ -195,6 +206,7 @@
           </app-breadcrumb>
         }
 
+        <!-- BUSCADOR DE ESPECIALIDADES -->
         <div class="reserva-citas__buscador-especialidad">
 
           <app-input-filter
@@ -206,7 +218,7 @@
           </app-input-filter>
 
         </div>
-
+              <!-- LISTADO DE ESPECIALIDADES -->
         <div class="reserva-citas__especialidades-lista">
 
           @for (especialidad of especialidadesFiltradas(); track especialidad.codigo) {
@@ -233,9 +245,61 @@
         </div>
 
       }
+
       @case (5) {
-        <app-label texto="Selecciona el médico"></app-label>
+
+        <!-- ENCABEZADO -->
+        <div class="reserva-citas__encabezado-paso">
+
+          <app-label texto="Selecciona al médico"></app-label>
+
+          <div class="reserva-citas__alert-indicacion">
+            <app-alert
+              texto="REVISA LOS PROFESIONALES DISPONIBLES."
+              color="primary"
+              size="xs"
+              icon="fa-solid fa-user-doctor"
+              rounded="lg">
+            </app-alert>
+          </div>
+
+        </div>
+
+        <!-- RESUMEN DE SELECCIONES ANTERIORES -->
+         @if (resumenSelecciones().length > 0) {
+          <app-breadcrumb
+            [items]="resumenSelecciones()"
+            variant="resumen"
+            size="sm"
+            ariaLabel="Resumen de selecciones">
+          </app-breadcrumb>
+        }
+
+        <!-- LISTADO DE MÉDICOS -->
+        <div class="reserva-citas__medicos-lista">
+
+          @for (medico of medicos(); track medico.codigo) {
+
+            <app-card-persona
+              variante="medico"
+              [nombre]="medico.nombreCompleto"
+              [documento]="'CMP: ' + medico.cmp"
+              [detalle]="medico.especialidad.trim() || '-'"
+              [imagen]="medico.fotoUrl ?? ''"
+              textoBoton="Seleccionar"
+              iconoBoton="fa-solid fa-check"
+              [botonAnchoCompleto]="false"
+              (seleccionar)="seleccionarMedico(medico)">
+            </app-card-persona>
+
+          } @empty {
+            <p>No hay médicos disponibles para esta especialidad.</p>
+          }
+
+        </div>
+
       }
+
       @case (6) {
         <app-label texto="Selecciona la fecha y horario"></app-label>
       }

@@ -1,3 +1,4 @@
+import { ImagenPipe } from '../../../../pipes/imagen.pipe';
 import { Component, computed, signal } from '@angular/core';
 import { TabItem, TabsComponent } from '../../../../components/tabs/tabs.component';
 import { AlertComponent } from '../../../../components/alert/alert.component';
@@ -10,7 +11,7 @@ import { BreadcrumbComponent,BreadcrumbItem } from '../../../../components/bread
 import { InputFilterComponent } from '../../../../components/input-filter/input-filter.component';
 
 @Component({
-  imports: [TabsComponent, AlertComponent,LabelComponent,CardPersonaComponent,CardComponent,CardIpressComponent,BreadcrumbComponent,InputFilterComponent],
+  imports: [ImagenPipe, TabsComponent, AlertComponent,LabelComponent,CardPersonaComponent,CardComponent,CardIpressComponent,BreadcrumbComponent,InputFilterComponent],
   selector: 'app-reserva-citas-page',
   styleUrl: './reserva-citas-page.component.scss',
   templateUrl: './reserva-citas-page.component.html',
@@ -18,7 +19,9 @@ import { InputFilterComponent } from '../../../../components/input-filter/input-
 export class ReservaCitasPageComponent {
 
 
+
   readonly afiliados = signal<AfiliadoReserva[]>([
+    // datos temporales de prueba
     {
       codigo: 'AF001',
       nombreCompleto: 'AFILIADO DE PRUEBA UNO',
@@ -37,41 +40,76 @@ export class ReservaCitasPageComponent {
     {
       codigo: 'LP',
       nombre: 'HOSPITAL LAS PALMAS',
-      imagen: 'assets/images/823.png',
+      imagen: 'hospital_las_palmas',
     },
     {
       codigo: 'HC',
       nombre: 'HOSPITAL CENTRAL FAP',
-      imagen: 'assets/images/721.png',
+      imagen: 'hospital_central_fap',
     },
     {
       codigo: 'SG',
       nombre: 'SAN GABINO',
-      imagen: 'assets/images/828.png',
+      imagen: 'san_gabino',
     },
   ]);
 
-  readonly ipressSeleccionada = signal<{
-    codigo: string;
-    nombre: string;
-    imagen: string;
-  } | null>(null);
+ // DATOS DE PRUEBA MEDICOS
 
-  seleccionarIpress(sede: {
-    codigo: string;
-    nombre: string;
-    imagen: string;
-  }): void {
+  readonly medicos = signal([
+    {
+      codigo: 'MED001',
+      nombreCompleto: 'MÉDICO DE PRUEBA UNO',
+      cmp: '00001',
+      especialidad: 'TRAUMATOLOGÍA GENERAL',
+      fotoUrl: null as string | null
+    },
+    {
+      codigo: 'MED002',
+      nombreCompleto: 'MÉDICO DE PRUEBA DOS',
+      cmp: '00002',
+      especialidad: 'TRAUMATOLOGÍA GENERAL',
+      fotoUrl: null as string | null
+    },
+    {
+      codigo: 'MED003',
+      nombreCompleto: 'MÉDICO DE PRUEBA TRES',
+      cmp: '00003',
+      especialidad: 'TRAUMATOLOGÍA INFATIL',
+      fotoUrl: null as string | null
+    },
+    {
+      codigo: 'MED004',
+      nombreCompleto: 'MÉDICO DE PRUEBA CUATRO',
+      cmp: '00004',
+      especialidad: 'TRAUMATOLOGÍA GENERAL',
+      fotoUrl: null as string | null
+    }
+  ]);
+  readonly ipressSeleccionada = signal<{codigo: string; nombre: string;imagen: string;} | null>(null);
+  readonly medicoSeleccionado = signal<{ codigo: string; nombreCompleto: string; cmp: string; fotoUrl: string | null } | null>(null);
+  // Etapa actual
+  readonly pasoActual = signal(1);
+  readonly afiliadoSeleccionado = signal<AfiliadoReserva | null>(null);
+  readonly busquedaEspecialidad = signal('');
+  readonly especialidadSeleccionada = signal<{codigo: string; nombre: string;imagen: string; } | null>(null);
+
+  // Última etapa habilitada
+  readonly pasoHabilitado = signal(1);
+
+  seleccionarMedico(medico: {codigo: string; nombreCompleto: string;cmp: string; fotoUrl: string | null;especialidad: string | null;}): void {
+    this.medicoSeleccionado.set(medico);
+    this.avanzarPaso();
+  }
+
+  seleccionarIpress(sede: {codigo: string;nombre: string;imagen: string;}): void {
     this.ipressSeleccionada.set(sede);
     this.avanzarPaso();
   }
 
-  readonly pasoActual = signal(1);
-  readonly afiliadoSeleccionado = signal<AfiliadoReserva | null>(null);
-  readonly busquedaEspecialidad = signal('');
 
-  readonly pasoHabilitado = signal(1);
 
+  // Etapas del proceso
   readonly pasos = computed<TabItem[]>(() => {
     const habilitado = this.pasoHabilitado();
 
@@ -86,13 +124,12 @@ export class ReservaCitasPageComponent {
     ].map((paso, index) => ({...paso,disabled: index + 1 > habilitado,}));
   });
 
+  // Pasos completados
   readonly pasosCompletados = computed(() =>
-    Array.from(
-      { length: this.pasoActual() - 1 },
-      (_, index) => String(index + 1)
-    )
+    Array.from({ length: this.pasoActual() - 1 },(_, index) => String(index + 1))
   );
 
+  // Cambiar de etapa
   seleccionarPaso(id: string): void {
     const paso = Number(id);
 
@@ -105,6 +142,7 @@ export class ReservaCitasPageComponent {
     this.pasoActual.set(paso);
   }
 
+  // Se utilizará cuando se complete cada etapa
   avanzarPaso(): void {
     const siguiente = this.pasoActual() + 1;
 
@@ -138,6 +176,7 @@ export class ReservaCitasPageComponent {
     const afiliado = this.afiliadoSeleccionado();
     const tipo = this.tipoAtencionSeleccionado();
     const sede = this.ipressSeleccionada();
+    const especialidad = this.especialidadSeleccionada();
 
     if (paso >= 2 && afiliado) {
       items.push({label: `AFILIADO: ${afiliado.nombreCompleto}`});
@@ -152,34 +191,42 @@ export class ReservaCitasPageComponent {
       items.push({label: `IPRESS: ${sede.nombre}`
       });
     }
+    if (paso >= 5 && especialidad) {
+      items.push({label: `ESPECIALIDAD: ${especialidad.nombre}`
+      });
+    }
+    if (paso >= 6 && especialidad) {
+      items.push({label: `ESPECIALIDAD: ${especialidad.nombre}`
+      });
+    }
 
     return items;
   });
 
   readonly especialidades = signal([
-    { codigo: '002', nombre: 'CARDIOLOGÍA', imagen: 'assets/svg/002.png' },
-    { codigo: '003', nombre: 'CIRUGÍA GENERAL', imagen: 'assets/svg/003.png' },
-    { codigo: '004', nombre: 'CIRUGÍA PLÁSTICA', imagen: 'assets/svg/004.png' },
-    { codigo: '005', nombre: 'UROLOGÍA', imagen: 'assets/svg/005.png' },
-    { codigo: '006', nombre: 'OTORRINOLARINGOLOGÍA', imagen: 'assets/svg/006.png' },
-    { codigo: '008', nombre: 'OFTALMOLOGÍA', imagen: 'assets/svg/008.png' },
-    { codigo: '009', nombre: 'GASTROENTEROLOGÍA', imagen: 'assets/svg/009.png' },
-    { codigo: '011', nombre: 'MEDICINA INTERNA', imagen: 'assets/svg/011.png' },
-    { codigo: '012', nombre: 'PSICOLOGÍA', imagen: 'assets/svg/012.png' },
-    { codigo: '013', nombre: 'PSIQUIATRÍA', imagen: 'assets/svg/013.png' },
-    { codigo: '014', nombre: 'NEUMOLOGÍA', imagen: 'assets/svg/014.png' },
-    { codigo: '015', nombre: 'NEUROLOGÍA', imagen: 'assets/svg/015.png' },
-    { codigo: '016', nombre: 'CIRUGÍA TÓRAX Y CARDIOVASCULAR', imagen: 'assets/svg/016.png' },
-    { codigo: '017', nombre: 'DERMATOLOGÍA', imagen: 'assets/svg/017.png' },
-    { codigo: '018', nombre: 'MEDICINA FÍSICA Y REHABILITACIÓN', imagen: 'assets/svg/018.png' },
-    { codigo: '020', nombre: 'REUMATOLOGÍA', imagen: 'assets/svg/020.png' },
-    { codigo: '021', nombre: 'TRAUMATOLOGÍA', imagen: 'assets/svg/021.png' },
-    { codigo: '022', nombre: 'NEFROLOGÍA', imagen: 'assets/svg/022.png' },
-    { codigo: '024', nombre: 'ENDOCRINOLOGÍA', imagen: 'assets/svg/024.png' },
-    { codigo: '046', nombre: 'ONCOLOGÍA', imagen: 'assets/svg/046.png' },
-    { codigo: '048', nombre: 'HEMATOLOGÍA', imagen: 'assets/svg/048.png' },
-    { codigo: '079', nombre: 'LABORATORIO', imagen: 'assets/svg/079.png' },
-    { codigo: '083', nombre: 'INFECTOLOGÍA', imagen: 'assets/svg/083.png' }
+    { codigo: '002', nombre: 'CARDIOLOGÍA', imagen: 'cardiologia' },
+    { codigo: '003', nombre: 'CIRUGÍA GENERAL', imagen: 'cirugia_general' },
+    { codigo: '004', nombre: 'CIRUGÍA PLÁSTICA', imagen: 'cirugia_plastica' },
+    { codigo: '005', nombre: 'UROLOGÍA', imagen: 'urologia' },
+    { codigo: '006', nombre: 'OTORRINOLARINGOLOGÍA', imagen: 'otorrinolaringologia' },
+    { codigo: '008', nombre: 'OFTALMOLOGÍA', imagen: 'oftalmologia' },
+    { codigo: '009', nombre: 'GASTROENTEROLOGÍA', imagen: 'gastroenterologia' },
+    { codigo: '011', nombre: 'MEDICINA INTERNA', imagen: 'medicina_interna' },
+    { codigo: '012', nombre: 'PSICOLOGÍA', imagen: 'psicologia' },
+    { codigo: '013', nombre: 'PSIQUIATRÍA', imagen: 'psiquiatria' },
+    { codigo: '014', nombre: 'NEUMOLOGÍA', imagen: 'neumologia' },
+    { codigo: '015', nombre: 'NEUROLOGÍA', imagen: 'neurologia' },
+    { codigo: '016', nombre: 'CIRUGÍA TÓRAX Y CARDIOVASCULAR', imagen: 'cirugia_torax_y_cardiovascular' },
+    { codigo: '017', nombre: 'DERMATOLOGÍA', imagen: 'dermatologia' },
+    { codigo: '018', nombre: 'MEDICINA FÍSICA Y REHABILITACIÓN', imagen: 'medicina_fisica_y_rehabilitacion' },
+    { codigo: '020', nombre: 'REUMATOLOGÍA', imagen: 'reumatologia' },
+    { codigo: '021', nombre: 'TRAUMATOLOGÍA', imagen: 'traumatologia' },
+    { codigo: '022', nombre: 'NEFROLOGÍA', imagen: 'nefrologia' },
+    { codigo: '024', nombre: 'ENDOCRINOLOGÍA', imagen: 'endocrinologia' },
+    { codigo: '046', nombre: 'ONCOLOGÍA', imagen: 'oncologia' },
+    { codigo: '048', nombre: 'HEMATOLOGÍA', imagen: 'hematologia' },
+    { codigo: '079', nombre: 'LABORATORIO', imagen: 'laboratorio' },
+    { codigo: '083', nombre: 'INFECTOLOGÍA', imagen: 'infectologia' }
   ]);
 
 
@@ -193,17 +240,9 @@ export class ReservaCitasPageComponent {
     return this.especialidades().filter(especialidad =>especialidad.nombre.toLocaleLowerCase('es').includes(busqueda));
   });
 
-  readonly especialidadSeleccionada = signal<{
-    codigo: string;
-    nombre: string;
-    imagen: string;
-  } | null>(null);
 
-  seleccionarEspecialidad(especialidad: {
-    codigo: string;
-    nombre: string;
-    imagen: string;
-  }): void {
+
+  seleccionarEspecialidad(especialidad: {codigo: string;nombre: string;imagen: string; }): void {
     this.especialidadSeleccionada.set(especialidad);
     this.avanzarPaso();
   }

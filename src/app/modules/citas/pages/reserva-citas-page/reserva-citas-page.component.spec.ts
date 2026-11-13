@@ -18,4 +18,9 @@ describe('ReservaCitasPageComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('usa alias descriptivos para especialidades y establecimientos', () => {
+    expect(component.especialidades()[0].imagen).toBe('cardiologia');
+    expect(component.ipress()[0].imagen).toBe('hospital_las_palmas');
+  });
 });

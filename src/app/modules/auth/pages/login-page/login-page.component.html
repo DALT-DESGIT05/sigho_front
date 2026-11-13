@@ -105,7 +105,6 @@
     }
   </section>
 </main>
-<!-- Modal -->
 <div class="modal fade" id="modal_code" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -147,12 +146,10 @@
       </div>
 
       <div class="modal-body text-center">
-        <!-- QR -->
-         @if(mostrarQr == false){
-           @if (qrcode_url) { <qrcode [qrdata]="qrcode_url" [width]="200"></qrcode> }
-         }
+        @if(mostrarQr == false){
+          @if (qrcode_url) { <qrcode [qrdata]="qrcode_url" [width]="200"></qrcode> }
+        }
 
-        <!-- Inputs OTP: 6 inputs MANUALES -->
         <div class="d-flex justify-content-center mt-4 gap-2">
           <input #otp id="otp-0" maxlength="1" inputmode="numeric" autocomplete="one-time-code"
                  type="text" class="form-control text-center"

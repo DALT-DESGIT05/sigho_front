@@ -1,4 +1,4 @@
-import { Component, inject, ViewChild, CUSTOM_ELEMENTS_SCHEMA, signal, computed, OnDestroy, OnInit, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, inject, ViewChild, CUSTOM_ELEMENTS_SCHEMA, signal, OnDestroy, OnInit, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { FormField, email, form, minLength, required } from '@angular/forms/signals';
 import { LoginService } from '../../../../services/auth/login.service';
 import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
@@ -11,6 +11,7 @@ import { QRCodeComponent } from 'angularx-qrcode';
 import { MenuService } from '../../../../services/menu.service';
 import { Modal } from 'bootstrap';
 import { ButtonComponent } from '../../../../components/button/button.component';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-login-page',
@@ -78,7 +79,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   isLoading: boolean = false;
 
-  readonly canSendPasswordReset = computed(() => this.reset_form.usuario_rest().valid() && this.reset_form.email_rest().valid() && !this.estado && !this.resetRequestInFlight);
+  canSendPasswordReset(): boolean {
+    return this.reset_form.usuario_rest().valid()
+      && this.reset_form.email_rest().valid()
+      && !this.estado
+      && !this.resetRequestInFlight;
+  }
 
 
   ngOnInit(): void {
@@ -190,9 +196,6 @@ export class LoginPageComponent implements OnInit, OnDestroy {
           this.loginRequestInFlight = false;
           this.estado = false;
           document.body.classList.remove('recaptcha-visible');
-          // if (success) {
-          //   this.two_fa_enable();
-          // }
           Swal.fire({
             title: "Login",
             text: "Usuario logueado correctamente",
@@ -318,14 +321,14 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             text: "Se envió el código a su correo",
             icon: "success"
           });
-          this.recaptchaToken = null;  // Restablecer el token después del éxito
+          this.recaptchaToken = null;
           this.open_modal();
           this.isLoading = false;
         },
         error: (error) => {
           this.resetRequestInFlight = false;
           this.estado = false;
-          this.recaptchaToken = null;  // Restablecer el token en caso de error
+          this.recaptchaToken = null;
           this.isLoading = false;
           const title = "Restablecimiento";
           const message = error.data?.message || "Error desconocido";
@@ -372,6 +375,10 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   }
 
   restablecer_by_correo() {
+    if (this.estado) {
+      return;
+    }
+
     const passwordFields = [
       this.reset_form.codigo_rest(),
       this.reset_form.psw_rest(),
@@ -392,9 +399,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     const dominio = Number(data.dominio_rest) || 0;
     const ip_usuario = '127.0.0.1';
 
-    this.mail_service.restablecer_by_correo(nuevaclave, repetirclave, codigoverificacion, usuario, correo, dominio, ip_usuario).subscribe({
-      next: (response) => {
+    this.mail_service.restablecer_by_correo(nuevaclave, repetirclave, codigoverificacion, usuario, correo, dominio, ip_usuario).pipe(
+      finalize(() => {
         this.estado = false;
+      }),
+    ).subscribe({
+      next: (response) => {
         Swal.fire({
           title: "Restablecimiento",
           text: "Su clave se cambió con éxito",
@@ -404,9 +414,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         this.reset_psw = false;
       },
       error: (error) => {
-        this.estado = false;
         if (error.status === 422 && error.data.errors) {
-          // Recoger todos los errores en un solo mensaje
           let errorMessage = '<ul>';
           Object.keys(error.data.errors).forEach(field => {
             error.data.errors[field].forEach((errMsg: string) => {
@@ -414,15 +422,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             });
           });
           errorMessage += '</ul>';
-
-          // Mostrar los errores en un Swal
           Swal.fire({
             title: "Error al restablecer la clave",
             html: errorMessage,
             icon: "error"
           });
         } else {
-          // Manejar otros tipos de errores
           Swal.fire({
             title: "Error",
             text: "Ocurrió un error inesperado",
@@ -450,59 +455,46 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   onOtpInput(event: Event, index: number) {
     const input = event.target as HTMLInputElement;
-    let value = (input.value || '').replace(/\D/g, ''); // solo dígitos
+    let value = (input.value || '').replace(/\D/g, '');
 
     if (!value) {
       input.value = '';
       this.otpDigits[index] = '';
       return;
     }
-
-    // si el user pegó varios caracteres o pegó por error, distribuimos
     if (value.length > 1) {
       this.fillFrom(index, value);
       return;
     }
-
-    // valor válido: un dígito
     input.value = value;
     this.otpDigits[index] = value;
-
-    // avanzar al siguiente SOLO porque el usuario digitó un dígito
     if (index < this.otpDigits.length - 1) {
       const arr = this.otpInputs.toArray();
       const next = arr[index + 1];
       next?.nativeElement.focus();
       next?.nativeElement.select();
     }
-
-    // si ya completó los 6 → validar
     if (this.otpDigits.every(d => d !== '')) {
       const code = this.otpDigits.join('');
       this.validateOtp(code);
     }
   }
-
-  // ===== keydown handler (backspace / flechas) =====
   onOtpKeydown(event: KeyboardEvent, index: number) {
     const key = event.key;
     const input = event.target as HTMLInputElement;
 
     if (key === 'Backspace') {
-      // si hay valor en la casilla, borrarlo y quedarse
       if (input.value) {
         input.value = '';
         this.otpDigits[index] = '';
         event.preventDefault();
         return;
       }
-
-      // si está vacía, ir a la anterior
       if (index > 0) {
         const prev = this.otpInputs.toArray()[index - 1];
         prev.nativeElement.focus();
         prev.nativeElement.select();
-        this.otpDigits[index - 1] = ''; // opcional limpiar anterior
+        this.otpDigits[index - 1] = '';
       }
     } else if (key === 'ArrowLeft') {
       if (index > 0) this.otpInputs.toArray()[index - 1].nativeElement.focus();
@@ -511,15 +503,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       if (index < this.otpDigits.length - 1) this.otpInputs.toArray()[index + 1].nativeElement.focus();
       event.preventDefault();
     } else {
-      // permitir solo dígitos (prevent otras teclas, ignorar combinaciones como Ctrl+V)
       const isModifier = event.ctrlKey || event.metaKey || event.altKey;
       if (!/^[0-9]$/.test(key) && !isModifier && key.length === 1) {
         event.preventDefault();
       }
     }
   }
-
-  // ===== paste handler (pegar cadena y distribuir) =====
   onOtpPaste(ev: ClipboardEvent, startIndex: number) {
     ev.preventDefault();
     const clipboard = ev.clipboardData?.getData('text') || '';
@@ -527,8 +516,6 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     if (!digits) return;
     this.fillFrom(startIndex, digits);
   }
-
-  // ===== helper para distribuir dígitos a partir del índice =====
   fillFrom(startIndex: number, digits: string) {
     const arr = this.otpInputs.toArray();
     const chars = digits.split('');
@@ -538,8 +525,6 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       const el = arr[startIndex + i];
       if (el) el.nativeElement.value = d;
     }
-
-    // focus al primer input vacío después del bloque rellenado (o al último si está completo)
     const nextEmpty = this.otpDigits.findIndex((v, idx) => v === '' && idx >= startIndex);
     const focusIndex = nextEmpty === -1 ? this.otpDigits.length - 1 : nextEmpty;
     arr[focusIndex]?.nativeElement.focus();
@@ -551,8 +536,16 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   }
 
   validateOtp(otpCode: string) {
+    if (this.isLoadingOtp) {
+      return;
+    }
 
-    this.login_service.validate_2fa(otpCode).subscribe({
+    this.isLoadingOtp = true;
+    this.login_service.validate_2fa(otpCode).pipe(
+      finalize(() => {
+        this.isLoadingOtp = false;
+      }),
+    ).subscribe({
       next: (resp) => {
         Swal.fire({
           title: 'Autenticación',
@@ -569,7 +562,6 @@ export class LoginPageComponent implements OnInit, OnDestroy {
           icon: 'error'
         });
         this.clearOtp();
-        // focus al primer input
         setTimeout(() => this.otpInputs.first?.nativeElement.focus(), 0);
       }
     });

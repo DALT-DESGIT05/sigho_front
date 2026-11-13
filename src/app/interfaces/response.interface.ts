@@ -1,7 +1,7 @@
 export interface ResponseInteface<T> {
   status: boolean;
   code: number;
-  errors: string[];
+  errors: string[] | Record<string, string[]>;
   data: T;
   message: string | null;
   identifier: string;

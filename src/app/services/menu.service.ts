@@ -118,7 +118,6 @@ export class MenuService {
     return {
       id_formulario: String(formulario.id_formulario),
       label: this.cleanLabel(formulario.nombre_formulario),
-      // 🔹 Cambiado para conservar la propiedad en el objeto pase lo que pase
       link: this.normalizeLink(formulario.url ?? formulario.link ?? formulario.ruta),
       icon: this.normalizeIcon(formulario.icon ?? formulario.icono, children?.length ? 'fa fa-folder-o' : 'fa fa-file-text-o'),
       children
@@ -184,10 +183,9 @@ export class MenuService {
       && /(^|\s)fa-[a-z0-9-]+(\s|$)/i.test(icon);
   }
 
-  // 🔹 Modificado para que no purgue la propiedad al serializar con JSON.stringify
   private normalizeLink(link: unknown): string | undefined {
     if (link === null || link === undefined || link === '') {
-      return ''; // Retornamos un string vacío en vez de undefined para forzar el guardado
+      return '';
     }
 
     return String(link);

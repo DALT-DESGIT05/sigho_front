@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { FormField, disabled, email, form, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
@@ -82,6 +89,10 @@ const ADMISION_INICIAL: AdmisionFormValue = {
   prioridad: 'I',
 };
 
+/** RN007: a companion is required for minors and older adults (Ley 30490: 60+ years). */
+const EDAD_MAYORIA = 18;
+const EDAD_ADULTO_MAYOR = 60;
+
 @Component({
   selector: 'app-admision',
   imports: [
@@ -122,25 +133,71 @@ export class AdmisionComponents {
     return this.nombre_completo(paciente);
   });
 
-  readonly es_afiliado_paciente = computed(() => {
-    const pac = this.paciente_seleccionado();
-    if (!pac) {
-      return false;
-    }
-    if (pac.codigo_afiliado) {
-      return true;
-    }
-    if (pac.cod_situ !== null && pac.cod_situ !== undefined) {
-      return [1, 11, 12].includes(Number(pac.cod_situ));
-    }
-    return false;
-  });
+  /** Active situations in sifsa1.fstsituacion: ACTIVO, AFILIADO POR HOSPITAL, AFILIADO POR IPRESS. */
+  private static readonly SITUACIONES_AFILIADO_ACTIVO = [1, 11, 12];
 
   readonly badge_iafas_header = computed(() => {
-    if (this.admision_model().paciente_fap || this.es_afiliado_paciente()) {
-      return 'AFILIADO IAFAS - FOSFAP';
+    const paciente = this.paciente_seleccionado();
+    const es_afiliado_activo =
+      paciente?.cod_situ !== null &&
+      paciente?.cod_situ !== undefined &&
+      AdmisionComponents.SITUACIONES_AFILIADO_ACTIVO.includes(Number(paciente.cod_situ));
+
+    return this.admision_model().paciente_fap && es_afiliado_activo
+      ? 'AFILIADO IAFAS - FOSFAP'
+      : null;
+  });
+
+  readonly nsa_letra_paciente_seleccionado = computed(() => {
+    const paciente = this.paciente_seleccionado();
+    if (!paciente) {
+      return null;
     }
-    return null;
+    const nsa = paciente.nsa?.trim();
+    if (!nsa) {
+      return null;
+    }
+
+    const esTitular =
+      !paciente.parentesco ||
+      this.normalizar(paciente.parentesco) === 'TITULAR' ||
+      this.normalizar(paciente.parentesco) === 'T' ||
+      this.normalizar(paciente.parentesco) === 'A' ||
+      paciente.tipo_afiliado === 'TITULAR';
+
+    const letra = (
+      paciente.codigo_parentesco?.trim() || (esTitular ? 'A' : '')
+    ).toUpperCase();
+
+    return letra && !nsa.toUpperCase().endsWith(letra)
+      ? `${nsa}${letra}`
+      : nsa.toUpperCase();
+  });
+
+  readonly es_afiliado_paciente_seleccionado = computed(() => {
+    const paciente = this.paciente_seleccionado();
+    if (!paciente) {
+      return false;
+    }
+    if (typeof paciente.es_afiliado === 'boolean') {
+      return paciente.es_afiliado;
+    }
+    const situ = paciente.cod_situ;
+    if (situ !== null && situ !== undefined) {
+      return AdmisionComponents.SITUACIONES_AFILIADO_ACTIVO.includes(Number(situ));
+    }
+    return Boolean(paciente.codigo_afiliado);
+  });
+
+  readonly estado_afiliacion_paciente_seleccionado = computed(() => {
+    const paciente = this.paciente_seleccionado();
+    if (!paciente) {
+      return 'NO AFILIADO';
+    }
+    if (paciente.estado_afiliacion) {
+      return paciente.estado_afiliacion;
+    }
+    return this.es_afiliado_paciente_seleccionado() ? 'AFILIADO' : 'NO AFILIADO';
   });
 
   readonly nombre_titular_completo = computed(() => {
@@ -194,6 +251,30 @@ export class AdmisionComponents {
   readonly validacion_solicitada = signal(false);
   readonly guardando = signal(false);
   readonly registrando_acompanante = signal(false);
+  /** True once a companion was registered for the selected patient in this admission. */
+  readonly acompanante_registrado = signal(false);
+
+  /** RN007: why the selected patient needs a companion, or null when none is required or one exists. */
+  readonly motivo_acompanante_requerido = computed<string | null>(() => {
+    if (this.acompanante_registrado() || this.paciente_seleccionado()?.tiene_acompanante) {
+      return null;
+    }
+
+    const modelo = this.admision_model();
+    if (modelo.paciente_nn) {
+      return null;
+    }
+
+    const edad = this.edad_para_alerta();
+    if (edad !== null && edad < EDAD_MAYORIA) {
+      return 'es menor de edad';
+    }
+    if (edad !== null && edad >= EDAD_ADULTO_MAYOR) {
+      return 'es adulto mayor';
+    }
+
+    return modelo.ind_discapacitado ? 'tiene una discapacidad' : null;
+  });
   readonly guardando_contacto = signal(false);
   readonly validacion_contacto_solicitada = signal(false);
   readonly contacto_campo = signal<'celular' | 'correo_electronico'>('celular');
@@ -265,15 +346,37 @@ export class AdmisionComponents {
       }),
     );
 
+  /** Emergency admission origins, in display order (sighoweb.m_procedencia.nom_proc). */
+  private static readonly PROCEDENCIAS_ADMISION = ['ASO', 'AMB', 'EXA', 'REF'];
+
+  /** Keeps only the admission origins in their configured order; falls back to all when none match. */
+  filtrar_procedencias(procedencias: SelectOption[]): SelectOption[] {
+    const orden = AdmisionComponents.PROCEDENCIAS_ADMISION;
+    const filtradas = procedencias
+      .filter((item) => orden.includes(this.codigo_procedencia(item)))
+      .sort(
+        (a, b) =>
+          orden.indexOf(this.codigo_procedencia(a)) - orden.indexOf(this.codigo_procedencia(b)),
+      );
+
+    return filtradas.length > 0 ? filtradas : procedencias;
+  }
+
+  private codigo_procedencia(item: SelectOption): string {
+    return String((item as SelectOption & { codigo?: string }).codigo ?? '')
+      .trim()
+      .toUpperCase();
+  }
+
   readonly mostrar_paciente = (paciente: PacienteBusqueda): string => {
-    const nombre = this.nombre_completo(paciente);
+    const nsa = paciente.nsa?.trim();
+    const codigo_parentesco = paciente.codigo_parentesco?.trim();
+    const nsa_parentesco = nsa ? `${nsa}${codigo_parentesco ?? ''}` : '';
     const documento = [paciente.tipo_documento, paciente.numero_documento]
       .filter(Boolean)
       .join(' ');
 
-    return documento
-      ? `${nombre} - ${documento}`
-      : nombre;
+    return [nsa_parentesco, this.nombre_completo(paciente), documento].filter(Boolean).join(' - ');
   };
 
   constructor() {
@@ -287,88 +390,57 @@ export class AdmisionComponents {
       ])
       .subscribe({
         next: ({ data }) => {
-        this.tipos_paciente = data.tipos_paciente;
-        this.tipo_documento_options.set(data.tipos_documento);
-        this.sexo_acompanante_options.set(
-          data.sexos.map((item) => ({ value: item.codigo, label: item.label })),
-        );
-        this.parentesco_options.set(data.parentescos);
+          this.tipos_paciente = data.tipos_paciente;
+          this.tipo_documento_options.set(data.tipos_documento);
+          this.sexo_acompanante_options.set(
+            data.sexos.map((item) => ({ value: item.codigo, label: item.label })),
+          );
+          this.parentesco_options.set(data.parentescos);
 
-        const procedencias_permitidas = ['ASO', 'AMB', 'EXA'];
-        const procedencias_filtradas = data.procedencias
-          .filter((item) => {
-            const codigo = String(
-              (item as SelectOption & { codigo?: string }).codigo ?? '',
-            ).toUpperCase();
-            const label = this.normalizar(item.label);
-            return (
-              procedencias_permitidas.includes(codigo) ||
-              label.includes('A SOLICITUD') ||
-              label.includes('AMBULATORIO') ||
-              label.includes('EXAMEN')
-            );
-          })
-          .sort((a, b) => {
-            const codA = String(
-              (a as SelectOption & { codigo?: string }).codigo ?? '',
-            ).toUpperCase();
-            const codB = String(
-              (b as SelectOption & { codigo?: string }).codigo ?? '',
-            ).toUpperCase();
-            const ordenA = codA === 'ASO' ? 0 : codA === 'AMB' ? 1 : 2;
-            const ordenB = codB === 'ASO' ? 0 : codB === 'AMB' ? 1 : 2;
-            return ordenA - ordenB;
+          const opciones_procedencia = this.filtrar_procedencias(data.procedencias);
+          this.procedencia_options.set(opciones_procedencia);
+
+          const procedencia_a_solicitud = opciones_procedencia.find(
+            (item) => this.codigo_procedencia(item) === 'ASO',
+          );
+          const procedencia_por_defecto_id =
+            (procedencia_a_solicitud?.value as number | undefined) ?? null;
+
+          const niveles =
+            (data.niveles_triaje ?? []).length > 0
+              ? data.niveles_triaje.map((nivel) => ({
+                  value: nivel.value,
+                  label: nivel.label,
+                  color: this.util_service.color_prioridad(nivel.color),
+                }))
+              : [
+                  { value: 'I', label: 'Resucitación', color: 'red' },
+                  { value: 'II', label: 'Emergencia', color: 'orange' },
+                  { value: 'III', label: 'Urgencia', color: 'yellow' },
+                  { value: 'IV', label: 'Urgencia Menor', color: 'green' },
+                  { value: 'V', label: 'Sin Urgencia', color: 'blue' },
+                ];
+          this.prioridades.set(niveles);
+
+          const opciones_prioridad = niveles.map((nivel) => ({
+            value: nivel.value,
+            label: `${nivel.value} - ${nivel.label}`,
+          }));
+          this.prioridad_options.set(opciones_prioridad);
+
+          this.actualizar_modelo({
+            especialidad_id: null,
+            procedencia_id: procedencia_por_defecto_id,
+            prioridad: 'I',
           });
-
-        const opciones_procedencia =
-          procedencias_filtradas.length > 0 ? procedencias_filtradas : data.procedencias;
-        this.procedencia_options.set(opciones_procedencia);
-
-        const procedencia_a_solicitud = opciones_procedencia.find((item) => {
-          const codigo = String(
-            (item as SelectOption & { codigo?: string }).codigo ?? '',
-          ).toUpperCase();
-          const label = this.normalizar(item.label);
-          return codigo === 'ASO' || label.includes('A SOLICITUD');
-        });
-        const procedencia_por_defecto_id =
-          (procedencia_a_solicitud?.value as number | undefined) ?? null;
-
-        const niveles =
-          (data.niveles_triaje ?? []).length > 0
-            ? data.niveles_triaje.map((nivel) => ({
-                value: nivel.value,
-                label: nivel.label,
-                color: this.util_service.color_prioridad(nivel.color),
-              }))
-            : [
-                { value: 'I', label: 'Resucitación', color: 'red' },
-                { value: 'II', label: 'Emergencia', color: 'orange' },
-                { value: 'III', label: 'Urgencia', color: 'yellow' },
-                { value: 'IV', label: 'Urgencia Menor', color: 'green' },
-                { value: 'V', label: 'Sin Urgencia', color: 'blue' },
-              ];
-        this.prioridades.set(niveles);
-
-        const opciones_prioridad = niveles.map((nivel) => ({
-          value: nivel.value,
-          label: `${nivel.value} - ${nivel.label}`,
-        }));
-        this.prioridad_options.set(opciones_prioridad);
-
-        this.actualizar_modelo({
-          especialidad_id: null,
-          procedencia_id: procedencia_por_defecto_id,
-          prioridad: 'I',
-        });
-        this.actualizar_tipo_paciente();
-      },
-      error: (error: { message?: string }) => {
-        this.util_service.mostrar_error(
-          error.message ?? 'No se pudieron cargar los catálogos de Emergencia.',
-        );
-      },
-    });
+          this.actualizar_tipo_paciente();
+        },
+        error: (error: { message?: string }) => {
+          this.util_service.mostrar_error(
+            error.message ?? 'No se pudieron cargar los catálogos de Emergencia.',
+          );
+        },
+      });
   }
 
   seleccionar_tipo_paciente(tipo: 'fap' | 'extrafap' | 'nn', checked: boolean): void {
@@ -417,6 +489,7 @@ export class AdmisionComponents {
     this.api_errors.set({});
     this.paciente_seleccionado_id.set(paciente.paciente_id);
     this.paciente_seleccionado.set(paciente);
+    this.acompanante_registrado.set(false);
     this.afiliado_fap_seleccionado = paciente.codigo_afiliado
       ? { codigo_afiliado: paciente.codigo_afiliado, paciente_id: paciente.paciente_id }
       : null;
@@ -434,6 +507,7 @@ export class AdmisionComponents {
   limpiar_paciente(): void {
     this.paciente_seleccionado_id.set(null);
     this.paciente_seleccionado.set(null);
+    this.acompanante_registrado.set(false);
     this.afiliado_fap_seleccionado = null;
     this.actualizar_modelo({
       numero_historia: '',
@@ -531,7 +605,7 @@ export class AdmisionComponents {
   }
 
   color_situacion(situacion: PacienteBusqueda['situacion']): PaletteColor {
-    return situacion === 'ACTIVIDAD' ? 'success' : situacion === 'RETIRO' ? 'warning' : 'primary';
+    return situacion === 'ACTIVIDAD' ? 'success' : situacion === 'RETIRO' ? 'danger' : 'primary';
   }
 
   cambiar_busqueda_paciente(): void {
@@ -678,6 +752,22 @@ export class AdmisionComponents {
       return;
     }
 
+    const motivo_acompanante = this.motivo_acompanante_requerido();
+    if (motivo_acompanante) {
+      const decision = await Swal.fire({
+        title: 'Acompañante requerido',
+        text: `El paciente ${motivo_acompanante} y no tiene un acompañante registrado. Se debe registrar su acompañante con documento, parentesco y datos de contacto. ¿Desea continuar sin acompañante?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Continuar sin acompañante',
+        cancelButtonText: 'Registrar acompañante',
+      });
+      if (!decision.isConfirmed) {
+        this.abrir_modal_acompanante();
+        return;
+      }
+    }
+
     const confirmacion = await Swal.fire({
       title: TITLE_MODAL,
       text: MESSAGE_CONFIRMATION_DEFAULT,
@@ -747,16 +837,18 @@ export class AdmisionComponents {
         return of(afiliado.paciente_id);
       }
 
-       return this.paciente_service.registrarFap({ codigo_afiliado: afiliado.codigo_afiliado }, true).pipe(
-        map(({ data }) => data.paciente_id),
-        tap((id) => {
-          afiliado.paciente_id = id;
-          this.paciente_seleccionado_id.set(id);
-          this.paciente_seleccionado.update((paciente) =>
-            paciente ? { ...paciente, paciente_id: id } : null,
-          );
-        }),
-      );
+      return this.paciente_service
+        .registrarFap({ codigo_afiliado: afiliado.codigo_afiliado }, true)
+        .pipe(
+          map(({ data }) => data.paciente_id),
+          tap((id) => {
+            afiliado.paciente_id = id;
+            this.paciente_seleccionado_id.set(id);
+            this.paciente_seleccionado.update((paciente) =>
+              paciente ? { ...paciente, paciente_id: id } : null,
+            );
+          }),
+        );
     }
 
     if (this.admision_model().paciente_extrafap) {
@@ -829,7 +921,10 @@ export class AdmisionComponents {
   private nombre_completo(paciente: PacienteBusqueda): string {
     const grado = paciente.grado_codigo?.toUpperCase()?.trim() || null;
     const situacion = paciente.situacion?.toUpperCase()?.trim();
-    const esTitular = Boolean(grado) || this.normalizar(paciente.parentesco ?? '') === 'TITULAR' || paciente.tipo_afiliado === 'TITULAR';
+    const esTitular =
+      Boolean(grado) ||
+      this.normalizar(paciente.parentesco ?? '') === 'TITULAR' ||
+      paciente.tipo_afiliado === 'TITULAR';
     const sufijoSituacion = esTitular && grado && situacion === 'RETIRO' ? '(r)' : null;
     const partesGrado = [grado, sufijoSituacion].filter(Boolean).join(' ');
 
@@ -859,6 +954,24 @@ export class AdmisionComponents {
       return 'F';
     }
     return '';
+  }
+
+  /** Age from the search result or, for a new record, calculated from its birth date. */
+  private edad_para_alerta(): number | null {
+    const modelo = this.admision_model();
+    if (modelo.edad !== '' && Number.isFinite(Number(modelo.edad))) {
+      return Number(modelo.edad);
+    }
+
+    const nacimiento = modelo.fecha_nacimiento ? new Date(`${modelo.fecha_nacimiento}T00:00:00`) : null;
+    if (!nacimiento || Number.isNaN(nacimiento.getTime())) {
+      return null;
+    }
+
+    const hoy = new Date();
+    const cumple_este_anio = new Date(hoy.getFullYear(), nacimiento.getMonth(), nacimiento.getDate());
+
+    return hoy.getFullYear() - nacimiento.getFullYear() - (hoy < cumple_este_anio ? 1 : 0);
   }
 
   private normalizar(valor: string): string {

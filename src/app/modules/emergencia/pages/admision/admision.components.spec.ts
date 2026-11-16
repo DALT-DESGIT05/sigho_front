@@ -8,6 +8,7 @@ import { vi } from 'vitest';
 import { environment } from '../../../../../environments/environments';
 import { ModalComponent } from '../../../../components/modal/modal.component';
 import { MESSAGE_CONFIRMATION_DEFAULT } from '../../../../config/constants';
+import { PacienteBusqueda } from '../../../../interfaces/emergencia/paciente.interface';
 import { UtilService } from '../../../../services/util.service';
 import { AcompananteModalComponent } from '../../components/acompanante-modal/acompanante-modal.component';
 import { AdmisionComponents } from './admision.components';
@@ -167,6 +168,67 @@ describe('AdmisionComponents', () => {
     expect(component.atencion_creada()?.codigo_episodio).toBe('EME-00000101');
   });
 
+  describe('companion requirement (RN007)', () => {
+    const paciente_con = (cambios: Partial<PacienteBusqueda>): PacienteBusqueda => ({
+      paciente_id: 123,
+      persona_id: 123,
+      tipo_documento_id: 10,
+      tipo_documento: 'DNI',
+      numero_documento: '12345678',
+      apellido_paterno: 'PÉREZ',
+      apellido_materno: null,
+      nombres: 'JUAN',
+      nsa: '654321',
+      parentesco: 'Titular',
+      tipo_afiliado: 'TITULAR',
+      celular: null,
+      correo_electronico: null,
+      situacion: 'ACTIVIDAD',
+      sexo: 'Masculino',
+      edad: 30,
+      ind_discapacitado: false,
+      ...cambios,
+    });
+
+    it('requires a companion for minors, older adults and patients with a disability', () => {
+      component.seleccionar_paciente(paciente_con({ edad: 5 }));
+      expect(component.motivo_acompanante_requerido()).toBe('es menor de edad');
+
+      component.seleccionar_paciente(paciente_con({ edad: 72 }));
+      expect(component.motivo_acompanante_requerido()).toBe('es adulto mayor');
+
+      component.seleccionar_paciente(paciente_con({ ind_discapacitado: true }));
+      expect(component.motivo_acompanante_requerido()).toBe('tiene una discapacidad');
+
+      component.seleccionar_paciente(paciente_con({}));
+      expect(component.motivo_acompanante_requerido()).toBeNull();
+    });
+
+    it('does not require a companion when the patient already has one or it was just registered', () => {
+      component.seleccionar_paciente(paciente_con({ edad: 5, tiene_acompanante: true }));
+      expect(component.motivo_acompanante_requerido()).toBeNull();
+
+      component.seleccionar_paciente(paciente_con({ edad: 5 }));
+      expect(component.motivo_acompanante_requerido()).toBe('es menor de edad');
+      component.acompanante_registrado.set(true);
+      expect(component.motivo_acompanante_requerido()).toBeNull();
+    });
+
+    it('asks to register the companion before creating the attention of a minor and does not save when declined', async () => {
+      const fire = vi.spyOn(Swal, 'fire').mockResolvedValue({ isConfirmed: false } as never);
+      vi.spyOn(component, 'abrir_modal_acompanante').mockImplementation(() => undefined);
+      component.seleccionar_paciente(paciente_con({ edad: 5 }));
+      component.admision_form.procedencia_id().value.set(1);
+
+      await component.guardar_admision();
+
+      expect(fire).toHaveBeenCalledTimes(1);
+      expect(fire).toHaveBeenCalledWith(expect.objectContaining({ title: 'Acompañante requerido' }));
+      expect(component.abrir_modal_acompanante).toHaveBeenCalled();
+      http_testing.expectNone(`${environment.baseUrl}v1/emergencia/atenciones`);
+    });
+  });
+
   it('places companion registration beside the compact patient search', () => {
     const element = fixture.nativeElement as HTMLElement;
     const search_row = element.querySelector('.patient-search-row');
@@ -248,6 +310,9 @@ describe('AdmisionComponents', () => {
     expect(text).not.toContain('TITULAR - PÉREZ GARCÍA JUAN');
     expect(text).not.toContain('CORONEL');
     expect(text).toContain('654321');
+    expect(text).toContain('654321A');
+    expect(text).toContain('AFILIADO');
+    expect(text).not.toContain('CA 00123456');
     expect(text).toContain('ACTIVIDAD');
     expect(text).toContain('987654321');
     expect(text).toContain('juan@example.com');
@@ -660,6 +725,94 @@ describe('AdmisionComponents', () => {
       paciente_nn: true,
       prioridad: 'I',
     });
+  });
+
+  it('shows only A SOLICITUD, AMBULATORIO, EXAMENES and REFERIDO as admission origins, in that order', () => {
+    const opciones = component.filtrar_procedencias([
+      { value: 1, codigo: 'EME', label: 'EMERGENCIA' },
+      { value: 11, codigo: 'REF', label: 'REFERIDO' },
+      { value: 9, codigo: 'EXA', label: 'EXAMENES' },
+      { value: 5, codigo: 'AMB', label: 'AMBULATORIO' },
+      { value: 3, codigo: 'ASO', label: 'A SOLICITUD' },
+    ] as never);
+
+    expect(opciones.map((opcion) => opcion.value)).toEqual([3, 5, 9, 11]);
+  });
+
+  it('keeps every origin when none of the admission origins exist', () => {
+    const procedencias = [{ value: 1, codigo: 'EME', label: 'EMERGENCIA' }] as never;
+
+    expect(component.filtrar_procedencias(procedencias)).toEqual(procedencias);
+  });
+
+  it('shows NSA and kinship code before the name in patient search options', () => {
+    const paciente = {
+      paciente_id: 456,
+      persona_id: 456,
+      tipo_documento_id: 1,
+      tipo_documento: 'DNI',
+      numero_documento: '12345678',
+      apellido_paterno: 'PÉREZ',
+      apellido_materno: 'GARCÍA',
+      nombres: 'JUAN',
+      nsa: '608332',
+      codigo_parentesco: 'A',
+      parentesco: 'TITULAR',
+      tipo_afiliado: 'TITULAR' as const,
+      celular: null,
+      correo_electronico: null,
+      situacion: null,
+      sexo: 'Masculino',
+      edad: 30,
+      ind_discapacitado: false,
+    };
+    const nombre = component.mostrar_paciente({ ...paciente, nsa: null }).split(' - ')[0];
+
+    expect(component.mostrar_paciente(paciente)).toBe(`608332A - ${nombre} - DNI 12345678`);
+    expect(component.mostrar_paciente({ ...paciente, codigo_parentesco: null })).toBe(
+      `608332 - ${nombre} - DNI 12345678`,
+    );
+    expect(component.mostrar_paciente({ ...paciente, nsa: null })).toBe(`${nombre} - DNI 12345678`);
+  });
+
+  it('shows the IAFAS header badge only for an active FOSFAP affiliate in FAP mode', () => {
+    const paciente = (cod_situ: number | null) => ({
+      paciente_id: 456,
+      persona_id: 456,
+      codigo_afiliado: '12345678',
+      cod_situ,
+      tipo_documento_id: 1,
+      tipo_documento: 'DNI',
+      numero_documento: '12345678',
+      apellido_paterno: 'PÉREZ',
+      apellido_materno: null,
+      nombres: 'JUAN',
+      nsa: '654321',
+      parentesco: null,
+      tipo_afiliado: null,
+      celular: null,
+      correo_electronico: null,
+      situacion: null,
+      sexo: 'Masculino',
+      edad: 30,
+      ind_discapacitado: false,
+    });
+
+    component.seleccionar_tipo_paciente('fap', true);
+    expect(component.badge_iafas_header()).toBeNull();
+
+    component.seleccionar_paciente(paciente(1));
+    expect(component.badge_iafas_header()).toBe('AFILIADO IAFAS - FOSFAP');
+
+    component.seleccionar_paciente(paciente(2));
+    expect(component.badge_iafas_header()).toBeNull();
+
+    component.seleccionar_tipo_paciente('extrafap', true);
+    component.seleccionar_paciente(paciente(1));
+    expect(component.badge_iafas_header()).toBeNull();
+
+    component.seleccionar_tipo_paciente('nn', true);
+    expect(component.badge_iafas_header()).toBeNull();
   });
 
   it('sets priority I automatically as a marked circle when NN patient is selected', () => {

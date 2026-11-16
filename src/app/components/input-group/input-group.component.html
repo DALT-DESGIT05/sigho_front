@@ -5,7 +5,7 @@
       [texto]="visibleLabel()"
       [title]="label_title()"
       [forId]="id()"
-      [required]="required()"
+      [required]="required() || requerido()"
       [color]="color()"
       [size]="size() === 'xs' ? 'sm' : 'md'">
     </app-label> }
@@ -20,7 +20,7 @@
           <input
             class="form-control app-input-group__control" [class.is-invalid]="hasError()" [class]="'form-control app-input-group__control ' + alignmentClass()"
             [id]="id()" [type]="type()" [name]="name()" [value]="inputValue()" [placeholder]="placeholder()" [autocomplete]="autocomplete()"
-            [disabled]="isDisabled()" [readonly]="readonly()" [required]="required()" [attr.min]="min()" [attr.maxlength]="maxlength()" [attr.minlength]="minlength()"
+            [disabled]="isDisabled()" [readonly]="readonly()" [required]="required()" [attr.min]="min()" [attr.max]="max()" [attr.step]="step()" [attr.maxlength]="maxlength()" [attr.minlength]="minlength()"
             [attr.aria-label]="ariaLabel() || visibleLabel() || null" (input)="handleInput($event)" (change)="handleChange($event)"
             (focus)="handleFocus($event)" (blur)="handleBlur($event)" (keydown)="handleKeydown($event)" (keyup)="handleKeyup($event)">
           }

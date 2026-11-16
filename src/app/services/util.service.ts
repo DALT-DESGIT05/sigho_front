@@ -140,7 +140,8 @@ export class UtilService {
       return 0;
     }
 
-    const numericValue = Number(value);
+    const stringVal = String(value).replace(',', '.');
+    const numericValue = Number(stringVal);
     return Number.isFinite(numericValue) ? numericValue : 0;
   }
 

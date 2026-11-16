@@ -29,6 +29,8 @@ export class InputTextComponent implements ControlValueAccessor {
   readonly requerido = input(false);
   readonly readonly = input(false);
   readonly invalid = input(false);
+  readonly touched = input<boolean | null>(null);
+  readonly dirty = input<boolean | null>(null);
   readonly cssClass = input('');
   readonly align = input<TableColumnAlignment>('start');
   readonly size = input<ComponentSize>('md');
@@ -74,7 +76,18 @@ export class InputTextComponent implements ControlValueAccessor {
 
   readonly visibleLabel = computed(() => this.label() || this.nombre());
   readonly label_title = computed(() => this.title() || this.visibleLabel());
-  readonly hasError = computed(() => this.invalid() || !!this.error());
+  readonly hasError = computed(() => {
+    if (this.error()) {
+      return true;
+    }
+    if (!this.invalid()) {
+      return false;
+    }
+    if (this.touched() !== null || this.dirty() !== null) {
+      return (this.touched() ?? false) || (this.dirty() ?? false);
+    }
+    return true;
+  });
   readonly useFloatingLabel = computed(() => !!this.visibleLabel() && (this.showFloatingLabel() || (this.responsiveFloatingLabel() && this.size() === 'xs')));
   readonly showExternalLabel = computed(() => !!this.visibleLabel() && this.showLabel() && !(this.responsiveFloatingLabel() && this.size() === 'xs'));
   readonly alignmentClass = computed(() => `text-${this.align()}`);
@@ -106,7 +119,14 @@ export class InputTextComponent implements ControlValueAccessor {
   handleChange(event: Event): void { this.change.emit(event); }
   handleFocus(event: FocusEvent): void { this.focus.emit(event); }
   handleBlur(event: FocusEvent): void { this.onTouched(); this.touch.emit(); this.blur.emit(event); }
-  handleKeydown(event: KeyboardEvent): void { this.keydown.emit(event); if (event.key === 'Enter') this.enter.emit(event); }
+  handleKeydown(event: KeyboardEvent): void {
+    if (!this.allowNegative() && (event.key === '-' || event.key === 'Subtract')) {
+      event.preventDefault();
+      return;
+    }
+    this.keydown.emit(event);
+    if (event.key === 'Enter') this.enter.emit(event);
+  }
   handleKeyup(event: KeyboardEvent): void { this.keyup.emit(event); }
 
   private toText(value: string | number | null | undefined): string { return value == null ? '' : String(value); }

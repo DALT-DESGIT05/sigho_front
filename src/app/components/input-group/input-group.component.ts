@@ -25,8 +25,11 @@ export class InputGroupComponent implements ControlValueAccessor {
   readonly type = input('text');
   readonly autocomplete = input('off');
   readonly required = input(false);
+  readonly requerido = input(false);
   readonly readonly = input(false);
   readonly invalid = input(false);
+  readonly touched = input<boolean | null>(null);
+  readonly dirty = input<boolean | null>(null);
   readonly cssClass = input('');
   readonly align = input<TableColumnAlignment>('start');
   readonly size = input<ComponentSize>('md');
@@ -35,6 +38,9 @@ export class InputGroupComponent implements ControlValueAccessor {
   readonly maxlength = input<number | null>(null);
   readonly minlength = input<number | null>(null);
   readonly min = input<number | null>(null);
+  readonly max = input<number | null>(null);
+  readonly step = input<number | string | null>(null);
+  readonly allowNegative = input(true);
   readonly ariaLabel = input('');
   /** Permite usar un control compuesto (por ejemplo, app-auto-complete) dentro del grupo. */
   readonly projectedControl = input(false);
@@ -57,7 +63,18 @@ export class InputGroupComponent implements ControlValueAccessor {
   readonly isDisabled = signal(false);
   readonly visibleLabel = computed(() => this.label() || this.nombre());
   readonly label_title = computed(() => this.title() || this.visibleLabel());
-  readonly hasError = computed(() => this.invalid() || !!this.error());
+  readonly hasError = computed(() => {
+    if (this.error()) {
+      return true;
+    }
+    if (!this.invalid()) {
+      return false;
+    }
+    if (this.touched() !== null || this.dirty() !== null) {
+      return (this.touched() ?? false) || (this.dirty() ?? false);
+    }
+    return true;
+  });
   readonly alignmentClass = computed(() => `text-${this.align()}`);
   private onChange: (value: string) => void = () => undefined;
   private onTouched: () => void = () => undefined;
@@ -76,11 +93,29 @@ export class InputGroupComponent implements ControlValueAccessor {
   registerOnChange(fn: (value: string) => void): void { this.onChange = fn; }
   registerOnTouched(fn: () => void): void { this.onTouched = fn; }
   setDisabledState(disabled: boolean): void { this.isDisabled.set(disabled); }
-  handleInput(event: Event): void { const value = (event.target as HTMLInputElement).value; this.inputValue.set(value); this.value.set(value); this.onChange(value); this.inputEvent.emit(event); }
+  handleInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value;
+    if (this.type() === 'number' && !this.allowNegative() && Number(value) < 0) {
+      value = '';
+      input.value = '';
+    }
+    this.inputValue.set(value);
+    this.value.set(value);
+    this.onChange(value);
+    this.inputEvent.emit(event);
+  }
   handleChange(event: Event): void { this.change.emit(event); }
   handleFocus(event: FocusEvent): void { this.focus.emit(event); }
   handleBlur(event: FocusEvent): void { this.onTouched(); this.touch.emit(); this.blur.emit(event); }
-  handleKeydown(event: KeyboardEvent): void { this.keydown.emit(event); if (event.key === 'Enter') this.enter.emit(event); }
+  handleKeydown(event: KeyboardEvent): void {
+    if (!this.allowNegative() && (event.key === '-' || event.key === 'Subtract')) {
+      event.preventDefault();
+      return;
+    }
+    this.keydown.emit(event);
+    if (event.key === 'Enter') this.enter.emit(event);
+  }
   handleKeyup(event: KeyboardEvent): void { this.keyup.emit(event); }
   private toText(value: string | number | null | undefined): string { return value == null ? '' : String(value); }
 }

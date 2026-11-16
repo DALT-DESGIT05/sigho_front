@@ -57,6 +57,12 @@
   margin-left: .75rem;
 }
 
+/* Los resultados de un autocompletado pueden extenderse sobre el cuerpo del modal. */
+.modal-content:has(.auto-complete__menu),
+.modal-body:has(.auto-complete__menu) {
+  overflow: visible;
+}
+
 .app-modal__footer--estandar [modal-footer] {
   width: 100%;
   flex: 1 1 100%;
@@ -103,6 +109,60 @@ modal-container:has(.app-modal--separated)::before {
 
 .modal-xxl.app-modal--fit-content .modal-content {
   min-height: 0;
+}
+
+/* Modal Diagnóstico Compacto */
+.modal-diagnostico {
+  .app-modal__header {
+    min-height: 46px;
+    padding: 0.5rem 1rem;
+
+    .modal-title {
+      font-size: 1rem;
+    }
+
+    .app-modal__close {
+      top: 0.5rem;
+      right: 0.75rem;
+    }
+  }
+
+  .modal-body {
+    padding: 0.75rem 1rem;
+  }
+
+  .app-modal__footer {
+    padding: 0.5rem 1rem;
+  }
+
+  .app-text-area__control {
+    min-height: 2.25rem !important;
+    height: 2.25rem;
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+  }
+
+  .clinical-section-card--compact {
+    background: #f4f9fd;
+    border: 1px solid #bdd7ee;
+    border-radius: 0.5rem;
+    margin: 0.4rem 0 0;
+    padding: 0.45rem 0.6rem;
+
+    .clinical-list-header {
+      margin-bottom: 0.35rem;
+    }
+
+    .clinical-list-title,
+    h4 {
+      color: #002060;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      margin: 0;
+    }
+  }
 }
 
 /* =========================================

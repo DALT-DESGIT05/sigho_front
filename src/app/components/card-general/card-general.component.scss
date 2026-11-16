@@ -40,6 +40,5 @@
   }
 }
 .app-card-general {
-  border-radius: 8px;
-  overflow: hidden;
+  --bs-card-border-radius: 8px;
 }

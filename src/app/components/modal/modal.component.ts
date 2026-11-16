@@ -39,6 +39,8 @@ export class ModalComponent {
   readonly fitContent = input(false);
   /** Oscurece el modal que queda detrás cuando este modal se abre encima de otro. */
   readonly separateFromParent = input(false);
+  readonly customClass = input('');
+  readonly dialogClass = input('');
 
   readonly opened = output<void>();
   readonly closed = output<void>();
@@ -56,6 +58,8 @@ export class ModalComponent {
     if (this.scrollable()) classes.push('modal-dialog-scrollable');
     if (this.separateFromParent()) classes.push('app-modal--separated');
     if (this.fitContent()) classes.push('app-modal--fit-content');
+    if (this.customClass()) classes.push(this.customClass());
+    if (this.dialogClass()) classes.push(this.dialogClass());
     return classes.filter(Boolean).join(' ');
   });
 

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, ElementRef, OnInit, computed, forwardRef, inject, input, output, signal, viewChild } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, computed, effect, forwardRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
 import { Observable, of } from 'rxjs';
@@ -36,10 +36,17 @@ export class AutoCompleteComponent<T extends object = any> implements ControlVal
   readonly placeholder = input('Buscar...');
   readonly minLength = input(0);
   readonly debounceTime = input(450);
+  /** Altura máxima opcional del panel de resultados, en píxeles. */
+  readonly menuMaxHeight = input<number | null>(null);
+  /** Permite mostrar descripciones extensas en varias líneas. */
+  readonly multilineOptions = input(false);
+  /** z-index opcional para desplegables que se muestran dentro de un modal. */
+  readonly menuZIndex = input<number | null>(null);
   readonly emptyMessage = input('No se encontraron resultados.');
   readonly loadingMessage = input('Buscando...');
   readonly clearable = input(true);
   readonly size = input<ComponentSize>('md');
+  readonly disabled = input(false);
   readonly searchChange = output<string>();
   readonly optionSelected = output<T>();
   readonly cleared = output<void>();
@@ -51,7 +58,8 @@ export class AutoCompleteComponent<T extends object = any> implements ControlVal
   readonly isLoading = signal(false);
   readonly hasError = signal(false);
   readonly activeIndex = signal(-1);
-  readonly disabled = signal(false);
+  private readonly disabledByForm = signal(false);
+  readonly isDisabled = computed(() => this.disabled() || this.disabledByForm());
   readonly searchText = signal('');
   private readonly input_control = viewChild<ElementRef<HTMLInputElement>>('input_control');
   readonly hasSelection = computed(() => this.selectedOption() !== null);
@@ -68,6 +76,17 @@ export class AutoCompleteComponent<T extends object = any> implements ControlVal
   private readonly destroyRef = inject(DestroyRef);
   private onChange: (value: unknown) => void = () => undefined;
   private onTouched: () => void = () => undefined;
+
+  constructor() {
+    effect(() => {
+      if (this.isDisabled()) {
+        this.searchControl.disable({ emitEvent: false });
+        this.isOpen.set(false);
+      } else {
+        this.searchControl.enable({ emitEvent: false });
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.searchControl.valueChanges.pipe(
@@ -112,17 +131,17 @@ export class AutoCompleteComponent<T extends object = any> implements ControlVal
   }
   registerOnChange(fn: (value: unknown) => void): void { this.onChange = fn; }
   registerOnTouched(fn: () => void): void { this.onTouched = fn; }
-  setDisabledState(isDisabled: boolean): void { this.disabled.set(isDisabled); isDisabled ? this.searchControl.disable({ emitEvent: false }) : this.searchControl.enable({ emitEvent: false }); }
+  setDisabledState(isDisabled: boolean): void { this.disabledByForm.set(isDisabled); }
   on_label_click(evento: MouseEvent): void {
     evento.preventDefault();
-    if (this.disabled()) return;
+    if (this.isDisabled()) return;
     this.input_control()?.nativeElement.focus();
     this.open();
   }
-  open(): void { if (!this.disabled()) { this.isOpen.set(true); if (!this.searchControl.value && this.minLength() === 0) { this.searchControl.setValue(' '); this.searchControl.setValue(''); } } }
+  open(): void { if (!this.isDisabled()) { this.isOpen.set(true); if (!this.searchControl.value && this.minLength() === 0) { this.searchControl.setValue(' '); this.searchControl.setValue(''); } } }
   toggle(event: Event): void {
     event.preventDefault();
-    if (this.disabled()) return;
+    if (this.isDisabled()) return;
     this.isOpen() ? this.isOpen.set(false) : this.open();
   }
   close(): void { window.setTimeout(() => { this.isOpen.set(false); this.onTouched(); }, 150); }

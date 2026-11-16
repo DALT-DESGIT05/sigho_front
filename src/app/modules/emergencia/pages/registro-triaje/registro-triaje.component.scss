@@ -98,21 +98,25 @@
   margin: 0;
   width: 100%;
 }
+:host ::ng-deep input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  -webkit-appearance: none;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
 .eva-input-box {
   width: 4.25rem;
 }
 :host ::ng-deep .eva-input-box .app-input-text__control {
-  appearance: textfield;
-  -moz-appearance: textfield;
-  -webkit-appearance: none;
   font-weight: 600;
   text-align: center;
-
-  &::-webkit-outer-spin-button,
-  &::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
 }
 .priority-fieldset {
   border: 0;
@@ -129,6 +133,11 @@
   cursor: pointer;
   margin: 0;
   position: relative;
+}
+.priority-option--disabled {
+  cursor: not-allowed !important;
+  opacity: 0.35;
+  pointer-events: none;
 }
 .priority-option input {
   height: 1px;
@@ -212,6 +221,31 @@
   flex-wrap: wrap;
   gap: 1rem;
   justify-content: flex-end;
+}
+
+.triage-field-error {
+  color: var(--palette-danger);
+  font-size: 0.72rem;
+  line-height: 1.2;
+  margin-top: 0.28rem;
+}
+
+.eva-slider-extremes {
+  line-height: 1;
+  margin-bottom: -0.25rem;
+  min-width: 0;
+  padding: 0 0.15rem;
+}
+
+.eva-extreme-badge {
+  color: var(--palette-gray-600);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.eva-description {
+  min-width: 0;
 }
 
 @media (max-width: 600px) {

@@ -11,7 +11,7 @@
           <app-select
             size="sm"
             label="Condición de Llegada"
-            [required]="true"
+            [requerido]="true"
             placeholder="-- Seleccione --"
             [options]="condicionLlegadaOptions()"
             [showEmptyOption]="true"
@@ -26,7 +26,7 @@
           <app-select
             size="sm"
             label="Motivo de Ingreso"
-            [required]="true"
+            [requerido]="true"
             placeholder="-- Seleccione --"
             [options]="motivoIngresoOptions()"
             [showEmptyOption]="true"
@@ -49,11 +49,17 @@
                 <div class="col-6">
                   <app-input-text
                     label="PAS (mmHg)"
-                    title="Presión Sistólica"
+                    [requerido]="true"
+                    placeholder="50 - 240"
+                    title="Presión Sistólica (50 - 240 mmHg)"
                     ariaLabel="Presión sistólica en milímetros de mercurio"
                     type="number"
                     [allowNegative]="false"
                     [formField]="triajeForm.paSistolica"
+                    (valueChange)="actualizar_signo_vital('paSistolica', $event)"
+                    (blur)="validar_extremo_al_salir('paSistolica')"
+                    (enter)="validar_extremo_al_salir('paSistolica')"
+                    (change)="validar_extremo_al_salir('paSistolica')"
                   />
                   <app-progress-bars
                     [clases]="progress_bar_classes(pressure_status('sistolica'))"
@@ -66,11 +72,17 @@
                 <div class="col-6">
                   <app-input-text
                     label="PAD (mmHg)"
-                    title="Presión Diastólica"
+                    [requerido]="true"
+                    placeholder="0 - 100"
+                    title="Presión Diastólica (0 - 100 mmHg)"
                     ariaLabel="Presión diastólica en milímetros de mercurio"
                     type="number"
                     [allowNegative]="false"
                     [formField]="triajeForm.paDiastolica"
+                    (valueChange)="actualizar_signo_vital('paDiastolica', $event)"
+                    (blur)="validar_extremo_al_salir('paDiastolica')"
+                    (enter)="validar_extremo_al_salir('paDiastolica')"
+                    (change)="validar_extremo_al_salir('paDiastolica')"
                   />
                   <app-progress-bars
                     [clases]="progress_bar_classes(pressure_status('diastolica'))"
@@ -84,19 +96,37 @@
             } @else if (vital.control === 'peso' || vital.control === 'talla') {
               @if (vital.control === 'peso') {
                 <app-input-group
-                  [label]="vital.label"
+                  label="Peso (kg)"
+                  [requerido]="true"
+                  placeholder="0.5 - 300.0"
                   [suffix]="vital.unit"
                   type="number"
+                  [min]="0.5"
+                  [max]="300.0"
+                  [step]="0.1"
+                  [allowNegative]="false"
                   [value]="triaje_model().peso"
                   (valueChange)="actualizar_signo_vital('peso', $event)"
+                  (blur)="validar_extremo_al_salir('peso')"
+                  (enter)="validar_extremo_al_salir('peso')"
+                  (change)="validar_extremo_al_salir('peso')"
                 />
               } @else {
                 <app-input-group
-                  [label]="vital.label"
+                  label="Talla (cm)"
+                  [requerido]="true"
+                  placeholder="25.0 - 250.0"
                   [suffix]="vital.unit"
                   type="number"
+                  [min]="25.0"
+                  [max]="250.0"
+                  [step]="0.1"
+                  [allowNegative]="false"
                   [value]="triaje_model().talla"
                   (valueChange)="actualizar_signo_vital('talla', $event)"
+                  (blur)="validar_extremo_al_salir('talla')"
+                  (enter)="validar_extremo_al_salir('talla')"
+                  (change)="validar_extremo_al_salir('talla')"
                 />
               }
             } @else if (vital.control === 'imc') {
@@ -109,58 +139,84 @@
                 >
                   <i prefix class="fa-solid fa-weight-scale" aria-hidden="true"></i>
                 </app-input-group>
-                <div class="imc-classification">
-                  <span class="imc-classification__label">Clasificación IMC</span>
-                  <output
-                    [class]="
-                      'imc-classification__value imc-classification__value--' + vital_status('imc')
-                    "
-                    aria-live="polite"
-                  >
-                    {{ imc_classification() }}
-                  </output>
-                </div>
+                @if (triaje_model().imc && imc_classification()) {
+                  <div class="imc-classification">
+                    <span class="imc-classification__label">Clasificación IMC</span>
+                    <output
+                      [class]="
+                        'imc-classification__value imc-classification__value--' + vital_status('imc')
+                      "
+                      aria-live="polite"
+                    >
+                      {{ imc_classification() }}
+                    </output>
+                  </div>
+                }
               </div>
             } @else {
               @switch (vital.control) {
                 @case ('temperatura') {
                   <app-input-text
                     [label]="vital.label + ' (' + vital.unit + ')'"
-                    [title]="vital.title"
+                    [requerido]="true"
+                    placeholder="36.0 - 40.0"
+                    [title]="vital.title + ' (36.0 - 40.0 °C)'"
                     [ariaLabel]="vital.title + ' (' + vital.unit + ')'"
                     [type]="vital.type"
                     [allowNegative]="false"
                     [formField]="triajeForm.temperatura"
+                    (valueChange)="actualizar_signo_vital('temperatura', $event)"
+                    (blur)="validar_extremo_al_salir('temperatura')"
+                    (enter)="validar_extremo_al_salir('temperatura')"
+                    (change)="validar_extremo_al_salir('temperatura')"
                   />
                 }
                 @case ('saturacion') {
                   <app-input-text
                     [label]="vital.label + ' (' + vital.unit + ')'"
-                    [title]="vital.title"
+                    [requerido]="true"
+                    placeholder="60 - 100"
+                    [title]="vital.title + ' (60 - 100 %)'"
                     [ariaLabel]="vital.title + ' (' + vital.unit + ')'"
                     [type]="vital.type"
                     [allowNegative]="false"
                     [formField]="triajeForm.saturacion"
+                    (valueChange)="actualizar_signo_vital('saturacion', $event)"
+                    (blur)="validar_extremo_al_salir('saturacion')"
+                    (enter)="validar_extremo_al_salir('saturacion')"
+                    (change)="validar_extremo_al_salir('saturacion')"
                   />
                 }
                 @case ('fc') {
                   <app-input-text
                     [label]="vital.label + ' (' + vital.unit + ')'"
-                    [title]="vital.title"
+                    [requerido]="true"
+                    placeholder="30 - 220"
+                    [title]="vital.title + ' (30 - 220 lpm)'"
                     [ariaLabel]="vital.title + ' (' + vital.unit + ')'"
                     [type]="vital.type"
                     [allowNegative]="false"
                     [formField]="triajeForm.fc"
+                    (valueChange)="actualizar_signo_vital('fc', $event)"
+                    (blur)="validar_extremo_al_salir('fc')"
+                    (enter)="validar_extremo_al_salir('fc')"
+                    (change)="validar_extremo_al_salir('fc')"
                   />
                 }
                 @case ('fr') {
                   <app-input-text
                     [label]="vital.label + ' (' + vital.unit + ')'"
-                    [title]="vital.title"
+                    [requerido]="true"
+                    placeholder="10 - 40"
+                    [title]="vital.title + ' (10 - 40 rpm)'"
                     [ariaLabel]="vital.title + ' (' + vital.unit + ')'"
                     [type]="vital.type"
                     [allowNegative]="false"
                     [formField]="triajeForm.fr"
+                    (valueChange)="actualizar_signo_vital('fr', $event)"
+                    (blur)="validar_extremo_al_salir('fr')"
+                    (enter)="validar_extremo_al_salir('fr')"
+                    (change)="validar_extremo_al_salir('fr')"
                   />
                 }
               }
@@ -199,9 +255,13 @@
       <div class="row g-2 mt-0">
         <div class="col-12 col-lg-4">
           <div class="eva-control">
-            <label for="eva-range">Escala de Dolor (EVA)</label>
+            <label for="eva-range">Escala de Dolor (EVA) <span class="text-danger">*</span></label>
             <div class="eva-layout">
               <div class="eva-scale-track">
+                <div class="eva-slider-extremes d-flex justify-content-between align-items-center">
+                  <span class="eva-extreme-badge">0</span>
+                  <span class="eva-extreme-badge">10</span>
+                </div>
                 <input
                   id="eva-range"
                   class="eva-slider"
@@ -219,12 +279,14 @@
                   [color]="eva_status()"
                   ariaLabel="Estado de la escala de dolor"
                 />
-                <app-label
-                  [texto]="eva_description()"
-                  [color]="eva_status()"
-                  size="xs"
-                  [truncate]="true"
-                />
+                <div class="eva-description text-center mt-1">
+                  <app-label
+                    [texto]="eva_description()"
+                    [color]="eva_status()"
+                    size="xs"
+                    [truncate]="true"
+                  />
+                </div>
               </div>
               <div class="eva-input-box">
                 <app-input-text
@@ -263,6 +325,7 @@
                 <label
                   class="priority-option"
                   [class]="'priority-option priority-option--' + priority.color"
+                  [class.priority-option--disabled]="priority.value === 'I' && prioridad1Bloqueada()"
                 >
                   <input
                     type="radio"
@@ -276,7 +339,7 @@
             </div>
           </fieldset>
           @if (error_atencion('prioridad', 'triaje.nivel_triaje_codigo')) {
-            <div class="text-danger small mt-1" role="alert">
+            <div class="triage-field-error" role="alert">
               {{ error_atencion('prioridad', 'triaje.nivel_triaje_codigo') }}
             </div>
           }
@@ -286,17 +349,18 @@
           <app-input-text
             size="sm"
             label="Motivo de Consulta"
-            [required]="true"
+            [requerido]="true"
             [value]="triaje_model().motivoConsulta"
             [error]="error_atencion('motivoConsulta', 'triaje.motivo_consulta')"
             (input)="actualizar_motivo_consulta($event)"
+            (blur)="triajeForm.motivoConsulta().markAsTouched()"
           />
         </div>
         <div class="col-6 col-lg-2">
           <app-select
             size="sm"
             label="Área"
-            [required]="true"
+            [requerido]="true"
             placeholder="-- Seleccione --"
             [options]="areasEmergenciaOptionsVisibles()"
             [showEmptyOption]="true"
@@ -307,7 +371,7 @@
             (selectedValueChange)="actualizar_seleccion_requerida('destinoAreaId', $event)"
           />
           @if (error_atencion('destinoAreaId', 'triaje.destino_area_id')) {
-            <div class="text-danger small mt-1" role="alert">
+            <div class="triage-field-error" role="alert">
               {{ error_atencion('destinoAreaId', 'triaje.destino_area_id') }}
             </div>
           }
@@ -317,7 +381,7 @@
             <app-select
               size="sm"
               label="Destino"
-              [required]="true"
+              [requerido]="true"
               placeholder="-- Seleccione --"
               [options]="destinosConsultorioOptionsVisibles()"
               [showEmptyOption]="true"
@@ -331,7 +395,7 @@
               "
             />
             @if (error_atencion('destinoEspecialidadId', 'triaje.destino_especialidad_id')) {
-              <div class="text-danger small mt-1" role="alert">
+              <div class="triage-field-error" role="alert">
                 {{ error_atencion('destinoEspecialidadId', 'triaje.destino_especialidad_id') }}
               </div>
             }
@@ -341,7 +405,7 @@
           <app-select
             size="sm"
             label="Médico de Turno"
-            [required]="true"
+            [requerido]="true"
             [placeholder]="cargandoMedicos() ? 'Cargando médicos...' : '-- Seleccione Médico --'"
             [options]="medicosProgramadosOptions()"
             [showEmptyOption]="true"
@@ -352,7 +416,7 @@
             (selectedValueChange)="actualizar_seleccion_requerida('programacionPersonalId', $event)"
           />
           @if (error_atencion('programacionPersonalId', 'triaje.programacion_personal_id')) {
-            <div class="text-danger small mt-1" role="alert">
+            <div class="triage-field-error" role="alert">
               {{ error_atencion('programacionPersonalId', 'triaje.programacion_personal_id') }}
             </div>
           }
@@ -375,7 +439,7 @@
         color="primary"
         type="submit"
         [loading]="guardando()"
-        [disabled]="registroGuardado() || triaje_bloqueado()"
+        [disabled]="registroGuardado() || triaje_bloqueado() || guardando() || !formulario_completo_y_valido()"
       />
     </footer>
   </form>

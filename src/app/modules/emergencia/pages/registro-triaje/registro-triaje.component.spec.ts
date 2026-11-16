@@ -159,6 +159,21 @@ describe('RegistroTriajeComponent', () => {
     fixture.detectChanges();
   });
 
+  it('preselects Evaluación Médica as the default admission reason', () => {
+    const motivos = [
+      { value: 1, codigo: 'ACTR', label: 'Accidente de Tránsito' },
+      { value: 7, codigo: 'EVME', label: 'Evaluación Médica' },
+    ] as never;
+
+    component.triaje_model.update((value) => ({ ...value, motivoIngreso: null }));
+    component.aplicar_motivo_ingreso_por_defecto(motivos);
+    expect(component.triaje_model().motivoIngreso).toBe(7);
+
+    component.triaje_model.update((value) => ({ ...value, motivoIngreso: 1 }));
+    component.aplicar_motivo_ingreso_por_defecto(motivos);
+    expect(component.triaje_model().motivoIngreso).toBe(1);
+  });
+
   it('forces priority I and Trauma Shock for an NN patient', () => {
     const detalle = component.detalle_atencion();
     expect(detalle).not.toBeNull();
@@ -397,6 +412,7 @@ describe('RegistroTriajeComponent', () => {
     util_service.imc_status.mockReturnValue('danger');
     component.pasoActual.set(2);
     component.triaje_model.update((value) => ({ ...value, peso: '90', talla: '165' }));
+    component.recalcular_imc_al_salir();
     fixture.detectChanges();
 
     const classification = (fixture.nativeElement as HTMLElement).querySelector(

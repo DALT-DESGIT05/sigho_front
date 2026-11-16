@@ -34,15 +34,25 @@ import {
   RegistrarTriajeRequest,
   RegistroTriajeFormValue,
   TriajeTicket,
-  TriajeDetalleRequest,
 } from '../../../../interfaces/emergencia/triaje.interface';
 import { MESSAGE_CONFIRMATION_DEFAULT, TITLE_MODAL } from '../../../../config/constants';
 import { PaletteColor } from '../../../../interfaces/util.interface';
 import { CatalogoEmergenciaService } from '../../../../services/emergencia/catalogo-emergencia.service';
 import { TriajeService } from '../../../../services/emergencia/triaje.service';
 import { UtilService } from '../../../../services/util.service';
-
-const EDAD_CORTE_EMERGENCIA_ADULTOS = 14;
+import {
+  CODIGOS_AREA_EMERGENCIA,
+  CODIGOS_PARAMETRO_CLINICO,
+  CODIGOS_PRIORIDAD,
+  CONDICION_LLEGADA_POR_DEFECTO,
+  EDAD_CORTE_EMERGENCIA_ADULTOS,
+  MOTIVO_INGRESO_POR_DEFECTO,
+} from './domain/triaje.constants';
+import {
+  DecisionTriajeClinico,
+  TriajeEvaluadorClinicoService,
+} from './domain/triaje-evaluador-clinico.service';
+import { TriajePayloadMapper } from './mappers/triaje-payload.mapper';
 
 const REGISTRO_TRIAJE_INICIAL: RegistroTriajeFormValue = {
   condicionLlegada: null,
@@ -83,6 +93,9 @@ interface VitalSignField {
   unit: string;
   type: 'number' | 'text';
   colClass: string;
+  min?: number;
+  max?: number;
+  step?: number;
 }
 
 @Component({
@@ -104,6 +117,7 @@ export class RegistroTriajeComponent implements OnInit {
   private readonly activated_route = inject(ActivatedRoute);
   private readonly catalogoEmergenciaService = inject(CatalogoEmergenciaService);
   private readonly triajeService = inject(TriajeService);
+  private readonly evaluadorClinico = inject(TriajeEvaluadorClinicoService);
   readonly utilService = inject(UtilService);
 
   readonly atencion_id = input<number | null>(null);
@@ -120,6 +134,9 @@ export class RegistroTriajeComponent implements OnInit {
   readonly detalle_atencion = signal<DetalleAtencionResponse | null>(null);
   readonly api_errors = signal<Record<string, string[]>>({});
   readonly parametrosClinicos = signal<CatalogoParametroClinico[]>([]);
+  readonly codigosParametrosDisponibles = computed(
+    () => new Set(this.parametrosClinicos().map((p) => p.codigo)),
+  );
   readonly areasEmergenciaOptions = signal<SelectOption[]>([]);
   readonly destinosConsultorioOptions = signal<SelectOption[]>([]);
   readonly destinosConsultorioOptionsVisibles = computed(() => {
@@ -154,16 +171,44 @@ export class RegistroTriajeComponent implements OnInit {
     });
   });
   readonly areas = signal<CatalogoEmergenciaCodigoOption[]>([]);
+  readonly traumaShockArea = computed(() =>
+    this.areas().find(
+      (a) =>
+        a.codigo === CODIGOS_AREA_EMERGENCIA.TRAUMA_SHOCK ||
+        this.es_area_trauma_shock(a),
+    ),
+  );
+  readonly traumaShockId = computed(() =>
+    this.traumaShockArea() ? Number(this.traumaShockArea()!.value) : null,
+  );
+  readonly consultorioEmergenciaArea = computed(() =>
+    this.areas().find(
+      (a) =>
+        a.codigo === CODIGOS_AREA_EMERGENCIA.CONSULTORIO_EMERGENCIA ||
+        this.normalize_option(a.codigo ?? '') === CODIGOS_AREA_EMERGENCIA.CONSULTORIO_EMERGENCIA,
+    ),
+  );
+  readonly consultorioEmergenciaId = computed(() =>
+    this.consultorioEmergenciaArea() ? Number(this.consultorioEmergenciaArea()!.value) : null,
+  );
   readonly esAreaConsultorioEmergencia = computed(() => {
     const areaId = this.triaje_model().destinoAreaId;
     const area = this.areas().find((item) => item.value === areaId);
-    return this.normalize_option(area?.codigo ?? '') === 'CON-EMER';
+    return (
+      this.normalize_option(area?.codigo ?? '') ===
+      CODIGOS_AREA_EMERGENCIA.CONSULTORIO_EMERGENCIA
+    );
   });
-  readonly areasEmergenciaOptionsVisibles = computed(() =>
-    this.esPacienteNn()
-      ? this.areasEmergenciaOptions().filter((area) => this.es_area_trauma_shock(area))
-      : this.areasEmergenciaOptions(),
-  );
+  readonly areasEmergenciaOptionsVisibles = computed(() => {
+    const esNn = this.esPacienteNn();
+    const esPrioridadI = this.triaje_model().prioridad === CODIGOS_PRIORIDAD.I;
+
+    if (esNn || esPrioridadI) {
+      return this.areasEmergenciaOptions().filter((area) => this.es_area_trauma_shock(area));
+    }
+
+    return this.areasEmergenciaOptions().filter((area) => !this.es_area_trauma_shock(area));
+  });
   readonly destinoOptionsVisibles = this.areasEmergenciaOptionsVisibles;
   readonly destinoOptions = this.areasEmergenciaOptions;
   readonly derivarOptions = signal<SelectOption[]>([]);
@@ -181,6 +226,37 @@ export class RegistroTriajeComponent implements OnInit {
 
     return prioridadI ? [prioridadI] : [{ value: 'I', label: 'Resucitación', color: 'red' }];
   });
+
+  readonly condicionLlegadaCodigoSeleccionada = computed(() => {
+    const condicionId = this.triaje_model().condicionLlegada;
+    if (!condicionId) return null;
+    const condicion = this.condicionLlegadaOptions().find(
+      (c) => Number(c.value) === Number(condicionId),
+    ) as (SelectOption & { codigo?: string }) | undefined;
+    return condicion?.codigo ? String(condicion.codigo).trim().toUpperCase() : null;
+  });
+
+  readonly evaluacionClinica = computed<DecisionTriajeClinico>(() => {
+    const model = this.triaje_model();
+    return this.evaluadorClinico.evaluar({
+      temperatura: model.temperatura,
+      paSistolica: model.paSistolica,
+      paDiastolica: model.paDiastolica,
+      saturacion: model.saturacion,
+      fc: model.fc,
+      fr: model.fr,
+      eva: model.eva,
+      condicionLlegadaCodigo: this.condicionLlegadaCodigoSeleccionada(),
+      esPacienteNn: this.esPacienteNn(),
+    });
+  });
+
+  readonly alertasCriticasSignosVitales = computed(
+    () => this.evaluacionClinica().alertasCriticas,
+  );
+  readonly prioridad1Bloqueada = computed(
+    () => this.evaluacionClinica().prioridad1Bloqueada,
+  );
   private ultimaEspecialidadConsultadaMedicos: number | null = null;
 
   private cargar_medicos_programados_segun_seleccion(): void {
@@ -248,6 +324,15 @@ export class RegistroTriajeComponent implements OnInit {
     required(schema.motivoIngreso);
     required(schema.prioridad);
     required(schema.motivoConsulta);
+    required(schema.temperatura);
+    required(schema.paSistolica);
+    required(schema.paDiastolica);
+    required(schema.saturacion);
+    required(schema.fc);
+    required(schema.fr);
+    required(schema.peso);
+    required(schema.talla);
+    required(schema.eva);
     maxLength(schema.observaciones, 200);
     maxLength(schema.motivoConsulta, 500);
     required(schema.destinoAreaId);
@@ -274,6 +359,9 @@ export class RegistroTriajeComponent implements OnInit {
       title: 'Temperatura',
       unit: '°C',
       type: 'number',
+      min: 36.0,
+      max: 40.0,
+      step: 0.1,
       colClass: 'col-6 col-lg-2',
     },
     {
@@ -290,6 +378,9 @@ export class RegistroTriajeComponent implements OnInit {
       title: 'Saturación de oxígeno',
       unit: '%',
       type: 'number',
+      min: 60,
+      max: 100,
+      step: 1,
       colClass: 'col-6 col-lg-2',
     },
     {
@@ -298,6 +389,9 @@ export class RegistroTriajeComponent implements OnInit {
       title: 'Frecuencia cardíaca',
       unit: 'lpm',
       type: 'number',
+      min: 30,
+      max: 220,
+      step: 1,
       colClass: 'col-6 col-lg-2',
     },
     {
@@ -306,6 +400,9 @@ export class RegistroTriajeComponent implements OnInit {
       title: 'Frecuencia respiratoria',
       unit: 'rpm',
       type: 'number',
+      min: 10,
+      max: 40,
+      step: 1,
       colClass: 'col-6 col-lg-2',
     },
     {
@@ -314,6 +411,9 @@ export class RegistroTriajeComponent implements OnInit {
       title: 'Peso',
       unit: 'kg',
       type: 'number',
+      min: 0.5,
+      max: 300.0,
+      step: 0.1,
       colClass: 'col-6 col-lg-2',
     },
     {
@@ -322,6 +422,9 @@ export class RegistroTriajeComponent implements OnInit {
       title: 'Talla',
       unit: 'cm',
       type: 'number',
+      min: 25.0,
+      max: 250.0,
+      step: 0.5,
       colClass: 'col-6 col-lg-2',
     },
     {
@@ -348,7 +451,9 @@ export class RegistroTriajeComponent implements OnInit {
       .subscribe({
         next: ({ data }) => {
         this.condicionLlegadaOptions.set(data.condiciones_llegada);
+        this.aplicar_condicion_llegada_por_defecto(data.condiciones_llegada);
         this.motivoIngresoOptions.set(data.motivos_ingreso);
+        this.aplicar_motivo_ingreso_por_defecto(data.motivos_ingreso);
         const areas = data.areas_emergencia ?? data.areas ?? [];
         this.areas.set(areas);
         this.areasEmergenciaOptions.set(areas);
@@ -379,22 +484,20 @@ export class RegistroTriajeComponent implements OnInit {
     });
 
     effect(() => {
-      const alertas = this.alertasCriticasSignosVitales();
+      const decision = this.evaluacionClinica();
       if (this.esPacienteNn()) {
         return;
       }
 
       untracked(() => {
         const actual = this.triaje_model();
-        const destinoTraumaShock = this.areasEmergenciaOptions().find((area) =>
-          this.es_area_trauma_shock(area),
-        );
-        const traumaShockId = destinoTraumaShock ? Number(destinoTraumaShock.value) : null;
+        const traumaShockId = this.traumaShockId();
+        const conEmerId = this.consultorioEmergenciaId();
 
-        if (alertas.length > 0) {
+        if (decision.tieneCritico) {
           const updates: Partial<RegistroTriajeFormValue> = {};
-          if (actual.prioridad !== 'I') {
-            updates.prioridad = 'I';
+          if (actual.prioridad !== CODIGOS_PRIORIDAD.I) {
+            updates.prioridad = CODIGOS_PRIORIDAD.I;
           }
           if (traumaShockId !== null && actual.destinoAreaId !== traumaShockId) {
             updates.destinoAreaId = traumaShockId;
@@ -406,26 +509,33 @@ export class RegistroTriajeComponent implements OnInit {
           }
         } else if (this.auto_asignado_por_critico()) {
           const updates: Partial<RegistroTriajeFormValue> = {};
-          if (actual.prioridad === 'I') {
-            updates.prioridad = '';
+          if (actual.prioridad === CODIGOS_PRIORIDAD.I) {
+            updates.prioridad = decision.prioridadSugerida ?? '';
           }
           if (traumaShockId !== null && actual.destinoAreaId === traumaShockId) {
-            updates.destinoAreaId = null;
+            updates.destinoAreaId = conEmerId;
             updates.destinoEspecialidadId = null;
           }
           this.auto_asignado_por_critico.set(false);
           if (Object.keys(updates).length > 0) {
             this.update_model(updates);
           }
+        } else if (decision.prioridad1Bloqueada && actual.prioridad === CODIGOS_PRIORIDAD.I) {
+          const updates: Partial<RegistroTriajeFormValue> = {
+            prioridad: decision.prioridadSugerida ?? '',
+          };
+          if (traumaShockId !== null && actual.destinoAreaId === traumaShockId) {
+            updates.destinoAreaId = conEmerId;
+            updates.destinoEspecialidadId = null;
+          }
+          this.update_model(updates);
         }
       });
     });
 
     effect(() => {
       const actual = this.triaje_model();
-      const imc = this.calcular_imc(actual.peso, actual.talla);
-      const area = this.areas().find((item) => item.value === actual.destinoAreaId);
-      const esConEmer = this.normalize_option(area?.codigo ?? '') === 'CON-EMER';
+      const esConEmer = this.esAreaConsultorioEmergencia();
       const destinoEspecialidadId = esConEmer ? actual.destinoEspecialidadId : null;
 
       let destinoEspecialidadFinal = null;
@@ -437,9 +547,9 @@ export class RegistroTriajeComponent implements OnInit {
         destinoEspecialidadFinal = destinoEspecialidadValido ? destinoEspecialidadId : null;
       }
 
-      if (actual.imc !== imc || actual.destinoEspecialidadId !== destinoEspecialidadFinal) {
+      if (actual.destinoEspecialidadId !== destinoEspecialidadFinal) {
         untracked(() => {
-          this.update_model({ imc, destinoEspecialidadId: destinoEspecialidadFinal });
+          this.update_model({ destinoEspecialidadId: destinoEspecialidadFinal });
         });
       }
 
@@ -501,6 +611,7 @@ export class RegistroTriajeComponent implements OnInit {
   actualizar_eva(evento: Event): void {
     const valor = (evento.target as HTMLInputElement).value;
     this.triajeForm.eva().value.set(valor);
+    this.update_model({ eva: valor });
   }
 
   actualizar_eva_desde_input(evento: Event): void {
@@ -509,98 +620,119 @@ export class RegistroTriajeComponent implements OnInit {
 
     if (valor === '') {
       this.triajeForm.eva().value.set('0');
+      this.update_model({ eva: '0' });
       return;
     }
 
     let numero = parseInt(valor, 10);
-    if (isNaN(numero) || numero < 0) {
-      numero = 0;
-      input.value = '0';
-    } else if (numero > 10) {
-      numero = 10;
-      input.value = '10';
+    if (isNaN(numero) || numero < 0 || numero > 10) {
+      if (!Swal.isVisible()) {
+        this.utilService.mostrar_alerta('Escala de Dolor (EVA) debe estar entre 0 y 10.', 'warning');
+      }
+      numero = Math.min(Math.max(isNaN(numero) ? 0 : numero, 0), 10);
+      input.value = numero.toString();
     }
 
     this.triajeForm.eva().value.set(numero.toString());
+    this.update_model({ eva: numero.toString() });
   }
 
   normalizar_eva_al_salir(): void {
     const valor = this.triaje_model().eva;
     if (!valor || valor.trim() === '') {
       this.triajeForm.eva().value.set('0');
+      this.update_model({ eva: '0' });
     }
   }
 
   imc_classification(): string {
-    const imc = Number(this.triaje_model().imc);
-
-    if (!imc) return 'Sin clasificación';
-    if (imc < 18.5) return 'Bajo peso';
-    if (imc < 25) return 'Normal';
-    if (imc < 30) return 'Sobrepeso';
-    if (imc < 35) return 'Obesidad grado I';
-    if (imc < 40) return 'Obesidad grado II';
-    return 'Obesidad grado III';
+    const actual = this.triaje_model();
+    if (!actual.imc) {
+      return '';
+    }
+    return this.utilService.imc_descripcion(actual.imc);
   }
 
   update_priority(value: string): void {
+    if (value === CODIGOS_PRIORIDAD.I && this.prioridad1Bloqueada() && !this.esPacienteNn()) {
+      return;
+    }
+
     this.auto_asignado_por_critico.set(false);
-    this.update_model({ prioridad: this.esPacienteNn() ? 'I' : value });
+    this.triajeForm.prioridad().markAsTouched();
+
+    const actual = this.triaje_model();
+    const traumaShockId = this.traumaShockId();
+    const conEmerId = this.consultorioEmergenciaId();
+    const updates: Partial<RegistroTriajeFormValue> = {
+      prioridad: this.esPacienteNn() ? CODIGOS_PRIORIDAD.I : value,
+    };
+
+    if (value === CODIGOS_PRIORIDAD.I) {
+      if (traumaShockId !== null && actual.destinoAreaId !== traumaShockId) {
+        updates.destinoAreaId = traumaShockId;
+        updates.destinoEspecialidadId = null;
+      }
+    } else if (traumaShockId !== null && actual.destinoAreaId === traumaShockId) {
+      updates.destinoAreaId = conEmerId;
+      updates.destinoEspecialidadId = null;
+    }
+
+    this.update_model(updates);
   }
 
   vital_status(control: VitalSignControl): PaletteColor {
     const values = this.triaje_model();
-    const edad = this.detalle_atencion()?.paciente?.edad ?? undefined;
+    const evalSignos = this.evaluacionClinica().signos;
 
     switch (control) {
       case 'temperatura':
         return (
-          this.estado_desde_maestro('TEMP', values.temperatura) ??
-          this.utilService.temperature_status(values.temperatura, edad)
+          this.estado_desde_maestro(CODIGOS_PARAMETRO_CLINICO.TEMP, values.temperatura) ??
+          this.evaluadorClinico.nivel_a_color(evalSignos.temperatura)
         );
       case 'saturacion':
         return (
-          this.estado_desde_maestro('SATO2', values.saturacion) ??
-          this.utilService.saturation_status(values.saturacion)
+          this.estado_desde_maestro(CODIGOS_PARAMETRO_CLINICO.SATO2, values.saturacion) ??
+          this.evaluadorClinico.nivel_a_color(evalSignos.saturacion)
         );
       case 'fc':
         return (
-          this.estado_desde_maestro('FC', values.fc) ??
-          this.utilService.heart_rate_status(values.fc, edad)
+          this.estado_desde_maestro(CODIGOS_PARAMETRO_CLINICO.FC, values.fc) ??
+          this.evaluadorClinico.nivel_a_color(evalSignos.fc)
         );
       case 'fr':
         return (
-          this.estado_desde_maestro('FR', values.fr) ??
-          this.utilService.respiratory_rate_status(values.fr, edad)
+          this.estado_desde_maestro(CODIGOS_PARAMETRO_CLINICO.FR, values.fr) ??
+          this.evaluadorClinico.nivel_a_color(evalSignos.fr)
         );
       case 'imc':
-        return this.utilService.imc_status(values.imc);
+        return this.triaje_model().imc
+          ? this.utilService.imc_status(this.triaje_model().imc)
+          : 'secondary';
       default:
         return 'secondary';
     }
   }
 
   pressure_status(part: 'sistolica' | 'diastolica'): PaletteColor {
+    const values = this.triaje_model();
+    const evalSignos = this.evaluacionClinica().signos;
     const value =
-      part === 'sistolica' ? this.triaje_model().paSistolica : this.triaje_model().paDiastolica;
-    const edad = this.detalle_atencion()?.paciente?.edad ?? undefined;
+      part === 'sistolica' ? values.paSistolica : values.paDiastolica;
 
     if (part === 'sistolica') {
       return (
-        this.estado_desde_maestro('PA', value) ??
-        this.utilService.systolic_status(value, edad)
+        this.estado_desde_maestro(CODIGOS_PARAMETRO_CLINICO.PA, value) ??
+        this.evaluadorClinico.nivel_a_color(evalSignos.paSistolica)
       );
     }
 
-    return this.utilService.diastolic_status(value, edad);
+    return this.evaluadorClinico.nivel_a_color(evalSignos.paDiastolica);
   }
 
   eva_status(): PaletteColor {
-    const eva = Number(this.triaje_model().eva);
-
-    if (eva <= 3) return 'success';
-    if (eva <= 6) return 'warning';
-    return 'danger';
+    return this.evaluadorClinico.nivel_a_color(this.evaluacionClinica().signos.eva);
   }
 
   progress_bar_classes(color: PaletteColor): string {
@@ -636,7 +768,7 @@ export class RegistroTriajeComponent implements OnInit {
     }
 
     const control = this.triajeForm[campo]();
-    if (!this.validacion_solicitada()) {
+    if (!control.touched()) {
       return '';
     }
 
@@ -667,15 +799,26 @@ export class RegistroTriajeComponent implements OnInit {
     this.api_errors.set({});
     this.validacion_solicitada.set(true);
 
-    if (!this.triajeForm().valid()) {
+    if (!this.formulario_completo_y_valido()) {
       this.triajeForm().markAsTouched();
       this.utilService.mostrar_alerta('Complete los campos obligatorios.', 'warning');
       return;
     }
 
-    const detalles = this.crear_detalles();
-    if (detalles === null) return;
-    if (detalles.length === 0) {
+    const { request, error } = TriajePayloadMapper.aRequest(this.triaje_model(), {
+      atencionId: this.atencion_id_resuelta,
+      esPacienteNn: this.esPacienteNn(),
+      esConsultorioEmergencia: this.esAreaConsultorioEmergencia(),
+      destinoTraumaShockId: this.traumaShockId(),
+      codigosParametrosDisponibles: this.codigosParametrosDisponibles(),
+    });
+
+    if (error || !request) {
+      this.utilService.mostrar_alerta(error ?? 'Error en los datos del triaje.', 'warning');
+      return;
+    }
+
+    if (request.control_vital.detalles.length === 0) {
       this.utilService.mostrar_alerta('Registre al menos un signo vital.', 'warning');
       return;
     }
@@ -694,7 +837,7 @@ export class RegistroTriajeComponent implements OnInit {
 
     this.guardando.set(true);
     this.triajeService
-      .registrar(this.crear_solicitud_triaje(this.atencion_id_resuelta, detalles), true)
+      .registrar(request, true)
       .pipe(finalize(() => this.guardando.set(false)))
       .subscribe({
         next: ({ data, message }) => {
@@ -727,188 +870,20 @@ export class RegistroTriajeComponent implements OnInit {
       .toUpperCase();
   }
 
-  private crear_solicitud_triaje(
-    atencionId: number,
-    detalles: TriajeDetalleRequest[],
-  ): RegistrarTriajeRequest {
-    const value = this.triaje_model();
-    const destinoTraumaShock = this.areasEmergenciaOptions().find((area) =>
-      this.es_area_trauma_shock(area),
-    );
-    const esPacienteNn = this.esPacienteNn();
-    const esConEmer = this.esAreaConsultorioEmergencia();
-
-    return {
-      atencion_id: atencionId,
-      triaje: {
-        condicion_llegada_id: value.condicionLlegada!,
-        motivo_ingreso_id: value.motivoIngreso!,
-        nivel_triaje_codigo: esPacienteNn ? 'I' : value.prioridad,
-        motivo_consulta: value.motivoConsulta.trim(),
-        destino_area_id:
-          esPacienteNn && destinoTraumaShock
-            ? Number(destinoTraumaShock.value)
-            : value.destinoAreaId!,
-        destino_especialidad_id: !esPacienteNn && esConEmer ? value.destinoEspecialidadId : null,
-        programacion_personal_id: value.programacionPersonalId ? Number(value.programacionPersonalId) : null,
-        observacion: value.observaciones.trim() || null,
-      },
-      control_vital: {
-        observaciones: null,
-        detalles,
-      },
-    };
-  }
-
-  private crear_detalles(): TriajeDetalleRequest[] | null {
-    const value = this.triaje_model();
-    const detalles: TriajeDetalleRequest[] = [];
-    let parametro_no_disponible: string | null = null;
-    const add = (codigo: string, raw: string, componente: string | null = null): void => {
-      if (raw.trim() === '') return;
-      if (!this.parametro_disponible(codigo)) {
-        parametro_no_disponible ??= codigo;
-        return;
-      }
-      detalles.push({
-        parametro_codigo: codigo,
-        componente_codigo: componente,
-        valor: Number(raw),
-      });
-    };
-
-    add('TEMP', value.temperatura);
-    add('FC', value.fc);
-    add('FR', value.fr);
-    add('SATO2', value.saturacion);
-    add('PESO', value.peso);
-    add('TALLA', value.talla);
-    add('EVA', value.eva);
-
-    const sistolica = value.paSistolica;
-    const diastolica = value.paDiastolica;
-    if (sistolica || diastolica) {
-      if (!sistolica || !diastolica) {
-        this.utilService.mostrar_alerta('Ingrese las presiones sistólica y diastólica.', 'warning');
-        return null;
-      }
-      add('PA', sistolica, 'PAS');
-      add('PA', diastolica, 'PAD');
-    }
-
-    if (parametro_no_disponible) {
-      this.utilService.mostrar_alerta(
-        `El parámetro clínico ${parametro_no_disponible} no está disponible.`,
-        'warning',
-      );
-      return null;
-    }
-
-    return detalles;
-  }
-
-  private parametro_disponible(codigo: string): boolean {
-    return this.parametrosClinicos().some((parametro) => parametro.codigo === codigo);
-  }
-
   calcular_imc(pesoRaw: string | number, tallaRaw: string | number): string {
-    const pesoLimpio = String(pesoRaw ?? '')
-      .replace(',', '.')
-      .trim();
-    const tallaLimpia = String(tallaRaw ?? '')
-      .replace(',', '.')
-      .trim();
-
-    const peso = Number(pesoLimpio);
-    const talla = Number(tallaLimpia);
-
-    if (!peso || !talla || peso <= 0 || talla <= 0) {
-      return '';
-    }
-
-    const tallaEnMetros = talla > 3 ? talla / 100 : talla;
-    if (tallaEnMetros <= 0.3 || tallaEnMetros > 2.5) {
-      return '';
-    }
-
-    const imc = peso / (tallaEnMetros * tallaEnMetros);
-    return Number.isFinite(imc) ? imc.toFixed(2) : '';
+    return this.evaluadorClinico.calcular_imc(pesoRaw, tallaRaw).imc;
   }
-
-  readonly alertasCriticasSignosVitales = computed(() => {
-    const values = this.triaje_model();
-    const alertas: { parametro: string; valor: string | number; mensaje: string }[] = [];
-
-    const agregarSiCritico = (
-      estado: PaletteColor,
-      parametro: string,
-      raw: string,
-      unidad: string,
-      mensaje: string,
-    ): void => {
-      if (estado === 'danger' && raw.trim() !== '') {
-        alertas.push({ parametro, valor: `${raw}${unidad}`, mensaje });
-      }
-    };
-
-    agregarSiCritico(
-      this.vital_status('saturacion'),
-      'Sat. O₂',
-      values.saturacion,
-      '%',
-      'Saturación en rango crítico (hipoxemia severa).',
-    );
-    agregarSiCritico(
-      this.pressure_status('sistolica'),
-      'PAS',
-      values.paSistolica,
-      ' mmHg',
-      'Presión arterial sistólica en rango crítico.',
-    );
-    agregarSiCritico(
-      this.pressure_status('diastolica'),
-      'PAD',
-      values.paDiastolica,
-      ' mmHg',
-      'Presión arterial diastólica en rango crítico.',
-    );
-    agregarSiCritico(
-      this.vital_status('fc'),
-      'FC',
-      values.fc,
-      ' lpm',
-      'Frecuencia cardíaca en rango crítico.',
-    );
-    agregarSiCritico(
-      this.vital_status('fr'),
-      'FR',
-      values.fr,
-      ' rpm',
-      'Frecuencia respiratoria en rango crítico.',
-    );
-    agregarSiCritico(
-      this.vital_status('temperatura'),
-      'Temp.',
-      values.temperatura,
-      ' °C',
-      'Temperatura en rango crítico.',
-    );
-
-    return alertas;
-  });
 
   private aplicar_reglas_paciente_nn(): void {
     if (!this.esPacienteNn()) {
       return;
     }
 
-    const destinoTraumaShock = this.areasEmergenciaOptions().find((area) =>
-      this.es_area_trauma_shock(area),
-    );
+    const traumaShockId = this.traumaShockId();
     this.update_model({
-      prioridad: 'I',
+      prioridad: CODIGOS_PRIORIDAD.I,
       destinoEspecialidadId: null,
-      ...(destinoTraumaShock ? { destinoAreaId: Number(destinoTraumaShock.value) } : {}),
+      ...(traumaShockId !== null ? { destinoAreaId: traumaShockId } : {}),
     });
   }
 
@@ -919,12 +894,210 @@ export class RegistroTriajeComponent implements OnInit {
     return descripcion.includes('TRAUMA') && descripcion.includes('SHOCK');
   }
 
+  /** Preselects "Caminando" (sighoweb.m_condi_llegada.cod_condi_llegada = 'PIE') when no condition is chosen yet. */
+  aplicar_condicion_llegada_por_defecto(condiciones: SelectOption[]): void {
+    if (this.triaje_model().condicionLlegada !== null) return;
+
+    const caminando = condiciones.find(
+      (condicion) =>
+        String((condicion as SelectOption & { codigo?: string }).codigo ?? '')
+          .trim()
+          .toUpperCase() === CONDICION_LLEGADA_POR_DEFECTO ||
+        String(condicion.label ?? '')
+          .trim()
+          .toLowerCase() === 'caminando',
+    );
+    if (caminando) {
+      this.update_model({ condicionLlegada: Number(caminando.value) });
+    }
+  }
+
+  /** Preselects "Evaluación Médica" (sighoweb.m_motivo_ingreso.cod_mot_ing = 'EVME') when no reason is chosen yet. */
+  aplicar_motivo_ingreso_por_defecto(motivos: SelectOption[]): void {
+    if (this.triaje_model().motivoIngreso !== null) return;
+
+    const evaluacion_medica = motivos.find(
+      (motivo) =>
+        String((motivo as SelectOption & { codigo?: string }).codigo ?? '').trim().toUpperCase() ===
+        MOTIVO_INGRESO_POR_DEFECTO,
+    );
+    if (evaluacion_medica) {
+      this.update_model({ motivoIngreso: Number(evaluacion_medica.value) });
+    }
+  }
+
   private update_model(patch: Partial<RegistroTriajeFormValue>): void {
     this.triaje_model.update((value) => ({ ...value, ...patch }));
   }
 
-  actualizar_signo_vital(campo: 'peso' | 'talla', value: string | number | null | undefined): void {
-    this.update_model({ [campo]: value == null ? '' : String(value) });
+  actualizar_signo_vital(
+    campo:
+      | 'temperatura'
+      | 'paSistolica'
+      | 'paDiastolica'
+      | 'saturacion'
+      | 'fc'
+      | 'fr'
+      | 'peso'
+      | 'talla',
+    value: string | number | null | undefined,
+  ): void {
+    const patch: Partial<RegistroTriajeFormValue> = { [campo]: value == null ? '' : String(value) };
+    if (campo === 'peso' || campo === 'talla') {
+      patch.imc = '';
+    }
+    this.update_model(patch);
+  }
+
+  recalcular_imc_al_salir(): void {
+    const actual = this.triaje_model();
+    const imc = this.calcular_imc(actual.peso, actual.talla);
+    if (actual.imc !== imc) {
+      this.update_model({ imc });
+    }
+  }
+
+  error_signo_vital(
+    control:
+      | 'temperatura'
+      | 'paSistolica'
+      | 'paDiastolica'
+      | 'saturacion'
+      | 'fc'
+      | 'fr'
+      | 'peso'
+      | 'talla',
+  ): string {
+    const model = this.triaje_model();
+    const valorRaw = model[control];
+    if (valorRaw === null || valorRaw === undefined || String(valorRaw).trim() === '') return '';
+
+    const num = Number(String(valorRaw).replace(',', '.'));
+    if (isNaN(num)) return 'Debe ser un número válido.';
+
+    const paramMap: Record<string, { min: number; max: number; unit: string; name: string }> = {
+      temperatura: { min: 36.0, max: 40.0, unit: '°C', name: 'Temperatura' },
+      paSistolica: { min: 50, max: 240, unit: 'mmHg', name: 'PAS' },
+      paDiastolica: { min: 0, max: 100, unit: 'mmHg', name: 'PAD' },
+      saturacion: { min: 60, max: 100, unit: '%', name: 'Sat. O₂' },
+      fc: { min: 30, max: 220, unit: 'lpm', name: 'FC' },
+      fr: { min: 10, max: 40, unit: 'rpm', name: 'FR' },
+      peso: { min: 0.5, max: 300.0, unit: 'kg', name: 'Peso' },
+      talla: { min: 25.0, max: 250.0, unit: 'cm', name: 'Talla' },
+    };
+
+    const cfg = paramMap[control];
+    if (!cfg) return '';
+
+    let min = cfg.min;
+    let max = cfg.max;
+    if (control === 'temperatura') {
+      const p = this.parametrosClinicos().find((x) => x.codigo === 'TEMP');
+      if (p?.valor_minimo_admisible != null) min = p.valor_minimo_admisible;
+      if (p?.valor_maximo_admisible != null) max = p.valor_maximo_admisible;
+    } else if (control === 'paSistolica' || control === 'paDiastolica') {
+      const p = this.parametrosClinicos().find((x) => x.codigo === 'PA');
+      const compCode = control === 'paSistolica' ? 'PAS' : 'PAD';
+      const c = p?.componentes?.find((x) => x.codigo === compCode);
+      const cMin = c?.puntaje_minimo != null ? Number(c.puntaje_minimo) : null;
+      const cMax = c?.puntaje_maximo != null ? Number(c.puntaje_maximo) : null;
+      if (cMin !== null && (cMin > 0 || (cMax !== null && cMax > 0))) {
+        min = cMin;
+      }
+      if (cMax !== null && ((cMin !== null && cMin > 0) || cMax > 0)) {
+        max = cMax;
+      }
+    } else if (control === 'saturacion') {
+      const p = this.parametrosClinicos().find((x) => x.codigo === 'SATO2');
+      if (p?.valor_minimo_admisible != null) min = p.valor_minimo_admisible;
+      if (p?.valor_maximo_admisible != null) max = p.valor_maximo_admisible;
+    } else if (control === 'fc') {
+      const p = this.parametrosClinicos().find((x) => x.codigo === 'FC');
+      if (p?.valor_minimo_admisible != null) min = p.valor_minimo_admisible;
+      if (p?.valor_maximo_admisible != null) max = p.valor_maximo_admisible;
+    } else if (control === 'fr') {
+      const p = this.parametrosClinicos().find((x) => x.codigo === 'FR');
+      if (p?.valor_minimo_admisible != null) min = p.valor_minimo_admisible;
+      if (p?.valor_maximo_admisible != null) max = p.valor_maximo_admisible;
+    } else if (control === 'peso') {
+      const p = this.parametrosClinicos().find((x) => x.codigo === 'PESO');
+      if (p?.valor_minimo_admisible != null) min = p.valor_minimo_admisible;
+      if (p?.valor_maximo_admisible != null) max = p.valor_maximo_admisible;
+    } else if (control === 'talla') {
+      const p = this.parametrosClinicos().find((x) => x.codigo === 'TALLA');
+      if (p?.valor_minimo_admisible != null) min = p.valor_minimo_admisible;
+      if (p?.valor_maximo_admisible != null) max = p.valor_maximo_admisible;
+    }
+
+    if (num < min || num > max) {
+      const minText = control === 'temperatura' || control === 'peso' || control === 'talla' ? min.toFixed(1) : String(min);
+      const maxText = control === 'temperatura' || control === 'peso' || control === 'talla' ? max.toFixed(1) : String(max);
+      return `${cfg.name} debe estar entre ${minText} y ${maxText} ${cfg.unit}.`;
+    }
+
+    if (control === 'paDiastolica' || control === 'paSistolica') {
+      const pas = Number(model.paSistolica);
+      const pad = Number(model.paDiastolica);
+      if (model.paSistolica && model.paDiastolica && pas <= pad) {
+        return 'PAS debe ser mayor que PAD.';
+      }
+    }
+
+    return '';
+  }
+
+  readonly signos_vitales_invalidos = computed(() => {
+    const camposVitales = [
+      'temperatura',
+      'paSistolica',
+      'paDiastolica',
+      'saturacion',
+      'fc',
+      'fr',
+      'peso',
+      'talla',
+    ] as const;
+
+    return camposVitales.some((campo) => !!this.error_signo_vital(campo));
+  });
+
+  readonly formulario_completo_y_valido = computed(() => {
+    return this.triajeForm().valid() && !this.signos_vitales_invalidos();
+  });
+
+  validar_extremo_al_salir(
+    campo:
+      | 'temperatura'
+      | 'paSistolica'
+      | 'paDiastolica'
+      | 'saturacion'
+      | 'fc'
+      | 'fr'
+      | 'peso'
+      | 'talla',
+  ): void {
+    if (Swal.isVisible()) {
+      return;
+    }
+    const error = this.error_signo_vital(campo);
+    if (error) {
+      this.utilService.mostrar_alerta(error, 'warning');
+      this.update_model({ [campo]: '' });
+      try {
+        if (this.triajeForm[campo]) {
+          this.triajeForm[campo]().value.set('');
+        }
+      } catch {
+        // Safe fallback
+      }
+      if (campo === 'peso' || campo === 'talla') {
+        this.recalcular_imc_al_salir();
+      }
+    } else {
+      if (campo === 'peso' || campo === 'talla') {
+        this.recalcular_imc_al_salir();
+      }
+    }
   }
 
   actualizar_seleccion_requerida(
@@ -934,10 +1107,12 @@ export class RegistroTriajeComponent implements OnInit {
     if (campo === 'destinoAreaId') {
       this.auto_asignado_por_critico.set(false);
     }
+    this.triajeForm[campo]().markAsTouched();
     this.update_model({ [campo]: value === '' || value === null ? null : Number(value) });
   }
 
   actualizar_motivo_consulta(event: Event): void {
+    this.triajeForm.motivoConsulta().markAsTouched();
     this.update_model({ motivoConsulta: (event.target as HTMLInputElement).value });
   }
 
@@ -960,7 +1135,7 @@ export class RegistroTriajeComponent implements OnInit {
     }
 
     const control = this.triajeForm[campo]();
-    if (!this.validacion_solicitada()) {
+    if (!control.touched()) {
       return '';
     }
 
@@ -981,7 +1156,7 @@ export class RegistroTriajeComponent implements OnInit {
     }
 
     const control = this.triajeForm.observaciones();
-    if (!this.validacion_solicitada()) {
+    if (!control.touched()) {
       return '';
     }
 

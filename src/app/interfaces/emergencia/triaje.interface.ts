@@ -20,12 +20,20 @@ export interface PacienteSeguimientoTriaje {
   apellido_materno?: string | null;
   nombres?: string | null;
   nombre_completo: string;
+  sexo_codigo?: string | null;
+  sexo?: string | null;
   edad: number | null;
   grado_id?: number | null;
   grado?: string | null;
   grado_codigo?: string | null;
   situacion?: string | null;
   es_nn: boolean;
+  es_discapacitado?: boolean | null;
+  ind_discapacitado?: boolean | number | null;
+  es_defensor_patria?: boolean | null;
+  ind_defensor_patria?: boolean | number | null;
+  tipo_persona_fap?: number | null;
+  es_fap?: boolean | null;
 }
 
 export interface SeguimientoTriaje {
@@ -135,10 +143,17 @@ export interface DetalleAtencionPaciente {
   correo_electronico: string | null;
   situacion: string | null;
   parentesco: string | null;
+  codigo_parentesco?: string | null;
   titular_nombre?: string | null;
   titular_grado?: string | null;
   titular_unidad?: string | null;
   es_nn: boolean;
+  es_discapacitado?: boolean | null;
+  ind_discapacitado?: boolean | number | null;
+  es_defensor_patria?: boolean | null;
+  ind_defensor_patria?: boolean | number | null;
+  tipo_persona_fap?: number | null;
+  es_fap?: boolean | null;
 }
 
 export interface DetalleAtencionDatos {
@@ -471,6 +486,9 @@ export interface Diagnostico {
   tipo_id: number;
   tipo_codigo: string;
   tipo_nombre: string;
+  clasificacion_id: number | null;
+  clasificacion_codigo: string | null;
+  clasificacion_nombre: string | null;
   observacion: string | null;
 }
 
@@ -489,7 +507,10 @@ export interface DiagnosticoCatalogo {
 
 export interface DiagnosticoContexto {
   diagnosticos: Diagnostico[];
+  /** Presuntivo, Definitivo, Repetitivo (m_tipo_cla_dx.ind_tipo_cla_dx = 1). */
   tipos: TipoDiagnostico[];
+  /** Principal, Secundario, Diferencial (m_tipo_cla_dx.ind_tipo_cla_dx = 0). */
+  clasificaciones: TipoDiagnostico[];
 }
 
 export interface ServicioImagen {
@@ -499,11 +520,7 @@ export interface ServicioImagen {
 }
 
 export type CategoriaApoyoImagen =
-  | 'radiografias'
-  | 'tomografias'
-  | 'resonancias'
-  | 'ecografias'
-  | 'mamografias';
+  'radiografias' | 'tomografias' | 'resonancias' | 'ecografias' | 'mamografias';
 
 export interface PrioridadOrdenMedica {
   prioridad_id: number;

@@ -23,6 +23,7 @@ import {
 import { CatalogoEmergenciaService } from '../../../../services/emergencia/catalogo-emergencia.service';
 import { TriajeService } from '../../../../services/emergencia/triaje.service';
 import { UtilService } from '../../../../services/util.service';
+import { formatear_nombre_paciente as formatear_nombre } from '../../utils/nombre-paciente.util';
 import { RegistroTriajeComponent } from '../registro-triaje/registro-triaje.component';
 
 const FILTROS_INICIALES: FiltrosSeguimientoTriaje = {
@@ -98,7 +99,11 @@ export class PacientesTriajeComponent {
   readonly columns: TableColumn<SeguimientoTriaje>[] = [
     { key: 'codigo_episodio', label: 'Registro' },
     { key: 'fecha_hora_ingreso', label: 'Fecha y Hora' },
-    { key: 'paciente.nombre_completo', label: 'Paciente' },
+    {
+      key: 'paciente.nombre_completo',
+      label: 'Paciente',
+      formatter: (_value, row) => formatear_nombre(row.paciente),
+    },
     { key: 'paciente.edad', label: 'Edad', align: 'center' },
     { key: 'motivo_ingreso', label: 'Motivo de Ingreso' },
     { key: 'destino', label: 'Destino' },
@@ -114,9 +119,9 @@ export class PacientesTriajeComponent {
     },
     {
       key: 'medico',
-      label: 'Médico responsable',
+      label: 'Médico',
       badge: {
-        texto: (_value, row) => row.medico?.trim() || 'Sin médico asignado',
+        texto: (_value, row) => row.medico?.trim() || 'Por asignar',
         clases: (_value, row) => (row.medico ? 'info' : 'secondary'),
         size: 'sm',
       },
@@ -264,42 +269,32 @@ export class PacientesTriajeComponent {
   }
 
   formatear_nombre_paciente(paciente: PacienteSeguimientoTriaje | null | undefined): string {
-    if (!paciente) return 'Paciente';
+    return formatear_nombre(paciente);
+  }
 
-    const grado = paciente.grado_codigo?.toUpperCase()?.trim() || null;
-    const situacion = paciente.situacion?.toUpperCase()?.trim();
-    const sufijoSituacion = grado && situacion === 'RETIRO' ? '(r)' : null;
-    const partesGrado = [grado, sufijoSituacion].filter(Boolean).join(' ');
-
-    let nombre = '';
-    if (paciente.apellido_paterno || paciente.apellido_materno || paciente.nombres) {
-      const apellidos = [paciente.apellido_paterno, paciente.apellido_materno]
-        .map((value: string | null | undefined) => value?.toUpperCase()?.trim())
-        .filter(Boolean)
-        .join(' ');
-      const nombres = (paciente.nombres || '')
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean)
-        .map((palabra: string) => palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase())
-        .join(' ');
-      nombre = [apellidos, nombres].filter(Boolean).join(' ');
-    } else {
-      nombre = (paciente.nombre_completo?.trim() || 'Paciente');
-    }
-
-    return partesGrado ? `${partesGrado} ${nombre}` : nombre;
+  formatear_sexo(sexo: string | null | undefined, sexo_codigo: string | null | undefined): string {
+    const valor = (sexo || sexo_codigo || '').trim().toLowerCase();
+    if (valor.startsWith('m')) return 'Masculino';
+    if (valor.startsWith('f')) return 'Femenino';
+    return (sexo || sexo_codigo || '').trim();
   }
 
   titulo_modal_triaje(atencion: SeguimientoTriaje): string {
     const paciente = atencion.paciente;
     const nombre = this.formatear_nombre_paciente(paciente);
-    const edad =
-      paciente?.edad !== null && paciente?.edad !== undefined
-        ? ` (${paciente.edad} ${paciente.edad === 1 ? 'año' : 'años'})`
-        : '';
+    const partesInfo: string[] = [];
 
-    return `Registro de Triaje - ${nombre}${edad}`;
+    if (paciente?.edad !== null && paciente?.edad !== undefined) {
+      partesInfo.push(`${paciente.edad} ${paciente.edad === 1 ? 'año' : 'años'}`);
+    }
+
+    const sexo = this.formatear_sexo(paciente?.sexo, paciente?.sexo_codigo);
+    if (sexo) {
+      partesInfo.push(sexo);
+    }
+
+    const info = partesInfo.length > 0 ? ` - ${partesInfo.join(' ')}` : '';
+    return `Registro de Triaje - ${nombre}${info}`;
   }
 
   abrir_modal_triaje(atencion: SeguimientoTriaje): void {

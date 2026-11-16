@@ -1,3 +1,4 @@
+import { ReprogramacionCitasPageComponent } from './pages/reprogramacion-citas-page/reprogramacion-citas-page.component';
 import { Routes } from '@angular/router';
 
 export const consultorioRoutes: Routes = [
@@ -14,6 +15,10 @@ export const consultorioRoutes: Routes = [
   {
     path: 'adicional',
     loadComponent: () =>import('./pages/adicional-page/adicional-page.component').then(m => m.AdicionalPageComponent)
+  },
+   {
+    path: 'reprogramacion-citas',
+    loadComponent: () =>import('./pages/reprogramacion-citas-page/reprogramacion-citas-page.component').then(m => m.ReprogramacionCitasPageComponent)
   },
 
 ]

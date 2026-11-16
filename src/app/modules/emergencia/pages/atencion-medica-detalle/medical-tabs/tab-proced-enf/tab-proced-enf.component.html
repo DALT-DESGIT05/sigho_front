@@ -63,7 +63,10 @@
         ></button>
       </div>
       <div class="modal-body">
-        <div class="laboratory-catalog-layout">
+        <div
+          class="laboratory-catalog-layout proced-enf-catalog-layout"
+          [class.has-selected-panel]="servicios_seleccionados_lista().length > 0"
+        >
           <fieldset class="laboratory-fieldset laboratory-fieldset--areas">
             <legend><i class="fa-solid fa-list-check" aria-hidden="true"></i>Categorías</legend>
             <nav class="laboratory-area-nav" aria-label="Categorías de indicaciones médicas">
@@ -158,25 +161,98 @@
               </div>
             </div>
           </fieldset>
+          @if (servicios_seleccionados_lista().length > 0) {
+            <fieldset class="laboratory-fieldset laboratory-fieldset--selected">
+              <legend class="d-flex align-items-center justify-content-between">
+                <span>
+                  <i class="fa-solid fa-clipboard-check text-primary me-1" aria-hidden="true"></i>
+                  Seleccionados ({{ servicios_seleccionados_lista().length }})
+                </span>
+                <button
+                  type="button"
+                  class="btn btn-link btn-sm text-danger text-decoration-none p-0 fw-normal"
+                  style="font-size: 11px;"
+                  title="Quitar todas las selecciones"
+                  (click)="limpiar_servicios_seleccionados()"
+                >
+                  <i class="fa-solid fa-trash-can me-1"></i>Limpiar
+                </button>
+              </legend>
+              <div class="laboratory-selected-content">
+                <div class="laboratory-selected-items">
+                  @for (item of servicios_seleccionados_lista(); track item.codigo) {
+                    <div class="laboratory-selected-card">
+                      <div class="d-flex align-items-start justify-content-between gap-2">
+                        <div class="flex-grow-1 min-w-0">
+                          <div class="d-flex align-items-center gap-1 mb-1">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 10px;">
+                              {{ item.codigo }}
+                            </span>
+                            <span class="badge bg-light text-secondary border" style="font-size: 10px;">
+                              {{ item.area_nombre }}
+                            </span>
+                          </div>
+                          <div class="fw-semibold text-dark small text-break mb-1">
+                            {{ item.nombre }}
+                          </div>
+                          @if (item.indicacion) {
+                            <div class="laboratory-selected-note">
+                              <i class="fa-solid fa-notes-medical text-primary me-1"></i>
+                              <span>{{ item.indicacion }}</span>
+                            </div>
+                          }
+                        </div>
+                        <div class="d-flex flex-column gap-1 flex-shrink-0">
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-outline-primary p-1 lh-1"
+                            [title]="item.indicacion ? 'Editar indicación' : 'Agregar indicación'"
+                            (click)="abrir_modal_indicacion_servicio(item.codigo, item.nombre)"
+                          >
+                            <i class="fa-solid fa-pen-to-square"></i>
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-outline-danger p-1 lh-1"
+                            title="Quitar de la lista"
+                            (click)="quitar_servicio_proced_enf(item.codigo)"
+                          >
+                            <i class="fa-solid fa-xmark"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </fieldset>
+          }
         </div>
       </div>
       <div class="modal-footer">
         <div class="laboratory-footer-controls">
-          <div class="laboratory-control-group">
+          <div class="laboratory-control-group laboratory-control-group--prioridad">
             <app-select
               label="Prioridad"
+              [requerido]="true"
               placeholder="-- Seleccione --"
+              [dropup]="true"
               [options]="prioridadesOptions()"
               [showEmptyOption]="true"
               emptyOptionLabel="-- Seleccione --"
               size="sm"
+              class="w-100"
               [selectedValue]="prioridad_proced_enf_id()"
               (selectedValueChange)="actualizar_prioridad_proced_enf_valor($event)"
             />
           </div>
         </div>
         <app-button
-          texto="Agregar"
+          [texto]="
+            servicios_seleccionados_lista().length > 0
+              ? 'Agregar (' + servicios_seleccionados_lista().length + ')'
+              : 'Agregar'
+          "
           action="save"
           color="primary"
           size="sm"

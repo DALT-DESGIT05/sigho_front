@@ -44,9 +44,10 @@
   title="Registrar diagnóstico"
   icon="fa-solid fa-notes-medical"
   size="lg"
+  customClass="modal-diagnostico"
   [showFooter]="true"
 >
-  <div class="row g-3">
+  <div class="row g-2">
     <div class="col-12 position-relative">
       @if (diagnostico_seleccionado()) {
         <app-label texto="Diagnóstico CIE-10" [required]="true" color="primary" />
@@ -70,12 +71,12 @@
           [displayWith]="mostrar_diagnostico"
           [minLength]="2"
           [debounceTime]="400"
-          size="md"
+          size="sm"
           (optionSelected)="seleccionar_diagnostico($event)"
         />
       }
     </div>
-    <div class="col-md-5">
+    <div class="col-md-6">
       <app-select
         label="Tipo de diagnóstico"
         [requerido]="true"
@@ -83,50 +84,69 @@
         [options]="tiposDiagnosticoOptions()"
         [showEmptyOption]="true"
         emptyOptionLabel="-- Seleccione --"
-        size="md"
+        size="sm"
         [disabled]="!habilitado() || guardando()"
         [selectedValue]="tipo_diagnostico_id()"
         (selectedValueChange)="actualizar_tipo_diagnostico_valor($event)"
       />
     </div>
-    <div class="col-md-7">
-      <app-input-text
-        label="Observación"
-        size="md"
+    <div class="col-md-6">
+      <app-select
+        label="Clasificación"
+        [requerido]="true"
+        placeholder="-- Seleccione --"
+        [options]="clasificacionesDiagnosticoOptions()"
+        [showEmptyOption]="true"
+        emptyOptionLabel="-- Seleccione --"
+        size="sm"
+        [disabled]="!habilitado() || guardando()"
+        [selectedValue]="clasificacion_diagnostico_id()"
+        (selectedValueChange)="actualizar_clasificacion_diagnostico_valor($event)"
+      />
+    </div>
+    <div class="col-12">
+      <app-text-area
+        label="Descripción"
+        size="sm"
+        [rows]="1"
+        resize="vertical"
         [maxlength]="200"
-        placeholder="Ingrese una observación opcional..."
+        placeholder="Ingrese una descripción opcional..."
         [value]="observacion_diagnostico()"
         [disabled]="!habilitado() || guardando()"
         (valueChange)="actualizar_observacion_texto($event)"
+        cssClass="w-100"
       />
     </div>
-    <div class="col-12 d-flex justify-content-end">
+    <div class="col-12 d-flex justify-content-end mt-1">
       <app-button
+        texto="Agregar"
         action="create"
         color="primary"
         size="sm"
-        [soloIcono]="true"
         title="Añadir a la lista"
         [disabled]="
           !habilitado() ||
           !diagnostico_seleccionado() ||
           tipo_diagnostico_id() === null ||
+          clasificacion_diagnostico_id() === null ||
           guardando()
         "
         (clicked)="agregar_temporal()"
       />
     </div>
 
-    <div class="col-12 mt-2">
-      <section class="clinical-section-card mb-0">
-        <div class="clinical-list-header">
+    @if (diagnosticos_temporales().length > 0) {
+    <div class="col-12 mt-1">
+      <section class="clinical-section-card clinical-section-card--compact mb-0">
+        <div class="clinical-list-header mb-1">
           <div class="clinical-title-actions">
-            <h3>Diagnósticos a registrar ({{ diagnosticos_temporales().length }})</h3>
+            <h4 class="clinical-list-title mb-0">Diagnósticos a registrar ({{ diagnosticos_temporales().length }})</h4>
           </div>
         </div>
         <app-table
-          size="sm"
-          [scrollHeight]="null"
+          size="xs"
+          [scrollHeight]="'140px'"
           [columns]="columnasTemporales"
           [cellTemplates]="plantillasTempCelda()"
           [rows]="diagnosticos_temporales()"
@@ -134,6 +154,7 @@
         />
       </section>
     </div>
+    }
   </div>
 
   <ng-template #accionesTempTpl let-fila>

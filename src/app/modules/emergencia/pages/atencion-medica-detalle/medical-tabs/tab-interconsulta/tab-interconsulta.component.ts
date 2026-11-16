@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
   TemplateRef,
   computed,
   inject,
@@ -60,9 +59,6 @@ export interface GuardarInterconsultaPayload {
 export class TabInterconsultaComponent {
   private readonly interconsultaService = inject(InterconsultaService);
   private readonly utilService = inject(UtilService);
-  private readonly orden_impresion_interconsulta = viewChild<ElementRef<HTMLElement>>(
-    'orden_impresion_interconsulta',
-  );
 
   readonly detalle = input.required<DetalleAtencionResponse>();
   readonly ordenes_interconsulta = input<readonly OrdenInterconsulta[]>([]);
@@ -109,7 +105,7 @@ export class TabInterconsultaComponent {
     },
     {
       key: 'diagnostico',
-      label: 'DIAGNÓSTICO',
+      label: 'DX RELACIONADO',
       formatter: (_val, fila) =>
         fila.diagnostico_codigo
           ? `${fila.diagnostico_codigo} - ${fila.diagnostico_nombre}`
@@ -117,13 +113,8 @@ export class TabInterconsultaComponent {
     },
     {
       key: 'que_solicita',
-      label: 'QUÉ SOLICITA',
+      label: 'QUÉ SE SOLICITA',
       formatter: (_val, fila) => fila.que_solicita || '-',
-    },
-    {
-      key: 'observaciones',
-      label: 'OBSERVACIONES',
-      formatter: (_val, fila) => fila.observaciones || '-',
     },
     {
       key: 'estado',
@@ -149,15 +140,40 @@ export class TabInterconsultaComponent {
   readonly que_solicita_interconsulta = signal('');
   readonly observaciones_interconsulta = signal('');
 
-  readonly especialidades_filtradas = computed(() => {
-    const areaId = this.area_interconsulta_id();
-    if (areaId === null) {
-      return [];
-    }
-    const todas = this.especialidades_interconsulta();
-    const porArea = todas.filter((esp) => esp.area_id === areaId);
-    const listaBase = porArea.length > 0 ? porArea : todas;
+  readonly solicitas = [
+    { id: 1, nombre: 'Especialidad' },
+    { id: 2, nombre: 'Diagnóstico' },
+    { id: 3, nombre: 'Recomendaciones' },
+  ];
 
+  readonly clases = [
+    { id: 1, nombre: 'Urgente' },
+    { id: 2, nombre: 'Previa Cita' },
+    { id: 3, nombre: 'En Cama' },
+    { id: 4, nombre: 'En Consultorio' },
+  ];
+
+  readonly solicita_seleccionado = signal<string>('Especialidad');
+  readonly clase_seleccionada = signal<string>('Urgente');
+
+  seleccionar_solicita(nombre: string): void {
+    this.solicita_seleccionado.set(nombre);
+  }
+
+  seleccionar_clase(nombre: string): void {
+    this.clase_seleccionada.set(nombre);
+    const prioridades = this.prioridades_orden();
+    if (nombre === 'Urgente') {
+      const urg = prioridades.find((p) => p.codigo === 'URG' || p.nombre?.toLowerCase().includes('urgente'));
+      if (urg) this.prioridad_interconsulta_id.set(urg.prioridad_id);
+    } else {
+      const normal = prioridades.find((p) => p.codigo === 'NOR' || p.nombre?.toLowerCase().includes('normal') || p.nombre?.toLowerCase().includes('programad'));
+      if (normal) this.prioridad_interconsulta_id.set(normal.prioridad_id);
+    }
+  }
+
+  readonly especialidades_admisibles = computed(() => {
+    const todas = this.especialidades_interconsulta();
     const paciente = this.detalle().paciente;
     const sexo = (paciente?.sexo_codigo || '').toUpperCase();
     const edad = paciente?.edad ?? null;
@@ -167,7 +183,7 @@ export class TabInterconsultaComponent {
     const ESPEC_GERIATRICAS = [30, 27, 28, 29, 58, 59];
     const ESPEC_NEONATOLOGIA = [51];
 
-    return listaBase.filter((esp) => {
+    return todas.filter((esp) => {
       if (sexo === 'M' && ESPEC_GINECO_OBSTETRICIA.includes(esp.especialidad_id)) {
         return false;
       }
@@ -190,6 +206,14 @@ export class TabInterconsultaComponent {
     });
   });
 
+  readonly especialidades_filtradas = computed(() => {
+    const areaId = this.area_interconsulta_id();
+    if (areaId === null) {
+      return [];
+    }
+    return this.especialidades_admisibles().filter((esp) => esp.area_id === areaId);
+  });
+
   readonly personal_interconsulta_filtrado = computed(() => {
     const especialidadId = this.especialidad_interconsulta_id();
     if (especialidadId === null) {
@@ -200,8 +224,15 @@ export class TabInterconsultaComponent {
     );
   });
 
+  readonly areas_filtradas = computed(() => {
+    const admisibles = this.especialidades_admisibles();
+    return this.areas_interconsulta().filter((a) =>
+      admisibles.some((esp) => esp.area_id === a.area_id),
+    );
+  });
+
   readonly areasOptions = computed<SelectOption[]>(() => {
-    return this.areas_interconsulta().map((a) => ({
+    return this.areas_filtradas().map((a) => ({
       value: a.area_id,
       label: a.nombre,
     }));
@@ -284,7 +315,18 @@ export class TabInterconsultaComponent {
   }
 
   guardar(): void {
-    const prioridad_id = this.prioridad_interconsulta_id();
+    let prioridad_id = this.prioridad_interconsulta_id();
+    if (prioridad_id === null) {
+      const prioridades = this.prioridades_orden();
+      if (this.clase_seleccionada() === 'Urgente') {
+        const urg = prioridades.find((p) => p.codigo === 'URG' || p.nombre?.toLowerCase().includes('urgente'));
+        prioridad_id = urg?.prioridad_id ?? prioridades[0]?.prioridad_id ?? 1;
+      } else {
+        const nor = prioridades.find((p) => p.codigo === 'NOR' || p.nombre?.toLowerCase().includes('normal') || p.nombre?.toLowerCase().includes('programad'));
+        prioridad_id = nor?.prioridad_id ?? prioridades[0]?.prioridad_id ?? 1;
+      }
+    }
+
     const diagnostico_id = this.diagnostico_interconsulta_id();
     const especialidad_id = this.especialidad_interconsulta_id();
     const area_id = this.area_interconsulta_id();
@@ -303,20 +345,27 @@ export class TabInterconsultaComponent {
       return;
     }
 
+    const tipoExamen = this.solicita_seleccionado();
+    const claseConsulta = this.clase_seleccionada();
+    const payloadQueSolicita = `[${tipoExamen}] ${que_solicita}`;
+    const payloadObservaciones = `[${claseConsulta}] ${observaciones}`.trim();
+
     this.guardarInterconsulta.emit({
       prioridad_id,
       diagnostico_id,
       especialidad_id,
       area_id,
       programacion_personal_id,
-      que_solicita,
-      observaciones,
+      que_solicita: payloadQueSolicita,
+      observaciones: payloadObservaciones,
     });
 
     this.limpiar();
   }
 
   limpiar(): void {
+    this.solicita_seleccionado.set('Especialidad');
+    this.clase_seleccionada.set('Urgente');
     this.prioridad_interconsulta_id.set(null);
     this.diagnostico_interconsulta_id.set(null);
     this.especialidad_interconsulta_id.set(null);

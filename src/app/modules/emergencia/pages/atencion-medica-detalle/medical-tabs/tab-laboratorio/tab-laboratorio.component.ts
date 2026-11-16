@@ -225,6 +225,46 @@ export class TabLaboratorioComponent {
     this.servicios_laboratorio_seleccionados.set(servicios);
   }
 
+  readonly servicios_seleccionados_lista = computed(() => {
+    const seleccionados = this.servicios_laboratorio_seleccionados();
+    const catalogo = this.catalogo_laboratorio();
+    const catalogoMap = new Map<string, ServicioLaboratorio>();
+    for (const servicio of catalogo) {
+      catalogoMap.set(servicio.codigo, servicio);
+    }
+
+    const resultado: Array<{
+      codigo: string;
+      nombre: string;
+      area_codigo: string;
+      area_nombre: string;
+    }> = [];
+
+    for (const codigo of seleccionados) {
+      const servicio = catalogoMap.get(codigo);
+      if (servicio) {
+        resultado.push({
+          codigo: servicio.codigo,
+          nombre: servicio.nombre,
+          area_codigo: servicio.area_codigo,
+          area_nombre: servicio.area_nombre,
+        });
+      }
+    }
+
+    return resultado;
+  });
+
+  quitar_servicio_laboratorio(codigo: string): void {
+    const servicios = new Set(this.servicios_laboratorio_seleccionados());
+    servicios.delete(codigo);
+    this.servicios_laboratorio_seleccionados.set(servicios);
+  }
+
+  limpiar_servicios_seleccionados(): void {
+    this.servicios_laboratorio_seleccionados.set(new Set());
+  }
+
   servicio_laboratorio_marcado(codigo: string): boolean {
     return this.servicios_laboratorio_seleccionados().has(codigo);
   }
@@ -241,10 +281,16 @@ export class TabLaboratorioComponent {
   }
 
   readonly prioridadesOptions = computed<SelectOption[]>(() => {
-    return this.prioridades_orden().map((p) => ({
-      value: p.prioridad_id,
-      label: p.nombre,
-    }));
+    return this.prioridades_orden()
+      .filter(
+        (p) =>
+          p.codigo?.toUpperCase() !== 'MUR' &&
+          !p.nombre?.toLowerCase().includes('muy urgente'),
+      )
+      .map((p) => ({
+        value: p.prioridad_id,
+        label: p.nombre,
+      }));
   });
 
   readonly diagnosticosOptions = computed<SelectOption[]>(() => {

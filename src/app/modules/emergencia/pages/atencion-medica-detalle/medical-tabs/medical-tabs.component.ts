@@ -19,20 +19,35 @@ import { CheckToggleComponent } from '../../../../../components/check-toggle/che
 import { ModalComponent } from '../../../../../components/modal/modal.component';
 import { FormularioRecetaMedicamentoComponent } from './formulario-receta-medicamento/formulario-receta-medicamento.component';
 import { HistorialRecetasModalComponent } from './historial-recetas-modal/historial-recetas-modal.component';
-import { TabDiagnosticosComponent, DiagnosticoItemPayload } from './tab-diagnosticos/tab-diagnosticos.component';
-import { TabApoyoImagenComponent, GuardarApoyoImagenPayload } from './tab-apoyo-imagen/tab-apoyo-imagen.component';
-import { TabLaboratorioComponent, GuardarLaboratorioPayload } from './tab-laboratorio/tab-laboratorio.component';
-import { TabProcedEnfComponent, GuardarProcedEnfPayload } from './tab-proced-enf/tab-proced-enf.component';
-import { TabInterconsultaComponent, GuardarInterconsultaPayload } from './tab-interconsulta/tab-interconsulta.component';
-import { TabHospitalizacionComponent, GuardarHospitalizacionPayload } from './tab-hospitalizacion/tab-hospitalizacion.component';
+import {
+  TabDiagnosticosComponent,
+  DiagnosticoItemPayload,
+} from './tab-diagnosticos/tab-diagnosticos.component';
+import {
+  TabApoyoImagenComponent,
+  GuardarApoyoImagenPayload,
+} from './tab-apoyo-imagen/tab-apoyo-imagen.component';
+import {
+  TabLaboratorioComponent,
+  GuardarLaboratorioPayload,
+} from './tab-laboratorio/tab-laboratorio.component';
+import {
+  TabProcedEnfComponent,
+  GuardarProcedEnfPayload,
+} from './tab-proced-enf/tab-proced-enf.component';
+import {
+  TabInterconsultaComponent,
+  GuardarInterconsultaPayload,
+} from './tab-interconsulta/tab-interconsulta.component';
+import {
+  TabHospitalizacionComponent,
+  GuardarHospitalizacionPayload,
+} from './tab-hospitalizacion/tab-hospitalizacion.component';
 import { TabEnfermedadComponent } from './tab-enfermedad/tab-enfermedad.component';
 import { TabEvaluacionComponent } from './tab-evaluacion/tab-evaluacion.component';
 import { TabRecetaComponent } from './tab-receta/tab-receta.component';
 
-import {
-  Farmacia,
-  RecetaMedica,
-} from '../../../../../interfaces/emergencia/receta.interface';
+import { Farmacia, RecetaMedica } from '../../../../../interfaces/emergencia/receta.interface';
 import {
   AreaInterconsulta,
   DetalleAtencionResponse,
@@ -99,6 +114,7 @@ export class MedicalTabsComponent {
   readonly cargando_examenes_regionales = input(false);
   readonly diagnosticos = input<readonly Diagnostico[]>([]);
   readonly tipos_diagnostico = input<readonly TipoDiagnostico[]>([]);
+  readonly clasificaciones_diagnostico = input<readonly TipoDiagnostico[]>([]);
   readonly resultados_diagnostico = input<readonly DiagnosticoCatalogo[]>([]);
   readonly buscando_diagnostico = input(false);
   readonly cargando_diagnosticos = input(false);
@@ -218,8 +234,6 @@ export class MedicalTabsComponent {
   }
 
   seleccionar_tipo_regional(tipo: 1 | 2): void {
-    if (this.evaluacion_registrada()) return;
-
     this.tipoRegionalActualizado.emit(tipo);
   }
 
@@ -256,9 +270,7 @@ export class MedicalTabsComponent {
   }
 
   alternar_todos_regional(tipo: 'CONSERVADO' | 'PATOLOGICO' | 'NO_EVALUADO'): void {
-    const todosMarcados = this.examenes_regionales().every(
-      (examen) => examen.estado_tipo === tipo,
-    );
+    const todosMarcados = this.examenes_regionales().every((examen) => examen.estado_tipo === tipo);
 
     const estado = this.estados_examen_regional().find((item) => item.estado_tipo === tipo);
 
@@ -306,23 +318,6 @@ export class MedicalTabsComponent {
 
   solicitar_guardado_enfermedad(event: Event): void {
     event.preventDefault();
-    this.validacion_enfermedad_solicitada.set(true);
-
-    const formulario = this.formulario();
-    const obligatorios = [
-      formulario.tiempo_enfermedad,
-      formulario.motivo_consulta,
-      formulario.anamnesis,
-    ];
-
-    if (obligatorios.some((valor) => !valor || !String(valor).trim())) {
-      this.utilService.mostrar_alerta(
-        'Complete los campos obligatorios de la enfermedad actual.',
-        'warning',
-      );
-      return;
-    }
-
     this.guardarEnfermedad.emit(event);
   }
 
@@ -331,22 +326,6 @@ export class MedicalTabsComponent {
     this.validacion_evaluacion_solicitada.set(true);
 
     const formulario = this.formulario();
-    if (!formulario.signos_y_sintomas?.trim()) {
-      this.utilService.mostrar_alerta(
-        'Ingrese el examen clínico.',
-        'warning',
-      );
-      return;
-    }
-
-    if (formulario.tipo_reg_evaluac === 2 && !formulario.examen_regional?.trim()) {
-      this.utilService.mostrar_alerta(
-        'Describa el examen físico regional.',
-        'warning',
-      );
-      return;
-    }
-
     if (formulario.tipo_reg_evaluac === 1) {
       const examenesIncompletos = this.examenes_regionales().some(
         (examen) =>

@@ -4,6 +4,7 @@ import {
   Component,
   TemplateRef,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -13,11 +14,11 @@ import {
 import { Observable, map } from 'rxjs';
 import { AutoCompleteComponent } from '../../../../../../components/auto-complete/auto-complete.component';
 import { ButtonComponent } from '../../../../../../components/button/button.component';
-import { InputTextComponent } from '../../../../../../components/input-text/input-text.component';
 import { LabelComponent } from '../../../../../../components/label/label.component';
 import { ModalComponent } from '../../../../../../components/modal/modal.component';
 import { SelectComponent, SelectOption, SelectValue } from '../../../../../../components/select/select.component';
 import { TableComponent } from '../../../../../../components/table/table.component';
+import { TextAreaComponent } from '../../../../../../components/text-area/text-area.component';
 import {
   TableCellContext,
   TableColumn,
@@ -33,6 +34,7 @@ import { UtilService } from '../../../../../../services/util.service';
 export interface DiagnosticoItemPayload {
   cie10_id: number;
   tipo_id: number;
+  clasificacion_id: number;
   observacion: string;
 }
 
@@ -42,6 +44,8 @@ interface DiagnosticoTemporalItem {
   descripcion: string;
   tipo_id: number;
   tipo_nombre: string;
+  clasificacion_id: number;
+  clasificacion_nombre: string;
   observacion: string;
 }
 
@@ -56,7 +60,7 @@ interface DiagnosticoTemporalItem {
     AutoCompleteComponent,
     TableComponent,
     SelectComponent,
-    InputTextComponent,
+    TextAreaComponent,
   ],
   templateUrl: './tab-diagnosticos.component.html',
   styleUrl: '../medical-tabs.component.scss',
@@ -70,6 +74,7 @@ export class TabDiagnosticosComponent {
 
   diagnosticos = input<readonly Diagnostico[]>([]);
   tipos_diagnostico = input<readonly TipoDiagnostico[]>([]);
+  clasificaciones_diagnostico = input<readonly TipoDiagnostico[]>([]);
   habilitado = input<boolean>(false);
   cargando = input<boolean>(false);
   guardando = input<boolean>(false);
@@ -81,6 +86,13 @@ export class TabDiagnosticosComponent {
     return this.tipos_diagnostico().map((tipo) => ({
       value: tipo.tipo_id,
       label: tipo.nombre,
+    }));
+  });
+
+  readonly clasificacionesDiagnosticoOptions = computed<SelectOption[]>(() => {
+    return this.clasificaciones_diagnostico().map((clasificacion) => ({
+      value: clasificacion.tipo_id,
+      label: clasificacion.nombre,
     }));
   });
 
@@ -124,8 +136,13 @@ export class TabDiagnosticosComponent {
       formatter: (_val, fila) => fila.tipo_nombre || '-',
     },
     {
+      key: 'clasificacion_nombre',
+      label: 'CLASIFICACIÓN',
+      formatter: (_val, fila) => fila.clasificacion_nombre || '-',
+    },
+    {
       key: 'observacion',
-      label: 'OBSERVACIÓN',
+      label: 'DESCRIPCIÓN',
       formatter: (_val, fila) => fila.observacion || '-',
     },
     {
@@ -152,8 +169,13 @@ export class TabDiagnosticosComponent {
       formatter: (_val, fila) => fila.tipo_nombre || '-',
     },
     {
+      key: 'clasificacion_nombre',
+      label: 'CLASIFICACIÓN',
+      formatter: (_val, fila) => fila.clasificacion_nombre || '-',
+    },
+    {
       key: 'observacion',
-      label: 'OBSERVACIÓN',
+      label: 'DESCRIPCIÓN',
       formatter: (_val, fila) => fila.observacion || '-',
     },
     {
@@ -165,8 +187,27 @@ export class TabDiagnosticosComponent {
 
   readonly diagnostico_seleccionado = signal<DiagnosticoCatalogo | null>(null);
   readonly tipo_diagnostico_id = signal<number | null>(null);
+  readonly clasificacion_diagnostico_id = signal<number | null>(null);
   readonly observacion_diagnostico = signal<string>('');
   readonly diagnosticos_temporales = signal<DiagnosticoTemporalItem[]>([]);
+
+  constructor() {
+    effect(() => {
+      const tipos = this.tipos_diagnostico();
+      if (this.tipo_diagnostico_id() === null && tipos.length > 0) {
+        this.tipo_diagnostico_id.set(this.obtener_tipo_presuntivo_id());
+      }
+    });
+  }
+
+  private obtener_tipo_presuntivo_id(): number | null {
+    const tipos = this.tipos_diagnostico();
+    const presuntivo =
+      tipos.find((t) => t.codigo?.toUpperCase() === 'PRE') ??
+      tipos.find((t) => t.nombre?.toLowerCase().includes('presuntivo')) ??
+      tipos[0];
+    return presuntivo?.tipo_id ?? null;
+  }
 
   readonly buscar_diagnostico_datasource = (
     termino: string,
@@ -192,6 +233,10 @@ export class TabDiagnosticosComponent {
     this.tipo_diagnostico_id.set(value ? Number(value) : null);
   }
 
+  actualizar_clasificacion_diagnostico_valor(value: SelectValue): void {
+    this.clasificacion_diagnostico_id.set(value ? Number(value) : null);
+  }
+
   actualizar_observacion(event: Event): void {
     this.observacion_diagnostico.set((event.target as HTMLInputElement).value);
   }
@@ -214,15 +259,17 @@ export class TabDiagnosticosComponent {
 
   limpiar_formulario(): void {
     this.diagnostico_seleccionado.set(null);
-    this.tipo_diagnostico_id.set(null);
+    this.tipo_diagnostico_id.set(this.obtener_tipo_presuntivo_id());
+    this.clasificacion_diagnostico_id.set(null);
     this.observacion_diagnostico.set('');
   }
 
   agregar_temporal(): void {
     const seleccionado = this.diagnostico_seleccionado();
     const tipoId = this.tipo_diagnostico_id();
+    const clasificacionId = this.clasificacion_diagnostico_id();
 
-    if (!seleccionado || tipoId === null) {
+    if (!seleccionado || tipoId === null || clasificacionId === null) {
       return;
     }
 
@@ -235,6 +282,7 @@ export class TabDiagnosticosComponent {
     }
 
     const tipoObj = this.tipos_diagnostico().find((t) => t.tipo_id === tipoId);
+    const clasificacionObj = this.clasificaciones_diagnostico().find((c) => c.tipo_id === clasificacionId);
 
     const nuevoItem: DiagnosticoTemporalItem = {
       cie10_id: seleccionado.cie10_id,
@@ -242,6 +290,8 @@ export class TabDiagnosticosComponent {
       descripcion: seleccionado.descripcion,
       tipo_id: tipoId,
       tipo_nombre: tipoObj?.nombre ?? 'Desconocido',
+      clasificacion_id: clasificacionId,
+      clasificacion_nombre: clasificacionObj?.nombre ?? 'Desconocido',
       observacion: this.observacion_diagnostico().trim(),
     };
 
@@ -265,6 +315,7 @@ export class TabDiagnosticosComponent {
       temporales.map((d) => ({
         cie10_id: d.cie10_id,
         tipo_id: d.tipo_id,
+        clasificacion_id: d.clasificacion_id,
         observacion: d.observacion,
       })),
     );

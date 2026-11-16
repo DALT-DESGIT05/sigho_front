@@ -83,9 +83,6 @@
     <div class="col-12 col-lg-8">
       <app-input-text
         label="Tiempo Enfermedad"
-        [requerido]="true"
-        [invalid]="campo_invalido('tiempo_enfermedad')"
-        [error]="campo_invalido('tiempo_enfermedad') ? 'Ingrese el tiempo de enfermedad o desde el evento.' : ''"
         [value]="formulario().tiempo_enfermedad"
         [disabled]="!detalle().fecha_hora_llamada_med"
         (valueChange)="actualizar_valor_campo('tiempo_enfermedad', $event)"
@@ -96,9 +93,6 @@
     <div class="col-12">
       <app-text-area
         label="Motivo de la Consulta"
-        [required]="true"
-        [invalid]="campo_invalido('motivo_consulta')"
-        [error]="campo_invalido('motivo_consulta') ? 'Ingrese el motivo de consulta.' : ''"
         [rows]="2"
         [maxlength]="200"
         [value]="formulario().motivo_consulta"
@@ -111,9 +105,6 @@
     <div class="col-12">
       <app-text-area
         label="Síntomas principales"
-        [required]="true"
-        [invalid]="campo_invalido('anamnesis')"
-        [error]="campo_invalido('anamnesis') ? 'Ingrese los síntomas principales o la enfermedad actual.' : ''"
         [rows]="4"
         [maxlength]="500"
         [value]="formulario().anamnesis"

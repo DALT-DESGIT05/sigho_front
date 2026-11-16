@@ -6,7 +6,7 @@
       label="Estructurado"
       size="sm"
       [checked]="formulario().tipo_reg_evaluac === 1"
-      [disabled]="!detalle().fecha_hora_llamada_med || evaluacion_registrada()"
+      [disabled]="!detalle().fecha_hora_llamada_med"
       (checkedChange)="seleccionar_tipo_regional(1)"
     />
     <app-radio
@@ -14,17 +14,14 @@
       label="Texto"
       size="sm"
       [checked]="formulario().tipo_reg_evaluac === 2"
-      [disabled]="!detalle().fecha_hora_llamada_med || evaluacion_registrada()"
+      [disabled]="!detalle().fecha_hora_llamada_med"
       (checkedChange)="seleccionar_tipo_regional(2)"
     />
   </div>
 
   <fieldset class="clinical-section-card">
-    <legend>Examen clínico <span class="required-mark">*</span></legend>
+    <legend>Examen clínico</legend>
     <app-text-area
-      [required]="true"
-      [invalid]="campo_invalido('signos_y_sintomas')"
-      [error]="campo_invalido('signos_y_sintomas') ? 'Ingrese el examen clínico.' : ''"
       [rows]="3"
       [maxlength]="200"
       [value]="formulario().signos_y_sintomas"
@@ -41,13 +38,22 @@
           <thead>
             <tr class="table-light">
               <th>EXAMEN</th>
-              <th class="text-center toggle-all-header" (click)="alternar_todos_regional('CONSERVADO')">
+              <th
+                class="text-center toggle-all-header"
+                (click)="alternar_todos_regional('CONSERVADO')"
+              >
                 CONSERVADO
               </th>
-              <th class="text-center toggle-all-header" (click)="alternar_todos_regional('PATOLOGICO')">
+              <th
+                class="text-center toggle-all-header"
+                (click)="alternar_todos_regional('PATOLOGICO')"
+              >
                 PATOLÓGICO
               </th>
-              <th class="text-center toggle-all-header" (click)="alternar_todos_regional('NO_EVALUADO')">
+              <th
+                class="text-center toggle-all-header"
+                (click)="alternar_todos_regional('NO_EVALUADO')"
+              >
                 NO EVALUADO
               </th>
               <th>OBSERVACIONES</th>
@@ -56,9 +62,7 @@
           <tbody>
             @if (cargando_examenes_regionales()) {
               <tr>
-                <td colspan="5" class="text-center text-muted">
-                  Consultando examen regional...
-                </td>
+                <td colspan="5" class="text-center text-muted">Consultando examen regional...</td>
               </tr>
             } @else {
               @for (examen of examenes_regionales(); track examen.examen_id) {
@@ -110,9 +114,7 @@
                     @if (clasificacion_regional_invalida(examen)) {
                       <div class="regional-field-error">Seleccione una clasificación.</div>
                     } @else if (observacion_regional_invalida(examen)) {
-                      <div class="invalid-feedback">
-                        Ingrese la observación clínica.
-                      </div>
+                      <div class="invalid-feedback">Ingrese la observación clínica.</div>
                     }
                   </td>
                 </tr>
@@ -124,11 +126,8 @@
     </fieldset>
   } @else {
     <fieldset class="clinical-section-card">
-      <legend>Examen regional <span class="required-mark">*</span></legend>
+      <legend>Examen regional</legend>
       <app-text-area
-        [required]="true"
-        [invalid]="campo_invalido('examen_regional')"
-        [error]="campo_invalido('examen_regional') ? 'Describa el examen físico regional.' : ''"
         [rows]="5"
         [maxlength]="200"
         [value]="formulario().examen_regional"

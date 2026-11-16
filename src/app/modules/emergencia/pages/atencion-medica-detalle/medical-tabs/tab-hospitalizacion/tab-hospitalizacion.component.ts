@@ -3,22 +3,18 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  TemplateRef,
   computed,
+  effect,
   inject,
   input,
   output,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { ButtonComponent } from '../../../../../../components/button/button.component';
 import { InputTextComponent } from '../../../../../../components/input-text/input-text.component';
 import { SelectComponent, SelectOption, SelectValue } from '../../../../../../components/select/select.component';
-import { TableComponent } from '../../../../../../components/table/table.component';
-import {
-  TableCellContext,
-  TableColumn,
-} from '../../../../../../interfaces/util.interface';
 import {
   DetalleAtencionResponse,
   Diagnostico,
@@ -37,7 +33,7 @@ export interface GuardarHospitalizacionPayload {
 @Component({
   selector: 'app-tab-hospitalizacion',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, TableComponent, SelectComponent, InputTextComponent],
+  imports: [CommonModule, ButtonComponent, SelectComponent, InputTextComponent],
   templateUrl: './tab-hospitalizacion.component.html',
   styleUrl: '../medical-tabs.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,48 +55,9 @@ export class TabHospitalizacionComponent {
   readonly guardarHospitalizacion = output<GuardarHospitalizacionPayload>();
   readonly eliminarHospitalizacion = output<number>();
 
-  private readonly accionesTpl =
-    viewChild<TemplateRef<TableCellContext<OrdenHospitalizacion>>>('accionesTpl');
-
-  readonly plantillasCelda = computed<
-    Record<string, TemplateRef<TableCellContext<OrdenHospitalizacion>>>
-  >(() => {
-    const plantillas: Record<string, TemplateRef<TableCellContext<OrdenHospitalizacion>>> = {};
-    const acc = this.accionesTpl();
-    if (acc) plantillas['acciones'] = acc;
-    return plantillas;
-  });
-
-  readonly columnasOrdenes: TableColumn<OrdenHospitalizacion>[] = [
-    {
-      key: 'diagnostico',
-      label: 'DIAGNÓSTICO',
-      formatter: (_val, fila) =>
-        fila.diagnostico_codigo
-          ? `${fila.diagnostico_codigo} - ${fila.diagnostico_nombre}`
-          : fila.diagnostico_nombre || '-',
-    },
-    {
-      key: 'motivo_nombre',
-      label: 'MOTIVO',
-      formatter: (_val, fila) => fila.motivo_nombre || '-',
-    },
-    {
-      key: 'observacion',
-      label: 'OBSERVACIÓN',
-      formatter: (_val, fila) => fila.observacion || '-',
-    },
-    {
-      key: 'fecha_registro',
-      label: 'FECHA REGISTRO',
-      formatter: (_val, fila) => fila.fecha_registro || '-',
-    },
-    {
-      key: 'acciones',
-      label: 'ACCIONES',
-      align: 'center',
-    },
-  ];
+  readonly orden_hospitalizacion_actual = computed<OrdenHospitalizacion | null>(
+    () => this.ordenes_hospitalizacion()[0] ?? null,
+  );
 
   readonly diagnostico_hospitalizacion_id = signal<number | null>(null);
   readonly motivo_hospitalizacion_id = signal<number | null>(null);
@@ -112,6 +69,23 @@ export class TabHospitalizacionComponent {
       label: `${d.codigo} - ${d.descripcion}`,
     }));
   });
+
+  constructor() {
+    effect(() => {
+      const orden = this.orden_hospitalizacion_actual();
+      untracked(() => {
+        if (orden) {
+          this.diagnostico_hospitalizacion_id.set(orden.diagnostico_id);
+          this.motivo_hospitalizacion_id.set(orden.motivo_id);
+          this.observacion_hospitalizacion.set(orden.observacion ?? '');
+        } else {
+          this.diagnostico_hospitalizacion_id.set(null);
+          this.motivo_hospitalizacion_id.set(null);
+          this.observacion_hospitalizacion.set('');
+        }
+      });
+    });
+  }
 
   actualizar_diagnostico_hospitalizacion_valor(value: SelectValue): void {
     this.diagnostico_hospitalizacion_id.set(value ? Number(value) : null);
@@ -147,8 +121,13 @@ export class TabHospitalizacionComponent {
       motivo_id,
       observacion: this.observacion_hospitalizacion().trim(),
     });
+  }
 
-    this.limpiar();
+  eliminar(): void {
+    const orden = this.orden_hospitalizacion_actual();
+    if (orden) {
+      this.eliminarHospitalizacion.emit(orden.orden_hospitalizacion_id);
+    }
   }
 
   limpiar(): void {

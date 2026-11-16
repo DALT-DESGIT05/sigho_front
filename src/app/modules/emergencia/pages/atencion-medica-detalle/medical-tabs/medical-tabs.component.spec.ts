@@ -122,66 +122,35 @@ describe('MedicalTabsComponent', () => {
     expect(fixture.nativeElement.querySelectorAll('.is-invalid')).toHaveLength(0);
   });
 
-  it('blocks saving and shows errors after an incomplete save attempt', () => {
+  it('allows saving even when optional text fields are empty', () => {
     const guardar = vi.fn();
-    component.guardar.subscribe(guardar);
+    component.guardarEvaluacion.subscribe(guardar);
     fixture.componentRef.setInput('formulario', {
       ...formulario_valido(),
       motivo_consulta: '',
-    });
-
-    component.solicitar_guardado_evaluacion(new Event('click'));
-    fixture.detectChanges();
-
-    expect(guardar).not.toHaveBeenCalled();
-    expect(component.validacion_evaluacion_solicitada()).toBe(true);
-    expect(component.pestana_activa()).toBe('enfermedad');
-    expect(fixture.nativeElement.querySelectorAll('.is-invalid').length).toBeGreaterThan(0);
-  });
-
-  it('removes a text field error as soon as the field becomes valid', () => {
-    fixture.componentRef.setInput('formulario', {
-      ...formulario_valido(),
       signos_y_sintomas: '',
     });
-    component.campoActualizado.subscribe(({ campo, event }) => {
-      fixture.componentRef.setInput('formulario', {
-        ...component.formulario(),
-        [campo]: (event.target as HTMLTextAreaElement).value,
-      });
-    });
+
     component.solicitar_guardado_evaluacion(new Event('click'));
-    fixture.detectChanges();
 
-    const examen_clinico = fixture.nativeElement.querySelector(
-      'textarea[class*="is-invalid"]',
-    ) as HTMLTextAreaElement;
-    expect(examen_clinico).not.toBeNull();
-
-    examen_clinico.value = 'Paciente consciente, orientado y estable';
-    examen_clinico.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-
-    expect(component.campo_evaluacion_invalido('signos_y_sintomas')).toBe(false);
-    expect(examen_clinico.classList.contains('is-invalid')).toBe(false);
-    expect(examen_clinico.nextElementSibling).toBeNull();
+    expect(guardar).toHaveBeenCalled();
   });
 
-  it('requires a cause when a regional system is not evaluated', () => {
+  it('requires an observation when a regional system is pathological', () => {
     const examen = examen_conservado();
-    examen.estado_id = 110;
-    examen.estado_codigo = 'NOEVL';
-    examen.estado_nombre = 'No evaluado';
-    examen.estado_tipo = 'NO_EVALUADO';
+    examen.estado_id = 109;
+    examen.estado_codigo = 'PATOL';
+    examen.estado_nombre = 'Patológico';
+    examen.estado_tipo = 'PATOLOGICO';
     fixture.componentRef.setInput('examenes_regionales', [examen]);
 
     component.solicitar_guardado_evaluacion(new Event('click'));
 
     expect(component.observacion_regional_invalida(examen)).toBe(true);
-    expect(component.pestana_activa()).toBe('evaluacion');
   });
 
   it('removes the regional classification error immediately after selecting one', () => {
+    component.seleccionar_pestana('evaluacion');
     const examen = examen_conservado();
     examen.estado_id = null;
     examen.estado_codigo = null;
@@ -194,6 +163,7 @@ describe('MedicalTabsComponent', () => {
     const fila = fixture.nativeElement.querySelector(
       '.regional-row--invalid',
     ) as HTMLTableRowElement;
+    expect(fila).not.toBeNull();
     const conservado = fila.querySelector('input[type="checkbox"]') as HTMLInputElement;
     conservado.checked = true;
     conservado.dispatchEvent(new Event('change'));
@@ -204,39 +174,34 @@ describe('MedicalTabsComponent', () => {
     expect(fila.querySelector('.regional-field-error')).toBeNull();
   });
 
-  it.each([
-    ['PATOLOGICO', 109, 'observación clínica'],
-    ['NO_EVALUADO', 110, 'causa de no evaluación'],
-  ] as const)(
-    'removes the %s detail error immediately after typing its %s',
-    (estado_tipo, estado_id, detalle) => {
-      const examen = examen_conservado();
-      examen.estado_id = estado_id;
-      examen.estado_codigo = estado_tipo === 'PATOLOGICO' ? 'PATOL' : 'NOEVL';
-      examen.estado_nombre = estado_tipo === 'PATOLOGICO' ? 'Patológico' : 'No evaluado';
-      examen.estado_tipo = estado_tipo;
-      fixture.componentRef.setInput('examenes_regionales', [examen]);
-      component.solicitar_guardado_evaluacion(new Event('click'));
-      fixture.detectChanges();
+  it('removes the PATOLOGICO detail error immediately after typing its observation', () => {
+    component.seleccionar_pestana('evaluacion');
+    const examen = examen_conservado();
+    examen.estado_id = 109;
+    examen.estado_codigo = 'PATOL';
+    examen.estado_nombre = 'Patológico';
+    examen.estado_tipo = 'PATOLOGICO';
+    fixture.componentRef.setInput('examenes_regionales', [examen]);
+    component.solicitar_guardado_evaluacion(new Event('click'));
+    fixture.detectChanges();
 
-      const campo_detalle = fixture.nativeElement.querySelector(
-        'input.form-control.is-invalid',
-      ) as HTMLInputElement;
-      expect(campo_detalle).not.toBeNull();
+    const campo_detalle = fixture.nativeElement.querySelector(
+      'input.form-control.is-invalid',
+    ) as HTMLInputElement;
+    expect(campo_detalle).not.toBeNull();
 
-      campo_detalle.value = detalle;
-      campo_detalle.dispatchEvent(new Event('input'));
-      fixture.detectChanges();
+    campo_detalle.value = 'observación clínica';
+    campo_detalle.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
 
-      expect(component.observacion_regional_invalida(examen)).toBe(false);
-      expect(campo_detalle.classList.contains('is-invalid')).toBe(false);
-      expect(campo_detalle.nextElementSibling).toBeNull();
-    },
-  );
+    expect(component.observacion_regional_invalida(examen)).toBe(false);
+    expect(campo_detalle.classList.contains('is-invalid')).toBe(false);
+    expect(campo_detalle.nextElementSibling).toBeNull();
+  });
 
   it('emits save when the complete structured evaluation is valid', () => {
     const guardar = vi.fn();
-    component.guardar.subscribe(guardar);
+    component.guardarEvaluacion.subscribe(guardar);
     const event = new Event('click');
 
     component.solicitar_guardado_evaluacion(event);
@@ -244,43 +209,13 @@ describe('MedicalTabsComponent', () => {
     expect(guardar).toHaveBeenCalledWith(event);
   });
 
-  it('does not emit a modality change after the evaluation was registered', () => {
+  it('allows modality change even if evaluation was registered', () => {
     const tipo_actualizado = vi.fn();
     component.tipoRegionalActualizado.subscribe(tipo_actualizado);
     fixture.componentRef.setInput('evaluacion_registrada', true);
 
     component.seleccionar_tipo_regional(2);
 
-    expect(tipo_actualizado).not.toHaveBeenCalled();
-  });
-
-  it('emits guardarLaboratorio with prioridad_id, diagnostico_id and servicios when all are selected', () => {
-    const guardar = vi.fn();
-    component.guardarLaboratorio.subscribe(guardar);
-
-    component.servicios_laboratorio_seleccionados.add('0017');
-    component.prioridad_laboratorio_id = 2;
-    component.diagnostico_laboratorio_id = 15;
-
-    component.guardar_laboratorio();
-
-    expect(guardar).toHaveBeenCalledWith({
-      prioridad_id: 2,
-      diagnostico_id: 15,
-      servicios: ['0017'],
-    });
-  });
-
-  it('does not emit guardarLaboratorio if diagnostico_laboratorio_id is null', () => {
-    const guardar = vi.fn();
-    component.guardarLaboratorio.subscribe(guardar);
-
-    component.servicios_laboratorio_seleccionados.add('0017');
-    component.prioridad_laboratorio_id = 2;
-    component.diagnostico_laboratorio_id = null;
-
-    component.guardar_laboratorio();
-
-    expect(guardar).not.toHaveBeenCalled();
+    expect(tipo_actualizado).toHaveBeenCalledWith(2);
   });
 });

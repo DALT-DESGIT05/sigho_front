@@ -24,7 +24,24 @@
   </div>
 
   <div class="vitales-grafico-col">
-    <div class="vitales-grafico-card">
+    <div
+      class="vitales-grafico-card"
+      (click)="abrirModalGrafico()"
+      title="Clic para ver gráfico en modal más grande"
+      role="button"
+      tabindex="0"
+      (keydown.enter)="abrirModalGrafico()"
+      (keydown.space)="abrirModalGrafico()"
+    >
+      <button
+        type="button"
+        class="vitales-grafico-expand-btn"
+        (click)="abrirModalGrafico($event)"
+        title="Ampliar gráfico"
+        aria-label="Ampliar gráfico"
+      >
+        <i class="fa-solid fa-expand"></i>
+      </button>
       <app-container-grafic
         [options]="opcionesGraficoEvolucion()"
         [loading]="cargando()"
@@ -197,6 +214,7 @@
         label="Peso (kg)"
         type="number"
         suffix="kg"
+        [step]="0.1"
         [value]="peso"
         (valueChange)="actualizar_campo('peso', $event)"
       />
@@ -209,6 +227,7 @@
         label="Talla (cm)"
         type="number"
         suffix="cm"
+        [step]="0.1"
         [value]="talla"
         (valueChange)="actualizar_campo('talla', $event)"
       />
@@ -218,29 +237,28 @@
     </div>
     <div class="col-12 col-lg-6">
       <div class="imc-control">
-        <app-input-group
-          label="IMC"
-          suffix="kg/m²"
-          [value]="imc()"
-          [readonly]="true"
-        >
+        <app-input-group label="IMC" suffix="kg/m²" [value]="imc()" [readonly]="true">
           <i prefix class="fa-solid fa-weight-scale" aria-hidden="true"></i>
         </app-input-group>
-        <div class="imc-classification">
-          <span class="imc-classification__label">Clasificación IMC</span>
-          <output
-            [class]="'imc-classification__value imc-classification__value--' + imcStatus()"
-            aria-live="polite"
-          >
-            {{ imcDescripcion() }}
-          </output>
-        </div>
+        @if (imc() && imcDescripcion() && imcDescripcion() !== 'Sin clasificación') {
+          <div class="imc-classification">
+            <span class="imc-classification__label">Clasificación IMC</span>
+            <output
+              [class]="'imc-classification__value imc-classification__value--' + imcStatus()"
+              aria-live="polite"
+            >
+              {{ imcDescripcion() }}
+            </output>
+          </div>
+        }
       </div>
     </div>
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center">
         <label class="form-label mb-1" for="sv-observaciones">Observaciones</label>
-        <small class="text-muted" style="font-size: 0.72rem;">{{ observaciones.length }} / 200</small>
+        <small class="text-muted" style="font-size: 0.72rem"
+          >{{ observaciones.length }} / 200</small
+        >
       </div>
       <input
         type="text"
@@ -265,4 +283,23 @@
     />
     <app-button action="close" size="sm" (clicked)="cerrar_modal()" />
   </div>
+</app-modal>
+
+<app-modal
+  #modalGrafico
+  title="Evolución de signos vitales"
+  icon="fa-solid fa-chart-line"
+  size="xl"
+  (opened)="onModalGraficoOpened()"
+  (closed)="onModalGraficoClosed()"
+>
+  @if (modalGraficoVisible()) {
+    <div class="vitales-grafico-modal-body">
+      <app-container-grafic
+        [options]="opcionesGraficoEvolucionModal()"
+        [loading]="cargando()"
+        height="480px"
+      />
+    </div>
+  }
 </app-modal>

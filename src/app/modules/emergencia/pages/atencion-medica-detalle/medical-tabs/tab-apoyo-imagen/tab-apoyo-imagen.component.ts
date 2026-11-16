@@ -182,12 +182,13 @@ export class TabApoyoImagenComponent {
     termino: string,
   ): Observable<readonly ServicioImagen[]> => {
     const categoria = this.categoria_apoyo_imagen_actual();
+    const area_codigo = categoria?.area_codigo;
 
-    return this.imagenService.buscar_servicios_imagen(termino).pipe(
+    return this.imagenService.buscar_servicios_imagen(termino, area_codigo).pipe(
       map((res: { data?: ServicioImagen[] }) => {
         const servicios = res.data ?? [];
-        return categoria
-          ? servicios.filter((servicio: ServicioImagen) => servicio.area_codigo === categoria.area_codigo)
+        return area_codigo
+          ? servicios.filter((servicio: ServicioImagen) => servicio.area_codigo === area_codigo)
           : servicios;
       }),
     );

@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { filter, finalize, switchMap, timer } from 'rxjs';
@@ -16,6 +22,19 @@ import {
 import { CatalogoEmergenciaService } from '../../../../services/emergencia/catalogo-emergencia.service';
 import { TriajeService } from '../../../../services/emergencia/triaje.service';
 import { UtilService } from '../../../../services/util.service';
+import { formatear_nombre_paciente } from '../../utils/nombre-paciente.util';
+
+export function formatear_area_especialidad(area: string | null | undefined): string {
+  if (!area) return '-';
+  const normalizado = area.trim();
+  if (
+    normalizado.toLowerCase().includes('tópico') ||
+    normalizado.toLowerCase().includes('topico')
+  ) {
+    return 'Tópico';
+  }
+  return normalizado;
+}
 
 const COLA_MEDICA_FILTROS: FiltrosSeguimientoTriaje = {
   documento: '',
@@ -48,10 +67,18 @@ export class AtencionMedicaComponent {
   readonly columns: TableColumn<SeguimientoTriaje>[] = [
     { key: 'codigo_episodio', label: 'Registro' },
     { key: 'fecha_hora_ingreso', label: 'Fecha y Hora' },
-    { key: 'paciente.nombre_completo', label: 'Paciente' },
+    {
+      key: 'paciente.nombre_completo',
+      label: 'Paciente',
+      formatter: (_value, row) => formatear_nombre_paciente(row.paciente),
+    },
     { key: 'paciente.edad', label: 'Edad', align: 'center' },
     { key: 'motivo_consulta', label: 'Motivo de Consulta' },
-    { key: 'area', label: 'Área' },
+    {
+      key: 'area',
+      label: 'Área/Especialidad',
+      formatter: (_value, row) => formatear_area_especialidad(row.area || row.destino),
+    },
     {
       key: 'prioridad',
       label: 'Prioridad',
@@ -62,21 +89,14 @@ export class AtencionMedicaComponent {
       },
     },
     {
-      key: 'medico',
-      label: 'Médico responsable',
-      badge: {
-        texto: (_value, row) => row.medico?.trim() || 'Sin médico asignado',
-        clases: (_value, row) => (row.medico ? 'info' : 'secondary'),
-        size: 'sm',
-      },
-    },
-    {
       key: 'estado_nombre',
       label: 'Estado',
       align: 'center',
       badge: {
-        texto: (_value, row) => row.estado_nombre || (row.fecha_hora_llamada_med ? 'En atención' : 'Triaje completado'),
-        clases: (_value, row) => (row.estado_codigo === 'EATE' || row.fecha_hora_llamada_med ? 'success' : 'primary'),
+        texto: (_value, row) =>
+          row.estado_nombre || (row.fecha_hora_llamada_med ? 'En atención' : 'Triaje completado'),
+        clases: (_value, row) =>
+          row.estado_codigo === 'EATE' || row.fecha_hora_llamada_med ? 'success' : 'primary',
         size: 'sm',
       },
     },
@@ -87,7 +107,7 @@ export class AtencionMedicaComponent {
       id: 'atender',
       label: 'Atender',
       title: 'Iniciar atención médica',
-      icon: 'fa-solid fa-play',
+      icon: 'fa-solid fa-bullhorn',
       color: 'primary',
       variant: 'solid',
       iconOnly: true,
@@ -109,10 +129,7 @@ export class AtencionMedicaComponent {
     this.catalogoEmergenciaService.obtenerCatalogos(['niveles_triaje']).subscribe({
       next: ({ data }) => {
         data.niveles_triaje.forEach((nivel) =>
-          this.colorPrioridad.set(
-            nivel.value,
-            this.color_nivel_triaje(nivel.value, nivel.color),
-          ),
+          this.colorPrioridad.set(nivel.value, this.color_nivel_triaje(nivel.value, nivel.color)),
         );
       },
       error: (error: { message?: string }) =>
@@ -171,8 +188,9 @@ export class AtencionMedicaComponent {
         anterior.medico !== nueva.medico ||
         anterior.fecha_hora_llamada_med !== nueva.fecha_hora_llamada_med;
       const cambioPrioridad = anterior.prioridad !== nueva.prioridad;
+      const cambioArea = anterior.area !== nueva.area;
 
-      if (cambioEstado || cambioMedico || cambioPrioridad) {
+      if (cambioEstado || cambioMedico || cambioPrioridad || cambioArea) {
         huboCambios = true;
         return nueva;
       }

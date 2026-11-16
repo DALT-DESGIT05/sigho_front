@@ -1,10 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  input,
-  output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { ButtonComponent } from '../../../../../../components/button/button.component';
 import { CheckToggleComponent } from '../../../../../../components/check-toggle/check-toggle.component';
 import { RadioComponent } from '../../../../../../components/radio/radio.component';
@@ -39,7 +34,6 @@ export class TabEvaluacionComponent {
   readonly solicitarGuardado = output<Event>();
 
   seleccionar_tipo_regional(tipo: 1 | 2): void {
-    if (this.evaluacion_registrada()) return;
     this.tipoRegionalActualizado.emit(tipo);
   }
 
@@ -76,9 +70,7 @@ export class TabEvaluacionComponent {
   }
 
   alternar_todos_regional(tipo: 'CONSERVADO' | 'PATOLOGICO' | 'NO_EVALUADO'): void {
-    const todosMarcados = this.examenes_regionales().every(
-      (examen) => examen.estado_tipo === tipo,
-    );
+    const todosMarcados = this.examenes_regionales().every((examen) => examen.estado_tipo === tipo);
 
     const estado = this.estados_examen_regional().find((item) => item.estado_tipo === tipo);
 
@@ -104,16 +96,18 @@ export class TabEvaluacionComponent {
     this.actualizarCampo.emit({ campo, event });
   }
 
-  actualizar_valor_campo(campo: keyof EvaluacionMedicaData, valor: string | number | null | undefined): void {
+  actualizar_valor_campo(
+    campo: keyof EvaluacionMedicaData,
+    valor: string | number | null | undefined,
+  ): void {
     const fakeEvent = {
       target: { value: valor == null ? '' : String(valor) } as HTMLInputElement,
     } as unknown as Event;
     this.actualizarCampo.emit({ campo, event: fakeEvent });
   }
 
-  campo_invalido(campo: keyof EvaluacionMedicaData): boolean {
-    if (!this.validacion_solicitada()) return false;
-    return !String(this.formulario()[campo] ?? '').trim();
+  campo_invalido(_campo: keyof EvaluacionMedicaData): boolean {
+    return false;
   }
 
   clasificacion_regional_invalida(examen: ExamenRegional): boolean {

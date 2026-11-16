@@ -144,6 +144,9 @@
           [displayWith]="mostrar_servicio_imagen"
           [minLength]="2"
           [debounceTime]="400"
+          [menuMaxHeight]="320"
+          [menuZIndex]="1080"
+          [multilineOptions]="true"
           size="md"
           (optionSelected)="seleccionar_servicio_imagen($event)"
         />
@@ -152,6 +155,7 @@
     <div class="col-md-6">
       <app-select
         label="Diagnóstico relacionado"
+        [requerido]="true"
         placeholder="-- Seleccione diagnóstico --"
         [options]="diagnosticosOptions()"
         [showEmptyOption]="true"
@@ -165,6 +169,7 @@
     <div class="col-md-6">
       <app-select
         label="Prioridad"
+        [requerido]="true"
         placeholder="-- Seleccione prioridad --"
         [options]="prioridadesOptions()"
         [showEmptyOption]="true"

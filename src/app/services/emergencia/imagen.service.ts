@@ -29,9 +29,13 @@ export class ImagenService {
 
   buscar_servicios_imagen(
     termino: string,
+    area_codigo?: string,
     mostrar_loading = false,
   ): Observable<ResponseInteface<ServicioImagen[]>> {
-    const params = new HttpParams().set('termino', termino);
+    let params = new HttpParams().set('termino', termino);
+    if (area_codigo) {
+      params = params.set('area_codigo', area_codigo);
+    }
 
     return this.httpClient
       .get<ResponseInteface<ServicioImagen[]>>(

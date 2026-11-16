@@ -45,13 +45,14 @@ export class DiagnosticoService {
     atencion_id: number,
     cie10_id: number,
     tipo_id: number,
+    clasificacion_id: number,
     observacion: string,
     mostrar_loading = false,
   ): Observable<ResponseInteface<DiagnosticoContexto>> {
     return this.httpClient
       .post<ResponseInteface<DiagnosticoContexto>>(
         `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/diagnosticos`,
-        { cie10_id, tipo_id, observacion },
+        { cie10_id, tipo_id, clasificacion_id, observacion },
         { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));

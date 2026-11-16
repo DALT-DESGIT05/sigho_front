@@ -1,10 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  input,
-  output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { ButtonComponent } from '../../../../../../components/button/button.component';
 import { CheckToggleComponent } from '../../../../../../components/check-toggle/check-toggle.component';
 import { InputTextComponent } from '../../../../../../components/input-text/input-text.component';
@@ -18,7 +13,13 @@ import {
 @Component({
   selector: 'app-tab-enfermedad',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, CheckToggleComponent, InputTextComponent, TextAreaComponent],
+  imports: [
+    CommonModule,
+    ButtonComponent,
+    CheckToggleComponent,
+    InputTextComponent,
+    TextAreaComponent,
+  ],
   templateUrl: './tab-enfermedad.component.html',
   styleUrl: '../medical-tabs.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -81,15 +82,17 @@ export class TabEnfermedadComponent {
     this.actualizarCampo.emit({ campo, event });
   }
 
-  actualizar_valor_campo(campo: keyof EvaluacionMedicaData, valor: string | number | null | undefined): void {
+  actualizar_valor_campo(
+    campo: keyof EvaluacionMedicaData,
+    valor: string | number | null | undefined,
+  ): void {
     const fakeEvent = {
       target: { value: valor == null ? '' : String(valor) } as HTMLInputElement,
     } as unknown as Event;
     this.actualizarCampo.emit({ campo, event: fakeEvent });
   }
 
-  campo_invalido(campo: keyof EvaluacionMedicaData): boolean {
-    if (!this.validacion_solicitada()) return false;
-    return !String(this.formulario()[campo] ?? '').trim();
+  campo_invalido(_campo: keyof EvaluacionMedicaData): boolean {
+    return false;
   }
 }

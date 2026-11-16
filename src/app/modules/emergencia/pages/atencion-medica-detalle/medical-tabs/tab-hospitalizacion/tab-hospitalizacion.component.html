@@ -6,7 +6,7 @@
         Registre el diagnóstico y motivo de la hospitalización.
       </p>
     </div>
-    @if (ordenes_hospitalizacion().length > 0) {
+    @if (orden_hospitalizacion_actual()) {
       <button
         type="button"
         class="btn btn-outline-secondary btn-sm"
@@ -20,9 +20,10 @@
   </div>
   <div class="hospitalization-form">
     <fieldset class="hospitalization-section">
-      <legend>Diagnóstico de hospitalización</legend>
+      <legend>Diagnóstico de hospitalización <span class="text-danger">*</span></legend>
       <app-select
         id="hospitalizacion-diagnostico"
+        [requerido]="true"
         placeholder="-- Seleccione diagnóstico --"
         [options]="diagnosticosOptions()"
         [showEmptyOption]="true"
@@ -35,7 +36,7 @@
     </fieldset>
 
     <fieldset class="hospitalization-section">
-      <legend>Motivo de hospitalización</legend>
+      <legend>Motivo de hospitalización <span class="text-danger">*</span></legend>
       <div class="hospitalization-choices">
         @for (motivo of motivos_hospitalizacion(); track motivo.motivo_id) {
           <label
@@ -72,9 +73,20 @@
       />
     </fieldset>
 
-    <div class="hospitalization-actions">
+    <div class="hospitalization-actions gap-2">
+      @if (orden_hospitalizacion_actual()) {
+        <app-button
+          texto="Eliminar orden"
+          action="delete"
+          color="danger"
+          size="sm"
+          [loading]="guardando_hospitalizacion()"
+          [disabled]="!detalle().fecha_hora_llamada_med"
+          (clicked)="eliminar()"
+        />
+      }
       <app-button
-        texto="Agregar"
+        texto="Guardar"
         action="save"
         color="primary"
         size="sm"
@@ -89,41 +101,14 @@
     </div>
   </div>
 
-  <section class="clinical-section-card">
-    <div class="clinical-list-header">
-      <h3>Órdenes de hospitalización registradas</h3>
-    </div>
-    <app-table
-      size="sm"
-      [scrollHeight]="null"
-      [columns]="columnasOrdenes"
-      [cellTemplates]="plantillasCelda()"
-      [rows]="ordenes_hospitalizacion()"
-      [loading]="cargando_hospitalizacion()"
-      emptyMessage="No se han registrado órdenes de hospitalización."
-    />
-  </section>
-
-  <ng-template #accionesTpl let-fila>
-    <div class="text-center">
-      <app-button
-        action="delete"
-        size="sm"
-        [soloIcono]="true"
-        title="Eliminar orden de hospitalización"
-        [disabled]="guardando_hospitalizacion()"
-        (clicked)="eliminarHospitalizacion.emit(fila.orden_hospitalizacion_id)"
-      />
-    </div>
-  </ng-template>
   <div class="hospitalizacion-print-area" aria-hidden="true">
     <div #orden_impresion_hospitalizacion class="laboratory-print-document">
       <header class="laboratory-print-header">
         <h4>Orden de hospitalización</h4>
         <p>Paciente: {{ detalle().paciente.nombre_completo }}</p>
         <p>Historia clínica: {{ detalle().paciente.numero_historia || '-' }}</p>
-        @if (ordenes_hospitalizacion().length > 0) {
-          <p>Fecha de registro: {{ ordenes_hospitalizacion()[0].fecha_registro }}</p>
+        @if (orden_hospitalizacion_actual(); as orden) {
+          <p>Fecha de registro: {{ orden.fecha_registro }}</p>
         }
       </header>
       <table>
@@ -135,7 +120,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (orden of ordenes_hospitalizacion(); track orden.orden_hospitalizacion_id) {
+          @if (orden_hospitalizacion_actual(); as orden) {
             <tr>
               <td>{{ orden.diagnostico_codigo }} - {{ orden.diagnostico_nombre }}</td>
               <td>{{ orden.motivo_nombre }}</td>

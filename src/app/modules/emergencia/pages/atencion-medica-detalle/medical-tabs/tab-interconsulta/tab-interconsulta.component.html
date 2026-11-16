@@ -25,6 +25,7 @@
         <div class="interconsultation-field">
           <app-select
             label="Área destino"
+            [requerido]="true"
             placeholder="-- Seleccione área --"
             [options]="areasOptions()"
             [showEmptyOption]="true"
@@ -38,10 +39,13 @@
         <div class="interconsultation-field">
           <app-select
             label="Especialidad destino"
+            [requerido]="true"
             placeholder="-- Seleccione especialidad --"
             [options]="especialidadesOptions()"
             [showEmptyOption]="true"
             emptyOptionLabel="-- Seleccione especialidad --"
+            [searchable]="true"
+            searchPlaceholder="Buscar especialidad..."
             size="sm"
             [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta() || area_interconsulta_id() === null"
             [selectedValue]="especialidad_interconsulta_id()"
@@ -51,10 +55,13 @@
         <div class="interconsultation-field">
           <app-select
             label="Médico destino"
+            [requerido]="true"
             placeholder="-- Seleccione médico --"
             [options]="personalOptions()"
             [showEmptyOption]="true"
             emptyOptionLabel="-- Seleccione médico --"
+            [searchable]="true"
+            searchPlaceholder="Buscar médico..."
             size="sm"
             [disabled]="
               !detalle().fecha_hora_llamada_med ||
@@ -68,39 +75,66 @@
       </div>
     </fieldset>
 
+    <fieldset class="interconsultation-section">
+      <legend>Diagnóstico relacionado <span class="text-danger">*</span></legend>
+      <app-select
+        placeholder="-- Seleccione diagnóstico --"
+        [requerido]="true"
+        [options]="diagnosticosOptions()"
+        [showEmptyOption]="true"
+        emptyOptionLabel="-- Seleccione diagnóstico --"
+        [searchable]="true"
+        searchPlaceholder="Buscar diagnóstico..."
+        size="sm"
+        [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta()"
+        [selectedValue]="diagnostico_interconsulta_id()"
+        (selectedValueChange)="actualizar_diagnostico_interconsulta_valor($event)"
+      />
+    </fieldset>
+
     <div class="interconsultation-options-grid">
       <fieldset class="interconsultation-section">
-        <legend>Diagnóstico relacionado</legend>
-        <app-select
-          placeholder="-- Seleccione diagnóstico --"
-          [options]="diagnosticosOptions()"
-          [showEmptyOption]="true"
-          emptyOptionLabel="-- Seleccione diagnóstico --"
-          size="sm"
-          [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta()"
-          [selectedValue]="diagnostico_interconsulta_id()"
-          (selectedValueChange)="actualizar_diagnostico_interconsulta_valor($event)"
-        />
-      </fieldset>
-
-      <fieldset class="interconsultation-section">
-        <legend>Prioridad</legend>
-        <div class="interconsultation-choices interconsultation-choices--two-columns">
-          @for (prioridad of prioridades_orden(); track prioridad.prioridad_id) {
+        <legend>Solicita examen de</legend>
+        <div class="interconsultation-choices">
+          @for (solicita of solicitas; track solicita.id) {
             <label
               class="interconsultation-choice"
               [class.interconsultation-choice--selected]="
-                prioridad_interconsulta_id() === prioridad.prioridad_id
+                solicita_seleccionado() === solicita.nombre
               "
             >
               <input
                 type="checkbox"
                 class="form-check-input"
-                [checked]="prioridad_interconsulta_id() === prioridad.prioridad_id"
+                [checked]="solicita_seleccionado() === solicita.nombre"
                 [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta()"
-                (change)="seleccionar_prioridad_interconsulta(prioridad.prioridad_id)"
+                (change)="seleccionar_solicita(solicita.nombre)"
               />
-              <span>{{ prioridad.nombre }}</span>
+              <span>{{ solicita.nombre }}</span>
+              <i class="fa fa-check" aria-hidden="true"></i>
+            </label>
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="interconsultation-section">
+        <legend>Clase de consulta</legend>
+        <div class="interconsultation-choices interconsultation-choices--two-columns">
+          @for (clase of clases; track clase.id) {
+            <label
+              class="interconsultation-choice"
+              [class.interconsultation-choice--selected]="
+                clase_seleccionada() === clase.nombre
+              "
+            >
+              <input
+                type="checkbox"
+                class="form-check-input"
+                [checked]="clase_seleccionada() === clase.nombre"
+                [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta()"
+                (change)="seleccionar_clase(clase.nombre)"
+              />
+              <span>{{ clase.nombre }}</span>
               <i class="fa fa-check" aria-hidden="true"></i>
             </label>
           }
@@ -112,7 +146,8 @@
       <legend>Información clínica</legend>
       <div class="interconsultation-field mb-3">
         <app-input-text
-          label="Qué solicita"
+          label="Qué se solicita"
+          [requerido]="true"
           size="sm"
           [maxlength]="500"
           placeholder="Describa el motivo de la interconsulta..."
@@ -148,7 +183,6 @@
         [loading]="guardando_interconsulta()"
         [disabled]="
           !detalle().fecha_hora_llamada_med ||
-          prioridad_interconsulta_id() === null ||
           diagnostico_interconsulta_id() === null ||
           area_interconsulta_id() === null ||
           especialidad_interconsulta_id() === null ||
@@ -194,13 +228,6 @@
   <ng-template #accionesTpl let-fila>
     <div class="d-flex justify-content-center gap-1">
       <app-button
-        action="print"
-        size="sm"
-        [soloIcono]="true"
-        title="Imprimir interconsulta"
-        (clicked)="imprimir_orden_interconsulta(fila.interconsulta_id)"
-      />
-      <app-button
         action="delete"
         size="sm"
         [soloIcono]="true"
@@ -208,40 +235,13 @@
         [disabled]="guardando_interconsulta()"
         (clicked)="eliminarInterconsulta.emit(fila.interconsulta_id)"
       />
+      <app-button
+        action="print"
+        size="sm"
+        [soloIcono]="true"
+        title="Imprimir interconsulta"
+        (clicked)="imprimir_orden_interconsulta(fila.interconsulta_id)"
+      />
     </div>
   </ng-template>
-  <div class="interconsulta-print-area" aria-hidden="true">
-    <div #orden_impresion_interconsulta class="laboratory-print-document">
-      <header class="laboratory-print-header">
-        <h4>Orden de interconsulta</h4>
-        <p>Paciente: {{ detalle().paciente.nombre_completo }}</p>
-        <p>Historia clínica: {{ detalle().paciente.numero_historia || '-' }}</p>
-        @if (ordenes_interconsulta().length > 0) {
-          <p>Fecha de solicitud: {{ ordenes_interconsulta()[0].fecha_hora_orden }}</p>
-        }
-      </header>
-      <table>
-        <thead>
-          <tr>
-            <th>Destino</th>
-            <th>Especialidad / Médico</th>
-            <th>Diagnóstico</th>
-            <th>Qué solicita</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (orden of ordenes_interconsulta(); track orden.interconsulta_id) {
-            <tr>
-              <td>{{ orden.area_nombre }}</td>
-              <td>{{ orden.especialidad_nombre }} · {{ orden.personal_nombre }}</td>
-              <td>{{ orden.diagnostico_codigo }} - {{ orden.diagnostico_nombre }}</td>
-              <td>{{ orden.que_solicita }}</td>
-              <td>{{ orden.estado_nombre }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  </div>
 </div>

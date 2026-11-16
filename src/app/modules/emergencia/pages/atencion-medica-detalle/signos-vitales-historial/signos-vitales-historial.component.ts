@@ -63,6 +63,9 @@ export class SignosVitalesHistorialComponent {
   readonly registrar = output<{ detalles: TriajeDetalleRequest[]; observaciones: string | null }>();
 
   private readonly modal = viewChild<ModalComponent>('modal');
+  private readonly modalGrafico = viewChild<ModalComponent>('modalGrafico');
+
+  readonly modalGraficoVisible = signal(false);
 
   private readonly parametrosClinicos = signal<CatalogoParametroClinico[]>([]);
   private intentoGuardado = false;
@@ -125,14 +128,17 @@ export class SignosVitalesHistorialComponent {
       tooltip: {
         trigger: 'axis',
         appendTo: 'body',
-        extraCssText: 'z-index: 999999 !important; box-shadow: 0 4px 14px rgba(0,0,0,0.15); border-radius: 6px; border: 1px solid #e5e7eb;',
+        extraCssText:
+          'z-index: 999999 !important; box-shadow: 0 4px 14px rgba(0,0,0,0.15); border-radius: 6px; border: 1px solid #e5e7eb;',
         axisPointer: { type: 'line' },
         formatter: (params: any) => {
           if (!Array.isArray(params) || params.length === 0) return '';
           const idx = params[0].dataIndex;
           const reg = lista[idx];
           const origen = reg?.origen_nombre ? ` (${reg.origen_nombre})` : '';
-          const fechaHora = reg?.fecha_hora ? `${this.formatearFecha(reg.fecha_hora)} ${this.formatearHora(reg.fecha_hora)}` : '';
+          const fechaHora = reg?.fecha_hora
+            ? `${this.formatearFecha(reg.fecha_hora)} ${this.formatearHora(reg.fecha_hora)}`
+            : '';
           let html = `<div style="font-size:12px; font-weight:600; margin-bottom:4px;">${fechaHora}${origen}</div>`;
           for (const p of params) {
             if (p.value !== null && p.value !== undefined) {
@@ -211,6 +217,189 @@ export class SignosVitalesHistorialComponent {
       ],
     };
   });
+
+  readonly opcionesGraficoEvolucionModal = computed<EChartsOption>(() => {
+    const lista = this.historialAscendente();
+
+    if (!lista || lista.length === 0) {
+      return {
+        title: {
+          text: 'Sin registros de evolución',
+          left: 'center',
+          top: 'middle',
+          textStyle: { color: '#6c757d', fontSize: 16, fontWeight: 'normal' },
+        },
+        xAxis: { type: 'category', data: [] },
+        yAxis: { type: 'value' },
+        series: [],
+      };
+    }
+
+    const categoriasX = lista.map((item) => {
+      const fecha = this.formatearFecha(item.fecha_hora);
+      const hora = this.formatearHora(item.fecha_hora);
+      return fecha && hora ? `${fecha}\n${hora}` : hora || '-';
+    });
+
+    const datosSistolica = lista.map((item) => this.valor(item.detalles, 'PA', 'PAS'));
+    const datosDiastolica = lista.map((item) => this.valor(item.detalles, 'PA', 'PAD'));
+    const datosFC = lista.map((item) => this.valor(item.detalles, 'FC'));
+    const datosFR = lista.map((item) => this.valor(item.detalles, 'FR'));
+    const datosTemp = lista.map((item) => this.valor(item.detalles, 'TEMP'));
+    const datosSat = lista.map((item) => this.valor(item.detalles, 'SATO2'));
+
+    return {
+      tooltip: {
+        trigger: 'axis',
+        appendTo: 'body',
+        extraCssText:
+          'z-index: 999999 !important; box-shadow: 0 6px 18px rgba(0,0,0,0.15); border-radius: 8px; border: 1px solid #e5e7eb; padding: 12px;',
+        axisPointer: { type: 'cross' },
+        formatter: (params: any) => {
+          if (!Array.isArray(params) || params.length === 0) return '';
+          const idx = params[0].dataIndex;
+          const reg = lista[idx];
+          const origen = reg?.origen_nombre ? ` (${reg.origen_nombre})` : '';
+          const fechaHora = reg?.fecha_hora
+            ? `${this.formatearFecha(reg.fecha_hora)} ${this.formatearHora(reg.fecha_hora)}`
+            : '';
+          let html = `<div style="font-size:13px; font-weight:700; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:4px;">${fechaHora}${origen}</div>`;
+          for (const p of params) {
+            if (p.value !== null && p.value !== undefined) {
+              html += `<div style="display:flex; align-items:center; justify-content:space-between; gap:16px; font-size:12px; margin-bottom:3px;">
+                <span><span style="display:inline-block; width:10px; height:10px; border-radius:50%; background-color:${p.color}; margin-right:6px;"></span>${p.seriesName}:</span>
+                <b style="font-size:12px;">${p.value}</b>
+              </div>`;
+            }
+          }
+          return html;
+        },
+      },
+      legend: {
+        data: [
+          'TA Sistólica',
+          'TA Diastólica',
+          'FC (lpm)',
+          'FR (rpm)',
+          'Temperatura (°C)',
+          'Sat. O₂ (%)',
+        ],
+        top: 8,
+        icon: 'circle',
+        itemGap: 20,
+        textStyle: { fontSize: 12, color: '#374151', fontWeight: 600 },
+      },
+      toolbox: {
+        right: 20,
+        top: 4,
+        feature: {
+          saveAsImage: { title: 'Descargar imagen' },
+          dataZoom: { title: { zoom: 'Zoom', back: 'Restablecer' } },
+          restore: { title: 'Restablecer' },
+        },
+      },
+      grid: {
+        top: 60,
+        left: 50,
+        right: 30,
+        bottom: 50,
+        containLabel: true,
+      },
+      xAxis: {
+        type: 'category',
+        data: categoriasX,
+        boundaryGap: false,
+        axisLine: { lineStyle: { color: '#d1d5db' } },
+        axisLabel: { color: '#374151', fontSize: 11, fontWeight: 500 },
+      },
+      yAxis: {
+        type: 'value',
+        min: 0,
+        max: (val: { max: number }) => Math.max(160, Math.ceil((val.max + 20) / 20) * 20),
+        splitLine: {
+          show: true,
+          lineStyle: { color: '#f3f4f6', type: 'dashed' },
+        },
+        axisLabel: { color: '#6b7280', fontSize: 11 },
+      },
+      series: [
+        {
+          name: 'TA Sistólica',
+          type: 'line',
+          smooth: true,
+          data: datosSistolica,
+          symbol: 'circle',
+          symbolSize: 8,
+          itemStyle: { color: '#1a56db' },
+          lineStyle: { width: 3, color: '#1a56db' },
+        },
+        {
+          name: 'TA Diastólica',
+          type: 'line',
+          smooth: true,
+          data: datosDiastolica,
+          symbol: 'circle',
+          symbolSize: 7,
+          itemStyle: { color: '#3b82f6' },
+          lineStyle: { width: 2, type: 'dashed', color: '#3b82f6' },
+        },
+        {
+          name: 'FC (lpm)',
+          type: 'line',
+          smooth: true,
+          data: datosFC,
+          symbol: 'circle',
+          symbolSize: 8,
+          itemStyle: { color: '#0e9f6e' },
+          lineStyle: { width: 2.5, color: '#0e9f6e' },
+        },
+        {
+          name: 'FR (rpm)',
+          type: 'line',
+          smooth: true,
+          data: datosFR,
+          symbol: 'circle',
+          symbolSize: 8,
+          itemStyle: { color: '#7e3af2' },
+          lineStyle: { width: 2.5, color: '#7e3af2' },
+        },
+        {
+          name: 'Temperatura (°C)',
+          type: 'line',
+          smooth: true,
+          data: datosTemp,
+          symbol: 'circle',
+          symbolSize: 7,
+          itemStyle: { color: '#d97706' },
+          lineStyle: { width: 2, color: '#d97706' },
+        },
+        {
+          name: 'Sat. O₂ (%)',
+          type: 'line',
+          smooth: true,
+          data: datosSat,
+          symbol: 'circle',
+          symbolSize: 7,
+          itemStyle: { color: '#06b6d4' },
+          lineStyle: { width: 2, color: '#06b6d4' },
+        },
+      ],
+    };
+  });
+
+  abrirModalGrafico(event?: Event): void {
+    event?.stopPropagation();
+    this.modalGraficoVisible.set(true);
+    this.modalGrafico()?.open();
+  }
+
+  onModalGraficoOpened(): void {
+    this.modalGraficoVisible.set(true);
+  }
+
+  onModalGraficoClosed(): void {
+    this.modalGraficoVisible.set(false);
+  }
 
   imc(): string {
     const valor = this.utilService.calculate_imc(this.peso, this.talla);
@@ -561,8 +750,7 @@ export class SignosVitalesHistorialComponent {
     const lista = this.historial();
     if (!lista || lista.length === 0) return;
 
-    const controlTriaje =
-      lista.find((c) => c.origen_codigo === 'TRI') ?? lista[0];
+    const controlTriaje = lista.find((c) => c.origen_codigo === 'TRI') ?? lista[0];
 
     if (!controlTriaje?.detalles) return;
 

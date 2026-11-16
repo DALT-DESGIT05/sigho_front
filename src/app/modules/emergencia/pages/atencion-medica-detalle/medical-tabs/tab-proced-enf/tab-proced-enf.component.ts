@@ -151,6 +151,40 @@ export class TabProcedEnfComponent {
     return [servicios.slice(0, mitad), servicios.slice(mitad)];
   });
 
+  readonly servicios_seleccionados_lista = computed(() => {
+    const seleccionados = this.servicios_proced_enf_seleccionados();
+    const catalogo = this.catalogo_proced_enf();
+    const indicaciones = this.indicaciones_por_servicio();
+
+    const catalogoMap = new Map<string, ServicioProcedEnf>();
+    for (const servicio of catalogo) {
+      catalogoMap.set(servicio.codigo, servicio);
+    }
+
+    const resultado: Array<{
+      codigo: string;
+      nombre: string;
+      area_codigo: string;
+      area_nombre: string;
+      indicacion: string | null;
+    }> = [];
+
+    for (const codigo of seleccionados) {
+      const servicio = catalogoMap.get(codigo);
+      resultado.push({
+        codigo,
+        nombre: servicio?.nombre || codigo,
+        area_codigo: servicio?.area_codigo ?? '005',
+        area_nombre: servicio
+          ? this.etiqueta_area_proced_enf(servicio.area_codigo ?? '005', servicio.area_nombre ?? 'Enfermería')
+          : 'Enfermería',
+        indicacion: indicaciones.get(codigo) ?? null,
+      });
+    }
+
+    return resultado;
+  });
+
   estado_badge_class(estado: string | null | undefined): string {
     return this.utilService.situacion_examen_badge_class(estado ?? '');
   }
@@ -269,6 +303,20 @@ export class TabProcedEnfComponent {
 
   servicio_proced_enf_marcado(codigo: string): boolean {
     return this.servicios_proced_enf_seleccionados().has(codigo);
+  }
+
+  quitar_servicio_proced_enf(codigo: string): void {
+    const servicios = new Set(this.servicios_proced_enf_seleccionados());
+    const indicaciones = new Map(this.indicaciones_por_servicio());
+    servicios.delete(codigo);
+    indicaciones.delete(codigo);
+    this.servicios_proced_enf_seleccionados.set(servicios);
+    this.indicaciones_por_servicio.set(indicaciones);
+  }
+
+  limpiar_servicios_seleccionados(): void {
+    this.servicios_proced_enf_seleccionados.set(new Set());
+    this.indicaciones_por_servicio.set(new Map());
   }
 
   indice_proced_enf(columna: number, indice: number): number {

@@ -34,11 +34,53 @@
   overflow: visible;
   position: relative;
   width: 100%;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    border-color: var(--palette-primary-300, #93c5fd);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+    .vitales-grafico-expand-btn {
+      opacity: 1;
+      background: var(--palette-primary-50, #eff6ff);
+      color: var(--palette-primary-600, #1d4ed8);
+      border-color: var(--palette-primary-300, #93c5fd);
+    }
+  }
 
   ::ng-deep .container-grafic {
     height: 100%;
     padding: 0.25rem 0.5rem 0.35rem 0.5rem;
   }
+}
+
+.vitales-grafico-expand-btn {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  z-index: 5;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--palette-gray-200, #e5e7eb);
+  border-radius: 0.25rem;
+  color: var(--palette-gray-600, #4b5563);
+  cursor: pointer;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.75rem;
+  opacity: 0.75;
+  transition: all 0.15s ease;
+
+  &:hover {
+    opacity: 1;
+    background: var(--palette-primary-100, #dbeafe);
+    color: var(--palette-primary-700, #1d4ed8);
+  }
+}
+
+.vitales-grafico-modal-body {
+  width: 100%;
+  min-height: 480px;
+  padding: 0.5rem;
 }
 
 .vitales-header {

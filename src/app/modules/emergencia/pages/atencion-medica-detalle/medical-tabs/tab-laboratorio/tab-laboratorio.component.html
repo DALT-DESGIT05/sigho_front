@@ -11,17 +11,19 @@
         (clicked)="abrir_modal_laboratorio()"
       />
     </div>
-    @if (ordenes_laboratorio().length > 0) {
-      <button
-        type="button"
-        class="btn btn-outline-secondary btn-sm"
-        title="Imprimir orden de laboratorio"
-        aria-label="Imprimir orden de laboratorio"
-        (click)="imprimir_orden_laboratorio()"
-      >
-        Imprimir orden <i class="fa fa-print" aria-hidden="true"></i>
-      </button>
-    }
+    <div class="clinical-list-header-actions">
+      @if (ordenes_laboratorio().length > 0) {
+        <button
+          type="button"
+          class="btn btn-outline-secondary btn-sm"
+          title="Generar orden de laboratorio"
+          aria-label="Generar orden de laboratorio"
+          (click)="imprimir_orden_laboratorio()"
+        >
+          Generar orden <i class="fa fa-print" aria-hidden="true"></i>
+        </button>
+      }
+    </div>
   </div>
   <section class="clinical-section-card mt-3">
     <legend>Laboratorio</legend>
@@ -45,7 +47,7 @@
   </ng-template>
 
   <ng-template #accionesTpl let-fila>
-    <div class="text-center">
+    <div class="text-center d-flex justify-content-center gap-1">
       <app-button
         action="delete"
         size="sm"
@@ -53,6 +55,13 @@
         title="Eliminar orden de laboratorio"
         [disabled]="!detalle().fecha_hora_llamada_med"
         (clicked)="eliminarLaboratorio.emit(fila.laboratorio_id)"
+      />
+      <app-button
+        action="print"
+        size="sm"
+        [soloIcono]="true"
+        title="Imprimir orden de solicitud"
+        (clicked)="imprimir_orden_laboratorio()"
       />
     </div>
   </ng-template>
@@ -109,7 +118,10 @@
           ></button>
         </div>
         <div class="modal-body">
-          <div class="laboratory-catalog-layout">
+          <div
+            class="laboratory-catalog-layout"
+            [class.has-selected-panel]="servicios_seleccionados_lista().length > 0"
+          >
             <fieldset class="laboratory-fieldset laboratory-fieldset--areas">
               <legend><i class="fa-solid fa-list-check" aria-hidden="true"></i>Áreas</legend>
               <nav class="laboratory-area-nav" aria-label="Áreas de laboratorio">
@@ -181,14 +193,75 @@
                 </div>
               </div>
             </fieldset>
+
+            @if (servicios_seleccionados_lista().length > 0) {
+              <fieldset class="laboratory-fieldset laboratory-fieldset--selected">
+                <legend class="d-flex align-items-center justify-content-between">
+                  <span>
+                    <i class="fa-solid fa-clipboard-check text-primary me-1" aria-hidden="true"></i>
+                    Seleccionados ({{ servicios_seleccionados_lista().length }})
+                  </span>
+                  <button
+                    type="button"
+                    class="btn btn-link btn-sm text-danger text-decoration-none p-0 fw-normal"
+                    style="font-size: 11px;"
+                    title="Quitar todas las selecciones"
+                    (click)="limpiar_servicios_seleccionados()"
+                  >
+                    <i class="fa-solid fa-trash-can me-1"></i>Limpiar
+                  </button>
+                </legend>
+                <div class="laboratory-selected-content">
+                  <div class="laboratory-selected-items">
+                    @for (item of servicios_seleccionados_lista(); track item.codigo) {
+                      <div class="laboratory-selected-card">
+                        <div class="d-flex align-items-start justify-content-between gap-2">
+                          <div class="flex-grow-1 min-w-0">
+                            <div class="d-flex align-items-center gap-1 mb-1">
+                              <span
+                                class="badge bg-primary-subtle text-primary border border-primary-subtle"
+                                style="font-size: 10px;"
+                              >
+                                {{ item.codigo }}
+                              </span>
+                              <span
+                                class="badge bg-light text-secondary border"
+                                style="font-size: 10px;"
+                              >
+                                {{ item.area_nombre }}
+                              </span>
+                            </div>
+                            <div class="fw-semibold text-dark small text-break">
+                              {{ item.nombre }}
+                            </div>
+                          </div>
+                          <div class="flex-shrink-0">
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-outline-danger p-1 lh-1"
+                              title="Quitar de la lista"
+                              (click)="quitar_servicio_laboratorio(item.codigo)"
+                            >
+                              <i class="fa-solid fa-xmark"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </fieldset>
+            }
           </div>
         </div>
         <div class="modal-footer">
-          <div class="laboratory-footer-controls">
-            <div class="laboratory-control-group">
+          <div class="laboratory-footer-controls d-flex flex-row flex-nowrap align-items-end">
+            <div class="laboratory-control-group laboratory-control-group--laboratorio-prioridad">
               <app-select
                 label="Prioridad"
+                [requerido]="true"
                 placeholder="-- Seleccione --"
+                [dropup]="true"
                 [options]="prioridadesOptions()"
                 [showEmptyOption]="true"
                 emptyOptionLabel="-- Seleccione --"
@@ -197,10 +270,12 @@
                 (selectedValueChange)="actualizar_prioridad_laboratorio_valor($event)"
               />
             </div>
-            <div class="laboratory-control-group laboratory-control-group--diagnostico">
+            <div class="laboratory-control-group laboratory-control-group--laboratorio-diagnostico">
               <app-select
                 label="Diagnóstico"
+                [requerido]="true"
                 placeholder="-- Seleccione diagnóstico --"
+                [dropup]="true"
                 [options]="diagnosticosOptions()"
                 [showEmptyOption]="true"
                 emptyOptionLabel="-- Seleccione diagnóstico --"
@@ -211,7 +286,11 @@
             </div>
           </div>
           <app-button
-            texto="Grabar"
+            [texto]="
+              servicios_seleccionados_lista().length > 0
+                ? 'Grabar (' + servicios_seleccionados_lista().length + ')'
+                : 'Grabar'
+            "
             action="save"
             color="primary"
             size="sm"

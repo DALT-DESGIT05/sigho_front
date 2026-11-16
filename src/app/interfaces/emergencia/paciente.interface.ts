@@ -4,6 +4,9 @@ export interface PacienteBusqueda {
   origen?: 'LOCAL' | 'SIFSA1';
   codigo_afiliado?: string | null;
   cod_situ?: number | null;
+  des_situ?: string | null;
+  es_afiliado?: boolean;
+  estado_afiliacion?: string | null;
   tipo_documento_id: number;
   tipo_documento: string;
   numero_documento: string | null;
@@ -12,6 +15,10 @@ export interface PacienteBusqueda {
   nombres: string | null;
   nsa: string | null;
   parentesco: string | null;
+  /** Kinship code from sifsa1.fstafiliado (A = titular, B = padre, D = cónyuge...). */
+  codigo_parentesco?: string | null;
+  /** True when the patient already has a companion linked (sighoweb.t_paciente_acompanante). */
+  tiene_acompanante?: boolean;
   tipo_afiliado: 'TITULAR' | 'FAMILIAR' | null;
   celular: string | null;
   correo_electronico: string | null;

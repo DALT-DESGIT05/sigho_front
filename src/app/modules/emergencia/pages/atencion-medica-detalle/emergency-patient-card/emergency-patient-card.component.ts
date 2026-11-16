@@ -39,7 +39,9 @@ export class EmergencyPatientCardComponent {
   private readonly correo_override = signal<string | null>(null);
 
   readonly contactPhone = computed(() => this.celular_override() ?? this.paciente().celular);
-  readonly contactEmail = computed(() => this.correo_override() ?? this.paciente().correo_electronico);
+  readonly contactEmail = computed(
+    () => this.correo_override() ?? this.paciente().correo_electronico,
+  );
 
   readonly es_afiliado_paciente = computed(() => {
     const pac = this.paciente();
@@ -47,6 +49,45 @@ export class EmergencyPatientCardComponent {
       return [1, 11, 12].includes(Number(pac.cod_situ));
     }
     return Boolean(pac.codigo_afiliado);
+  });
+
+  readonly es_fap = computed(() => {
+    const pac = this.paciente();
+    if (pac.tipo_persona_fap !== null && pac.tipo_persona_fap !== undefined) {
+      return Number(pac.tipo_persona_fap) === 1;
+    }
+    if (pac.es_fap !== undefined && pac.es_fap !== null) {
+      return Boolean(pac.es_fap);
+    }
+    return (
+      this.es_afiliado_paciente() ||
+      Boolean(pac.codigo_afiliado || pac.nsa || pac.grado || pac.grado_codigo)
+    );
+  });
+
+  readonly tipo_paciente_texto = computed(() => (this.es_fap() ? 'FAP' : 'EXTRAFAP'));
+
+  readonly titulo_card_paciente = computed(() => `Paciente (${this.tipo_paciente_texto()})`);
+
+  readonly etiqueta_paciente = computed(() => `Paciente ${this.tipo_paciente_texto()}`);
+
+  readonly es_titular_paciente = computed(() => {
+    const pac = this.paciente();
+    const paren = pac.parentesco?.trim();
+    if (!paren) return true;
+    const normalizado = paren
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toUpperCase();
+    return normalizado === 'TITULAR' || normalizado === 'T' || normalizado === 'A';
+  });
+
+  readonly parentesco_card_valor = computed(() => {
+    if (this.es_titular_paciente()) {
+      return 'TITULAR';
+    }
+    return this.paciente().parentesco || 'No registrado';
   });
 
   readonly badge_iafas_header = computed(() => {
@@ -71,11 +112,62 @@ export class EmergencyPatientCardComponent {
     return partesGrado || nombre || 'No registrado';
   });
 
+  readonly parentesco_paciente = computed(() => {
+    const pac = this.paciente();
+    if (this.es_titular_paciente()) {
+      return 'TITULAR';
+    }
+    return pac.parentesco?.trim() || 'No registrado';
+  });
+
+  readonly hc_nsa = computed(() => {
+    const pac = this.paciente();
+    const nsa = pac.nsa?.trim();
+    const letra = (
+      pac.codigo_parentesco?.trim() || (this.es_titular_paciente() ? 'A' : '')
+    ).toUpperCase();
+    if (nsa) {
+      const nsaLetra =
+        letra && !nsa.toUpperCase().endsWith(letra) ? `${nsa}${letra}` : nsa.toUpperCase();
+      return `HC - ${nsaLetra}`;
+    }
+    if (pac.numero_historia) {
+      const his = pac.numero_historia.trim();
+      return his.toUpperCase().startsWith('HC') ? his : `HC - ${his}`;
+    }
+    return null;
+  });
+
+  readonly condiciones_especiales = computed<string[]>(() => {
+    const pac = this.paciente();
+    const condiciones: string[] = [];
+
+    const esDiscapacitado =
+      Boolean(pac.es_discapacitado) ||
+      Number(pac.ind_discapacitado) === 1 ||
+      pac.ind_discapacitado === true;
+
+    if (esDiscapacitado) {
+      condiciones.push('DISCAPACITADO');
+    }
+
+    const esDefensorPatria =
+      Boolean(pac.es_defensor_patria) ||
+      Number(pac.ind_defensor_patria) === 1 ||
+      pac.ind_defensor_patria === true;
+
+    if (esDefensorPatria) {
+      condiciones.push('DEFENSOR DE LA PATRIA');
+    }
+
+    return condiciones;
+  });
+
   readonly nombre_paciente = computed(() => {
     const paciente = this.paciente();
     const grado = paciente.grado_codigo?.toUpperCase()?.trim() || null;
     const situacion = paciente.situacion?.toUpperCase()?.trim();
-    const esTitular = Boolean(grado) || (paciente.parentesco?.toUpperCase()?.trim() === 'TITULAR');
+    const esTitular = Boolean(grado) || paciente.parentesco?.toUpperCase()?.trim() === 'TITULAR';
     const sufijoSituacion = esTitular && grado && situacion === 'RETIRO' ? '(r)' : null;
 
     const partesGrado = [grado, sufijoSituacion].filter(Boolean).join(' ');
@@ -94,7 +186,7 @@ export class EmergencyPatientCardComponent {
         .join(' ');
       nombre = [apellidos, nombres].filter(Boolean).join(' ');
     } else {
-      nombre = (paciente.nombre_completo?.trim() || '');
+      nombre = paciente.nombre_completo?.trim() || '';
     }
 
     return partesGrado ? `${partesGrado} ${nombre}` : nombre;
@@ -126,7 +218,12 @@ export class EmergencyPatientCardComponent {
   private readonly contacto_api_error = signal('');
 
   color_situacion(situacion: string | null | undefined): PaletteColor {
-    return situacion === 'ACTIVIDAD' ? 'success' : situacion === 'RETIRO' ? 'warning' : 'primary';
+    const normalizado = situacion?.toUpperCase()?.trim();
+    return normalizado === 'ACTIVIDAD'
+      ? 'success'
+      : normalizado === 'RETIRO'
+        ? 'danger'
+        : 'primary';
   }
 
   es_derechohabiente(parentesco: string | null | undefined): boolean {

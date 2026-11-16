@@ -1,4 +1,4 @@
-<app-card-general title="Paciente">
+<app-card-general [title]="titulo_card_paciente()">
   <div card-header>
     @if (badge_iafas_header(); as badgeText) {
       <span class="patient-header-iafas-text" [title]="badgeText">
@@ -16,10 +16,12 @@
     <div class="d-flex align-items-center justify-content-between gap-2 mb-2 flex-wrap">
       <app-patient-identity
         [identificador]="paciente().codigo_afiliado || paciente().numero_documento || ''"
-        [codigoAfiliado]="paciente().codigo_afiliado || null"
         [codSitu]="paciente().cod_situ ?? null"
         [nombre]="nombre_paciente()"
-        [parentesco]="paciente().parentesco || null"
+        [parentesco]="parentesco_paciente()"
+        [hcNsa]="hc_nsa()"
+        [condicionesEspeciales]="condiciones_especiales()"
+        [etiqueta]="etiqueta_paciente()"
         [situacion]="paciente().situacion || null"
       />
       <div class="d-flex align-items-center gap-2 ms-auto">
@@ -36,30 +38,29 @@
             </div>
           </div>
         }
-        @if (es_derechohabiente(paciente().parentesco)) {
-          <app-button
-            text="Ver datos"
-            icon="fa-solid fa-address-book"
-            size="sm"
-            color="primary"
-            (clicked)="abrir_modal_datos_titular()"
-          />
-        }
       </div>
     </div>
     <app-summary-card-group minWidth="9rem">
+      <app-summary-card
+        etiqueta="Situación"
+        [valor]="paciente().situacion || 'No registrada'"
+        icon="fa-solid fa-circle-check"
+        [color]="color_situacion(paciente().situacion)"
+        [iconColor]="color_situacion(paciente().situacion)"
+        [contentColor]="color_situacion(paciente().situacion)"
+      />
+      @if (!es_titular_paciente()) {
+        <app-summary-card
+          etiqueta="Parentesco"
+          [valor]="parentesco_card_valor()"
+          icon="fa-solid fa-users"
+        />
+      }
       <app-summary-card
         etiqueta="DNI"
         [valor]="paciente().numero_documento || 'No registrado'"
         icon="fa-regular fa-address-card"
       />
-      @if (paciente().nsa) {
-        <app-summary-card
-          etiqueta="NSA"
-          [valor]="paciente().nsa!"
-          icon="fa-regular fa-address-card"
-        />
-      }
       <app-summary-card
         etiqueta="Sexo"
         [valor]="paciente().sexo || 'No registrado'"
@@ -70,15 +71,6 @@
         [valor]="paciente().edad === null ? 'No registrada' : paciente().edad + ' años'"
         icon="fa-regular fa-calendar"
       />
-      @if (!es_derechohabiente(paciente().parentesco)) {
-        <app-summary-card
-          etiqueta="Situación"
-          [valor]="paciente().situacion || 'No registrada'"
-          icon="fa-solid fa-circle-check"
-          [color]="color_situacion(paciente().situacion)"
-          [iconColor]="color_situacion(paciente().situacion)"
-        />
-      }
       <app-summary-card
         etiqueta="Celular"
         [valor]="contactPhone() || 'No registrado'"
@@ -100,6 +92,20 @@
         actionAriaLabel="Actualizar correo electrónico"
         (actionClicked)="abrir_modal_contacto('correo_electronico')"
       />
+      @if (es_derechohabiente(paciente().parentesco)) {
+        <app-summary-card
+          class="patient-titular-card"
+          etiqueta="Titular"
+          [valor]="nombre_titular_completo()"
+          [valueTitle]="nombre_titular_completo()"
+          icon="fa-solid fa-user-shield"
+          actionIcon="fa-solid fa-address-book"
+          actionText="Ver datos"
+          actionColor="primary"
+          actionAriaLabel="Ver datos del titular"
+          (actionClicked)="abrir_modal_datos_titular()"
+        />
+      }
     </app-summary-card-group>
   </section>
 </app-card-general>
@@ -158,7 +164,7 @@
         <div class="affiliate-detail-grid affiliate-detail-grid--holder">
           <div>
             <small>Titular</small>
-            <span class="fw-semibold text-uppercase">{{ nombre_titular_completo() }}</span>
+            <span class="fw-semibold">{{ nombre_titular_completo() }}</span>
           </div>
         </div>
       </div>
@@ -194,18 +200,15 @@
           </div>
           <div>
             <small>Edad</small>
-            <span class="fw-semibold">{{ paciente().edad === null ? 'No registrada' : paciente().edad + ' años' }}</span>
+            <span class="fw-semibold">{{
+              paciente().edad === null ? 'No registrada' : paciente().edad + ' años'
+            }}</span>
           </div>
         </div>
       </div>
     </div>
   </div>
   <div modal-footer>
-    <app-button
-      action="close"
-      size="sm"
-      color="primary"
-      (clicked)="datos_titular_modal.close()"
-    />
+    <app-button action="close" size="sm" color="primary" (clicked)="datos_titular_modal.close()" />
   </div>
 </app-modal>

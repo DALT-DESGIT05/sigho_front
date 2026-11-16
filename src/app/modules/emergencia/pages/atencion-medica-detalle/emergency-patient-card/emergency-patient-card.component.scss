@@ -34,6 +34,11 @@
     flex: 0 1 12rem !important;
     max-width: 13rem !important;
   }
+
+  .patient-titular-card {
+    flex: 0 1 14rem !important;
+    max-width: 18rem !important;
+  }
 }
 
 .patient-allergy-alert {
@@ -52,7 +57,8 @@
 }
 
 @keyframes allergy-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);

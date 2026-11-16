@@ -9,7 +9,8 @@
         [alt]="fotoAlt()"
         imageClass="app-patient-identity__image"
         objectFit="contain"
-        (imageError)="marcarFotoNoDisponible()">
+        (imageError)="marcarFotoNoDisponible()"
+      >
       </app-image-lazy>
     }
   </div>
@@ -19,15 +20,39 @@
     <div class="app-patient-identity__data">
       <strong class="app-patient-identity__name" [title]="nombre()">{{ nombre() }}</strong>
       @if (parentesco()) {
-        <span class="app-patient-identity__kinship" [title]="'Parentesco ' + parentesco()">{{ parentesco() }}</span>
+        <span class="app-patient-identity__kinship" [title]="parentesco()">{{ parentesco() }}</span>
+      }
+      @if (nsaLetra()) {
+        <span class="app-patient-identity__hc-badge" [title]="'NSA ' + nsaLetra()!">{{ nsaLetra() }}</span>
+      } @else if (hcNsa()) {
+        <span class="app-patient-identity__hc-badge" [title]="hcNsa()!">{{ hcNsa() }}</span>
+      }
+      @if (mostrarAfiliacion()) {
+        <span
+          class="app-patient-identity__affiliation"
+          [class.app-patient-identity__affiliation--active]="esAfiliado()"
+          [class.app-patient-identity__affiliation--inactive]="!esAfiliado()"
+          [title]="'Estado de afiliación: ' + textoAfiliacion()"
+        >
+          {{ textoAfiliacion() }}
+        </span>
+      }
+      @for (condicion of listaCondicionesEspeciales(); track condicion) {
+        <span class="app-patient-identity__special-badge" [title]="condicion">{{ condicion }}</span>
       }
       <span class="app-patient-identity__identifiers">
-      @if (historia() !== null && historia() !== '') {
-        <span class="app-patient-identity__history" [title]="'Historia Clinica ' + historia()">HC {{ historia() }}</span>
-      }
-      @if (codigoAfiliado()) {
-        <span class="app-patient-identity__history" [title]="'Código de afiliado ' + codigoAfiliado()">CA {{ codigoAfiliado() }}</span>
-      }
+        @if (historia() !== null && historia() !== '') {
+          <span class="app-patient-identity__history" [title]="'Historia Clinica ' + historia()"
+            >HC {{ historia() }}</span
+          >
+        }
+        @if (codigoAfiliado()) {
+          <span
+            class="app-patient-identity__history"
+            [title]="'Código de afiliado ' + codigoAfiliado()"
+            >CA {{ codigoAfiliado() }}</span
+          >
+        }
       </span>
     </div>
   </div>

@@ -1142,7 +1142,14 @@ export class AtencionMedicaDetalleComponent {
       });
   }
 
-  guardar_diagnostico(lista: Array<{ cie10_id: number; tipo_id: number; observacion: string }>): void {
+  guardar_diagnostico(
+    lista: Array<{
+      cie10_id: number;
+      tipo_id: number;
+      clasificacion_id: number;
+      observacion: string;
+    }>,
+  ): void {
     if (this.guardandoDiagnostico() || !lista || lista.length === 0) return;
 
     const inicio_guardado = performance.now();
@@ -1167,6 +1174,7 @@ export class AtencionMedicaDetalleComponent {
           this.atencionId,
           item.cie10_id,
           item.tipo_id,
+          item.clasificacion_id,
           item.observacion,
           index === 0,
         )

@@ -69,16 +69,19 @@
           />
         </div>
 
-        <!-- PROGRAMA -->
-        <div class="col-12 col-md-6">
-          <app-select
-            label="Programa"
-            [required]="true"
-            placeholder="-- Seleccione programa --"
-            [options]="programas()"
-            formControlName="programa"
-          />
-        </div>
+         <!-- INTERVALO DE ATENCIÓN -->
+          <div class="col-12 col-md-6">
+            <app-input-text
+              label="Intervalo de Atención"
+              [value]="intervaloAtencion() !== null
+                ? intervaloAtencion() + ' minutos'
+                : ''"
+              [readonly]="true"
+              [placeholder]="cargandoIntervalo()
+                ? 'Consultando intervalo...'
+                : 'Sin intervalo configurado'"
+            />
+          </div>
 
         <!-- TURNO -->
         <div class="col-12 col-md-6">
@@ -129,8 +132,11 @@
   </div>
 
   <div modal-footer class="d-flex justify-content-between w-100">
-    <app-button modal-footer-close
+
+    <app-button
+      modal-footer-close
       accion="cancel"
+      [disabled]="guardandoProgramacion()"
       (clicked)="cerrarModalProgramacion()">
     </app-button>
 

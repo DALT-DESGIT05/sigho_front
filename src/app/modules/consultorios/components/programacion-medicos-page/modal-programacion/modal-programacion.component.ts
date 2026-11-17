@@ -12,6 +12,12 @@ import { AlertDialogComponent } from '../../../../../components/alert-dialog/ale
 
 import { TurnoService } from '../../../../../services/consultorios/turno.service';
 import { Turno } from '../../../../../interfaces/consultorios/turno.interface';
+import { ActividadMedicaService } from '../../../../../services/consultorios/actividad-medica.service';
+import { EspecialidadService } from '../../../../../services/consultorios/especialidad.service';
+import { firstValueFrom } from 'rxjs';
+
+import { StoreProgramacionMedico } from '../../../../../interfaces/consultorios/programacion-medicos.interface';
+import { ProgramacionMedicosService } from '../../../../../services/consultorios/programacion-medicos.service';
 
 export interface DatosModalProgramacion {
   codigo_especialidad: number;
@@ -42,28 +48,22 @@ export class ModalProgramacionComponent implements OnInit {
   readonly turnos = signal<SelectOption[]>([]);
   readonly dataTurnos = signal<Turno[]>([]);
   readonly cargandoTurnos = signal(false);
+  private readonly actividadMedicaService = inject(ActividadMedicaService);
+  readonly actividadesMedicas = signal<SelectOption[]>([]);
+  readonly cargandoActividadesMedicas = signal(false);
+  private readonly EspecialidadService = inject(EspecialidadService);
+  private readonly programacionMedicosService =inject(ProgramacionMedicosService);
+  readonly guardandoProgramacion = signal(false);
+  readonly intervaloAtencion = signal<number | null>(null);
+  readonly cargandoIntervalo = signal(false);
+  private solicitudIntervalo = 0;
 
-  readonly actividadesMedicas = signal<SelectOption[]>([
-    { value: 1, label: 'CONSULTA MÉDICA' },
-    { value: 2, label: 'PROCEDIMIENTOS' },
-    { value: 3, label: 'INTERCONSULTA' }
-  ]);
 
-  readonly programas = signal<SelectOption[]>([
-    { value: 1, label: 'NORMAL (20 min)' },
-    { value: 2, label: 'ESPECIAL (30 min)' }
-  ]);
-
-  private readonly duracionProgramas: Record<number, number> = {
-    1: 20,
-    2: 30
-  };
 
   readonly registroForm = this.fb.group({
     fecha_inicio: ['', Validators.required],
     fecha_termino: ['', Validators.required],
     actividad_medica: [null as number | null, Validators.required],
-    programa: [null as number | null, Validators.required],
     turno: [null as number | null, Validators.required],
     hora_inicio: ['', Validators.required],
     hora_termino: ['', Validators.required],
@@ -75,9 +75,6 @@ export class ModalProgramacionComponent implements OnInit {
       codigo_turno => this.actualizarHorarioPorTurno(codigo_turno)
     );
 
-    this.registroForm.controls.programa.valueChanges.subscribe(
-      () => this.calcularCupos()
-    );
 
     this.registroForm.controls.hora_inicio.valueChanges.subscribe(
       () => this.calcularCupos()
@@ -86,25 +83,29 @@ export class ModalProgramacionComponent implements OnInit {
     this.registroForm.controls.hora_termino.valueChanges.subscribe(
       () => this.calcularCupos()
     );
+    this.registroForm.controls.actividad_medica.valueChanges.subscribe(
+      codigo_actividad => this.cambiarActividadMedica(codigo_actividad)
+    );
   }
 
   ngOnInit(): void {
     this.cargarTurnos();
+    this.cargarActividadesMedicas();
   }
 
   abrir(datos: DatosModalProgramacion): void {
+    ++this.solicitudIntervalo;
+    this.intervaloAtencion.set(null);
+    this.cargandoIntervalo.set(false);
     this.datosProgramacion.set(datos);
-
     this.registroForm.reset({
       fecha_inicio: datos.fecha_inicio,
       fecha_termino: datos.fecha_termino,
       actividad_medica: null,
-      programa: null,
       turno: null,
       hora_inicio: '',
       hora_termino: '',
-      cupos: 0
-    });
+      cupos: 0 });
 
     this.modalProgramacion()?.open();
   }
@@ -158,8 +159,8 @@ export class ModalProgramacionComponent implements OnInit {
   }
 
   private calcularCupos(): void {
-    const { programa, hora_inicio, hora_termino } =this.registroForm.getRawValue();
-    const duracion = programa === null ? 0: this.duracionProgramas[programa] ?? 0;
+  const { hora_inicio, hora_termino } =this.registroForm.getRawValue();
+  const duracion = this.intervaloAtencion() ?? 0;
 
     if (!duracion || !hora_inicio || !hora_termino) {
       this.registroForm.controls.cupos.setValue(0, {emitEvent: false});
@@ -183,41 +184,133 @@ export class ModalProgramacionComponent implements OnInit {
     if (datos.fecha_inicio > datos.fecha_termino) return false;
     if (!datos.hora_inicio || !datos.hora_termino) return false;
     if (datos.hora_inicio >= datos.hora_termino) return false;
+    if (this.cargandoIntervalo() || (this.intervaloAtencion() ?? 0) <= 0) {return false; }
 
     return (datos.cupos ?? 0) > 0;
   }
 
+
   async guardarProgramacion(): Promise<void> {
-    if (!this.puedeGuardarProgramacion()) {this.registroForm.markAllAsTouched();
+
+    // Evitar solicitudes duplicadas
+    if (this.guardandoProgramacion()) return;
+
+    // Validar formulario
+    if (!this.puedeGuardarProgramacion()) {
+      this.registroForm.markAllAsTouched();
       return;
     }
 
     const datos = this.registroForm.getRawValue();
     const seleccion = this.datosProgramacion();
 
-    if (!seleccion) return;
-
-    console.log('Programación válida para guardar:', {codigo_especialidad: seleccion.codigo_especialidad, id_medico: seleccion.codigo_medico, });
-
-    // Pendiente: conectar endpoint de registro.
-    this.cerrarModalProgramacion();
-
-    const alerta = this.alertaProgramacion();
-
-    if (!alerta) {
-      console.error('AlertDialogComponent no está disponible');
+    if (!seleccion || datos.actividad_medica == null || datos.turno == null) {
       return;
     }
 
-    await alerta.open({
-      tipo: 'success',
-      diseno: 'centrado',
-      titulo: 'Programación registrada',
-      mensaje: 'La programación médica se registró correctamente.',
-      texto_confirmar: 'Aceptar',
-      cerrar_fuera: false,
-      cerrar_escape: false,
-      imagen: 'icono_de_aceptacion'
+    // Preparar los datos para Laravel
+    const payload: StoreProgramacionMedico = {
+      persona: seleccion.codigo_medico,
+      especialidad: seleccion.codigo_especialidad,
+      fecha_inicio: datos.fecha_inicio ?? '',
+      fecha_fin: datos.fecha_termino ?? '',
+      turno: datos.turno,
+      actividad_medica_ipress: datos.actividad_medica,
+      hora_inicio: datos.hora_inicio ?? '',
+      hora_fin: datos.hora_termino ?? ''
+    };
+
+    // Iniciar guardado
+    this.guardandoProgramacion.set(true);
+
+    try {
+      await firstValueFrom(this.programacionMedicosService.store_prog_medico(payload, true));
+
+      // Cerrar únicamente cuando Laravel confirme el registro
+      this.cerrarModalProgramacion();
+
+      await this.alertaProgramacion()?.open({
+        tipo: 'success',
+        diseno: 'centrado',
+        titulo: 'Programación registrada',
+        mensaje: 'La programación médica se registró correctamente.',
+        texto_confirmar: 'Aceptar',
+        cerrar_fuera: false,
+        cerrar_escape: false,
+        imagen: 'icono_de_aceptacion'
+      });
+
+    } catch (error) {
+      console.error('Error al registrar programación médica:', error);
+
+      await this.alertaProgramacion()?.open({
+        tipo: 'error',
+        diseno: 'centrado',
+        titulo: 'Error al registrar',
+        mensaje: 'No se pudo registrar la programación médica. Verifique los datos e inténtelo nuevamente.',
+        texto_confirmar: 'Aceptar',
+        cerrar_fuera: false,
+        cerrar_escape: false
+      });
+
+    } finally {
+      this.guardandoProgramacion.set(false);
+    }
+  }
+
+  cargarActividadesMedicas(): void {
+    this.cargandoActividadesMedicas.set(true);
+    this.actividadMedicaService.list_actmed_by_ipress().subscribe({
+      next: ({ data }) => {
+        this.actividadesMedicas.set(
+          data.map(actividad => ({value: actividad.codigo_actividad_medica_ipress,label: actividad.nombre_actividad_medica}))
+        );
+
+        this.cargandoActividadesMedicas.set(false);
+      },
+      error: (error) => {
+        console.error('Error al cargar actividades médicas:', error);
+
+        this.actividadesMedicas.set([]);
+        this.cargandoActividadesMedicas.set(false);
+      }
     });
   }
+
+
+  private cambiarActividadMedica(codigo_actividad: number | null): void {
+    const solicitud_actual = ++this.solicitudIntervalo;
+
+    this.intervaloAtencion.set(null);
+    this.cargandoIntervalo.set(false);
+    this.registroForm.controls.cupos.setValue(0, { emitEvent: false });
+
+    const especialidad = this.datosProgramacion()?.codigo_especialidad;
+
+    if (codigo_actividad === null || especialidad == null) return;
+
+    this.cargandoIntervalo.set(true);
+
+    this.EspecialidadService.find_interval(
+      codigo_actividad,
+      especialidad
+    ).subscribe({
+      next: ({ data }) => {
+        if (solicitud_actual !== this.solicitudIntervalo) return;
+
+        this.intervaloAtencion.set(data.intervalo);
+        this.cargandoIntervalo.set(false);
+        this.calcularCupos();
+      },
+      error: (error) => {
+        if (solicitud_actual !== this.solicitudIntervalo) return;
+
+        console.error('Error al obtener intervalo:', error);
+        this.intervaloAtencion.set(null);
+        this.cargandoIntervalo.set(false);
+        this.registroForm.controls.cupos.setValue(0, { emitEvent: false });
+      }
+  });
+}
+
 }

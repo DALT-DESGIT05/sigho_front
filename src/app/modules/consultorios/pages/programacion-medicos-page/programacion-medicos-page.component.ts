@@ -9,21 +9,13 @@ import { TableComponent } from '../../../../components/table/table.component';
 import { EspecialidadService } from '../../../../services/consultorios/especialidad.service';
 import { PersonalService } from '../../../../services/consultorios/personal.service';
 import { ModalProgramacionComponent } from '../../components/programacion-medicos-page/modal-programacion/modal-programacion.component';
+import { ProgramacionMedicosService } from '../../../../services/consultorios/programacion-medicos.service';
+import { ProgramacionMedicoMes, StoreProgramacionMedico,FiltrosProgramacionMedicoMes,ProgramacionMedico, } from '../../../../interfaces/consultorios/programacion-medicos.interface';
+import { forkJoin } from 'rxjs';
+import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
+import { catchError, map, throwError } from 'rxjs';
 
-interface ProgramacionMedico {
-  id: number;
-  id_medico: number;
-  id_consultorio: number;
-  fecha: string;
-  turno: string;
-  actividad_medica: string;
-  hora_inicio: string;
-  hora_termino: string;
-  cupos: number;
-  reservados: number;
-  adicionales: number;
-  disponibles: number;
-}
+
 
 @Component({
   selector: 'app-programacion-medicos-page',
@@ -44,6 +36,11 @@ export class ProgramacionMedicosPage implements OnInit {
   readonly consultaRealizada = signal(false);
   readonly especialidades = signal<SelectOption[]>([]);
   readonly cargandoEspecialidades = signal(false);
+  private readonly programacionMedicosService = inject(ProgramacionMedicosService);
+
+
+  readonly cargandoProgramaciones = signal(false);
+  private solicitudProgramaciones = 0;
   readonly medicos = signal<SelectOption[]>([]);
   readonly cargandoMedicos = signal(false);
   private solicitudMedicos = 0;
@@ -138,22 +135,62 @@ export class ProgramacionMedicosPage implements OnInit {
 
     const filtros = this.filtrosForm.getRawValue();
 
-    if (filtros.fecha_inicio! > filtros.fecha_termino!) {
-      console.warn('La fecha inicio no puede superar la fecha término.');
+    if (
+      filtros.medico == null ||
+      !filtros.fecha_inicio ||
+      !filtros.fecha_termino ||
+      filtros.fecha_inicio > filtros.fecha_termino
+    ) {
       this.programaciones.set([]);
       this.consultaRealizada.set(false);
       return;
     }
 
-    const resultados = this.programacionesMock.filter(programacion =>
-      programacion.id_consultorio === filtros.especialidad &&
-      programacion.id_medico === filtros.medico &&
-      programacion.fecha >= filtros.fecha_inicio! &&
-      programacion.fecha <= filtros.fecha_termino!
-    );
+    const solicitudActual = ++this.solicitudProgramaciones;
+    const fechaInicio = filtros.fecha_inicio;
+    const fechaFin = filtros.fecha_termino;
+    const medico = filtros.medico;
+    const [anioInicio, mesInicio] = fechaInicio.split('-').map(Number);
+    const [anioFin, mesFin] = fechaFin.split('-').map(Number);
+    const consultas = []; let anio = anioInicio;let mes = mesInicio;
 
-    this.programaciones.set(resultados);
-    this.consultaRealizada.set(true);
+    while (anio < anioFin || (anio === anioFin && mes <= mesFin)) {
+      consultas.push(this.programacionMedicosService.list_prog_medico_by_mes({persona: medico, mes, anio}));mes++;
+
+      if (mes > 12) { mes = 1; anio++;}
+    }
+
+    this.cargandoProgramaciones.set(true);
+    this.consultaRealizada.set(false);
+    this.programaciones.set([]);
+
+    forkJoin(consultas).subscribe({
+      next: (respuestas) => {
+        if (solicitudActual !== this.solicitudProgramaciones) return;
+
+        const registros = respuestas
+          .flatMap(respuesta => respuesta.data)
+          .filter(item =>
+            item.fecha >= fechaInicio &&
+            item.fecha <= fechaFin
+          );
+
+        this.programaciones.set(
+          registros.map(item => this.adaptarProgramacion(item))
+        );
+
+        this.consultaRealizada.set(true);
+        this.cargandoProgramaciones.set(false);
+      },
+      error: (error) => {
+        if (solicitudActual !== this.solicitudProgramaciones) return;
+
+        console.error('Error al consultar programaciones:', error);
+        this.programaciones.set([]);
+        this.consultaRealizada.set(false);
+        this.cargandoProgramaciones.set(false);
+      }
+    });
   }
 
   obtenerNombreMedico(): string {
@@ -242,49 +279,22 @@ export class ProgramacionMedicosPage implements OnInit {
     }
   }
 
-  // Datos ficticios hasta integrar el endpoint de programación.
-  private readonly programacionesMock: ProgramacionMedico[] = [
-    {
-      id: 1,
-      id_medico: 3,
-      id_consultorio: 2,
-      fecha: '2026-11-05',
-      turno: 'MAÑANA',
-      actividad_medica: 'CONSULTA MÉDICA',
-      hora_inicio: '08:40',
-      hora_termino: '12:00',
-      cupos: 9,
-      reservados: 9,
-      adicionales: 7,
-      disponibles: 0
-    },
-    {
-      id: 2,
-      id_medico: 3,
-      id_consultorio: 2,
-      fecha: '2026-11-06',
-      turno: 'MAÑANA',
-      actividad_medica: 'CONSULTA MÉDICA',
-      hora_inicio: '08:40',
-      hora_termino: '12:00',
-      cupos: 9,
-      reservados: 9,
-      adicionales: 9,
-      disponibles: 0
-    },
-    {
-      id: 3,
-      id_medico: 3,
-      id_consultorio: 2,
-      fecha: '2026-11-06',
-      turno: 'TARDE',
-      actividad_medica: 'CONSULTA MÉDICA',
-      hora_inicio: '14:40',
-      hora_termino: '18:00',
-      cupos: 9,
-      reservados: 9,
-      adicionales: 1,
-      disponibles: 0
-    }
-  ];
+
+
+  private adaptarProgramacion(
+    item: ProgramacionMedicoMes
+  ): ProgramacionMedico {
+    return {
+      id: item.codigo_programacion_medico,
+      fecha: item.fecha,
+      turno: String(item.turno),
+      actividad_medica: String(item.actividad_medica_ipress),
+      hora_inicio: item.hora_inicio ?? '',
+      hora_termino: item.hora_fin ?? '',
+      cupos: item.cant_cupos,
+      reservados: '—',
+      adicionales: '—',
+      disponibles: '—'
+    };
+  }
 }

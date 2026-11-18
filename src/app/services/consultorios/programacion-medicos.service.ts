@@ -30,33 +30,53 @@ export class ProgramacionMedicosService {
   }
 
   list_prog_medico_by_mes(
-  filtros: FiltrosProgramacionMedicoMes,
-  mostrar_loading = false
-) {
-  const url = this.baseUrl +
-    'v1/consultorio/programacion_medicos/list_prog_medico_by_mes';
+    filtros: FiltrosProgramacionMedicoMes,
+    mostrar_loading = false
+  ) {
+    const url = this.baseUrl +'v1/consultorio/programacion_medicos/list_prog_medico_by_mes';
 
-  const params = new HttpParams()
-    .set('persona', filtros.persona)
-    .set('mes', filtros.mes)
-    .set('anio', filtros.anio);
+    const params = new HttpParams()
+      .set('persona', filtros.persona)
+      .set('mes', filtros.mes)
+      .set('anio', filtros.anio);
 
-  return this.httpClient.get<ResponseInteface<ProgramacionMedicoMes[]>>(
-    url,
-    {
-      params,
+    return this.httpClient.get<ResponseInteface<ProgramacionMedicoMes[]>>(
+      url,
+      {
+        params,
+        context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
+      }
+    ).pipe(
+      map(({ message, data }) => ({ message, data })),
+      catchError((error) => {
+        const data_error = {
+          data: error.error,
+          status: error.status
+        };
+
+        return throwError(() => data_error);
+      })
+    );
+  }
+
+
+  delete_prog_medico(programacion_medico: number, mostrar_loading = false) {
+    const url = this.baseUrl +'v1/consultorio/programacion_medicos/delete_prog_medico';
+
+    return this.httpClient.delete<ResponseInteface<unknown>>(url, {
+      body: { programacion_medico },
       context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
-    }
-  ).pipe(
-    map(({ message, data }) => ({ message, data })),
-    catchError((error) => {
-      const data_error = {
-        data: error.error,
-        status: error.status
-      };
+    }).pipe(
+      map(({ message, data }) => ({ message, data })),
+      catchError((error) => {
+        const data_error = {
+          data: error.error,
+          status: error.status
+        };
 
-      return throwError(() => data_error);
-    })
-  );
-}
+        return throwError(() => data_error);
+      })
+    );
+  }
+
 }

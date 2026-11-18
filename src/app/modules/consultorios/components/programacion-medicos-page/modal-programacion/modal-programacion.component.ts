@@ -1,5 +1,5 @@
 
-import { Component, inject, OnInit, signal, viewChild } from '@angular/core';
+import { Component, inject, OnInit, output, signal, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { ModalComponent } from '../../../../../components/modal/modal.component';
@@ -54,6 +54,7 @@ export class ModalProgramacionComponent implements OnInit {
   private readonly EspecialidadService = inject(EspecialidadService);
   private readonly programacionMedicosService =inject(ProgramacionMedicosService);
   readonly guardandoProgramacion = signal(false);
+  readonly programacionRegistrada = output<void>();
   readonly intervaloAtencion = signal<number | null>(null);
   readonly cargandoIntervalo = signal(false);
   private solicitudIntervalo = 0;
@@ -130,10 +131,37 @@ export class ModalProgramacionComponent implements OnInit {
         this.dataTurnos.set(data);
 
         this.turnos.set(
-          data.map(turno => ({
-            value: turno.codigo_turno,
-            label: turno.nombre_turno
-          }))
+          data.map(turno => {
+            const label = turno.nombre_turno
+              // Eliminar códigos numéricos: 03 -, 11 -, 03/11 -
+              .replace(/^\s*\d+(?:\s*\/\s*\d+)?\s*-\s*/i, '')
+
+              // Eliminar códigos alfabéticos: Ret_d -, Ret_n -, Vac -
+              .replace(/^\s*[a-z]+(?:_[a-z]+)*\s*-\s*/i, '')
+
+              // Eliminar "Turno" únicamente en mañana y tarde
+              .replace(/^Turno\s+(?=Mañana|Tarde\b)/i, '')
+
+              // Eliminar (M/T)
+              .replace(/\s*\(m\/t\)/gi, '')
+
+              // Formatear duración: (12h) -> (12 h)
+              .replace(/\(\s*(\d+)\s*h\s*\)/gi, '($1 h)')
+
+              // Simplificar descanso
+              .replace(/Libre\s*\/\s*descanso\s*post[\s-]*guardia/i, 'Descanso postguardia')
+
+              // Normalizar espacios
+              .replace(/\s+/g, ' ')
+              .trim()
+              .toLocaleLowerCase('es-PE')
+              .replace(/^./, letra => letra.toLocaleUpperCase('es-PE'));
+
+            return {
+              value: turno.codigo_turno,
+              label
+            };
+          })
         );
 
         this.cargandoTurnos.set(false);
@@ -227,7 +255,9 @@ export class ModalProgramacionComponent implements OnInit {
       await firstValueFrom(this.programacionMedicosService.store_prog_medico(payload, true));
 
       // Cerrar únicamente cuando Laravel confirme el registro
-      this.cerrarModalProgramacion();
+        this.cerrarModalProgramacion();
+      // Notificar al padre para actualizar la tabla
+        this.programacionRegistrada.emit();
 
       await this.alertaProgramacion()?.open({
         tipo: 'success',
@@ -240,22 +270,32 @@ export class ModalProgramacionComponent implements OnInit {
         imagen: 'icono_de_aceptacion'
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al registrar programación médica:', error);
+
+      const errorFecha = error?.data?.errors?.fecha_inicio;
+
+      const esErrorFecha = Array.isArray(errorFecha)
+        && errorFecha.some((mensaje: string) =>
+          mensaje.includes('today')
+        );
 
       await this.alertaProgramacion()?.open({
         tipo: 'error',
         diseno: 'centrado',
-        titulo: 'Error al registrar',
-        mensaje: 'No se pudo registrar la programación médica. Verifique los datos e inténtelo nuevamente.',
+        titulo: esErrorFecha ? 'Fecha de programación no permitida': 'Error al registrar',
+        mensaje: esErrorFecha
+          ? 'No se pueden registrar programaciones en fechas anteriores al día de hoy. Seleccione una fecha válida para continuar.'
+          : 'No se pudo registrar la programación médica. Verifique los datos e inténtelo nuevamente.',
+
         texto_confirmar: 'Aceptar',
         cerrar_fuera: false,
-        cerrar_escape: false
+        cerrar_escape: false,
+        imagen:'icono_de_no_aceptacion'
       });
-
-    } finally {
-      this.guardandoProgramacion.set(false);
-    }
+    }   finally {
+          this.guardandoProgramacion.set(false);
+        }
   }
 
   cargarActividadesMedicas(): void {

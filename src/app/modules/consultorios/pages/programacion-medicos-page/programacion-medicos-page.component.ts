@@ -11,9 +11,10 @@ import { PersonalService } from '../../../../services/consultorios/personal.serv
 import { ModalProgramacionComponent } from '../../components/programacion-medicos-page/modal-programacion/modal-programacion.component';
 import { ProgramacionMedicosService } from '../../../../services/consultorios/programacion-medicos.service';
 import { ProgramacionMedicoMes, StoreProgramacionMedico,FiltrosProgramacionMedicoMes,ProgramacionMedico, } from '../../../../interfaces/consultorios/programacion-medicos.interface';
-import { forkJoin } from 'rxjs';
+import { forkJoin, firstValueFrom } from 'rxjs';
 import { HttpClient, HttpContext, HttpParams } from '@angular/common/http';
 import { catchError, map, throwError } from 'rxjs';
+import { AlertDialogComponent } from '../../../../components/alert-dialog/alert-dialog.component';
 
 
 
@@ -21,7 +22,8 @@ import { catchError, map, throwError } from 'rxjs';
   selector: 'app-programacion-medicos-page',
   standalone: true,
   imports:[
-            ReactiveFormsModule,CardGeneralComponent, SelectComponent,InputDateComponent,ButtonComponent, TableComponent, ModalProgramacionComponent
+            ReactiveFormsModule,CardGeneralComponent, SelectComponent,InputDateComponent,ButtonComponent, TableComponent, ModalProgramacionComponent,AlertDialogComponent
+
           ],
   templateUrl: './programacion-medicos-page.component.html',
   styleUrl: './programacion-medicos-page.component.scss'
@@ -37,6 +39,8 @@ export class ProgramacionMedicosPage implements OnInit {
   readonly especialidades = signal<SelectOption[]>([]);
   readonly cargandoEspecialidades = signal(false);
   private readonly programacionMedicosService = inject(ProgramacionMedicosService);
+  readonly alertaEliminacion =viewChild<AlertDialogComponent>('alertaEliminacion');
+  readonly eliminandoProgramacion = signal(false);
 
 
   readonly cargandoProgramaciones = signal(false);
@@ -231,8 +235,18 @@ export class ProgramacionMedicosPage implements OnInit {
     { key: 'fecha', label: 'FECHA', align: 'center' as const },
     { key: 'turno', label: 'TURNO', align: 'center' as const },
     { key: 'actividad_medica', label: 'ACTIVIDAD MÉDICA', align: 'center' as const },
-    { key: 'hora_inicio', label: 'HORA INICIO', align: 'center' as const },
-    { key: 'hora_termino', label: 'HORA TÉRMINO', align: 'center' as const },
+    {
+      key: 'hora_inicio',
+      label: 'HORA INICIO',
+      align: 'center' as const,
+      icon: 'fa-regular fa-clock'
+    },
+    {
+      key: 'hora_termino',
+      label: 'HORA TÉRMINO',
+      align: 'center' as const,
+      icon: 'fa-regular fa-clock'
+    },
     {
       key: 'cupos',
       label: 'CUPOS',
@@ -269,13 +283,75 @@ export class ProgramacionMedicosPage implements OnInit {
     }
   ];
 
-  onAccionProgramacion(event: { action: string; row: any }): void {
-    const { action, row } = event;
 
-    switch (action) {
-      case 'eliminar':
-        console.log('Eliminar programación:', row);
-        break;
+  async onAccionProgramacion(event: { action: string; row: ProgramacionMedico }): Promise<void> {
+
+    if (event.action !== 'eliminar' || this.eliminandoProgramacion()) {
+      return;
+    }
+
+    const programacion = event.row;
+    const alerta = this.alertaEliminacion();
+
+    if (!alerta) return;
+
+    const confirmado = await alerta.open({
+      tipo: 'confirm',
+      diseno: 'centrado',
+      titulo: 'Eliminar programación médica',
+      mensaje: `¿Está seguro de eliminar la programación del ${programacion.fecha}, correspondiente al turno ${programacion.turno}?`,
+       imagen: 'emblema_de_preguntas_medicas',
+      texto_confirmar: 'Sí, eliminar',
+      texto_cancelar: 'Cancelar',
+      color_confirmar: 'danger',
+      mostrar_cancelar: true,
+      cerrar_fuera: false,
+      cerrar_escape: false
+    });
+
+    if (!confirmado || this.eliminandoProgramacion()) return;
+
+    this.eliminandoProgramacion.set(true);
+
+    try {
+      const respuesta = await firstValueFrom(
+        this.programacionMedicosService.delete_prog_medico(
+          programacion.id,
+          true
+        )
+      );
+
+      this.consultar();
+
+      await alerta.open({
+        tipo: 'success',
+        diseno: 'centrado',
+        titulo: 'Programación eliminada',
+        mensaje: respuesta.message || 'La programación médica se eliminó correctamente.',
+        texto_confirmar: 'Aceptar',
+        cerrar_fuera: false,
+        cerrar_escape: false,
+        imagen: 'icono_de_aceptacion'
+      });
+
+    } catch (error: any) {
+      console.error('Error al eliminar programación médica:', error);
+
+      const mensaje = error?.data?.message || 'No se pudo eliminar la programación médica. Inténtelo nuevamente.';
+
+      await alerta.open({
+        tipo: 'error',
+        diseno: 'centrado',
+        titulo: 'No se pudo eliminar',
+        mensaje,
+        texto_confirmar: 'Aceptar',
+        cerrar_fuera: false,
+        cerrar_escape: false,
+        imagen: 'icono_de_no_aceptacion'
+      });
+
+    } finally {
+      this.eliminandoProgramacion.set(false);
     }
   }
 
@@ -286,9 +362,14 @@ export class ProgramacionMedicosPage implements OnInit {
   ): ProgramacionMedico {
     return {
       id: item.codigo_programacion_medico,
-      fecha: item.fecha,
-      turno: String(item.turno),
-      actividad_medica: String(item.actividad_medica_ipress),
+      fecha: this.formatearFecha(item.fecha),
+
+      // Mostrar descripciones en lugar de códigos
+      turno: item.turno_descripcion
+        ?.replace(/^\d+\s*-\s*/, '')
+        .replace(/\s*\(\s*\d+\s*h\s*\)/gi, '')
+        .trim() ?? String(item.turno),
+      actividad_medica: item.actividad_medica_descripcion ?? String(item.actividad_medica_ipress),
       hora_inicio: item.hora_inicio ?? '',
       hora_termino: item.hora_fin ?? '',
       cupos: item.cant_cupos,
@@ -296,5 +377,13 @@ export class ProgramacionMedicosPage implements OnInit {
       adicionales: '—',
       disponibles: '—'
     };
+  }
+
+  private formatearFecha(fecha: string): string {
+    if (!fecha) return '';
+
+    const [anio, mes, dia] = fecha.split('-');
+
+    return `${dia}/${mes}/${anio}`;
   }
 }

@@ -18,6 +18,7 @@ export interface FiltrosProgramacionMedicoMes {
 }
 
 // Respuesta de Laravel
+// Respuesta de Laravel
 export interface ProgramacionMedicoMes {
   codigo_programacion_medico: number;
   fecha: string;
@@ -26,7 +27,9 @@ export interface ProgramacionMedicoMes {
   cant_cupos: number;
   intervalo: number;
   actividad_medica_ipress: number;
+  actividad_medica_descripcion: string | null; // NUEVO
   turno: number;
+  turno_descripcion: string | null; // NUEVO
   publicado: number;
 }
 

@@ -84,21 +84,40 @@
     </div>
 
     <div class="programacion-medicos__tabla">
+      <ng-template #horaInicioTemplate let-row>
+        <span class="d-inline-flex align-items-center gap-2">
+          <i class="fa-regular fa-clock text-primary"></i>
+          {{ row.hora_inicio }}
+        </span>
+      </ng-template>
+
+      <ng-template #horaTerminoTemplate let-row>
+        <span class="d-inline-flex align-items-center gap-2">
+          <i class="fa-regular fa-clock text-primary"></i>
+          {{ row.hora_termino }}
+        </span>
+      </ng-template>
+
       <app-table
         [columns]="columnasProgramacion"
         [rows]="programaciones()"
+        [cellTemplates]="{hora_inicio: horaInicioTemplate, hora_termino: horaTerminoTemplate}"
         [actions]="accionesProgramacion"
         scrollHeight="auto"
         size="sm"
         emptyMessage="No se encontraron programaciones para el médico seleccionado."
         (action)="onAccionProgramacion($event)">
       </app-table>
+
     </div>
 
   </app-card-general>
 </div>
 
+<app-alert-dialog #alertaEliminacion></app-alert-dialog>
+
 <!-- COMPONENTE HIJO -->
 <app-modal-programacion
-  #modalProgramacionHijo>
+  #modalProgramacionHijo
+  (programacionRegistrada)="consultar()">
 </app-modal-programacion>

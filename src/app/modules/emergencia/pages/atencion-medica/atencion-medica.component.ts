@@ -40,7 +40,7 @@ const COLA_MEDICA_FILTROS: FiltrosSeguimientoTriaje = {
   documento: '',
   numero_historia: '',
   motivo_consulta: '',
-  estado: 'TRIADO',
+  estado: 'ATENCION_MEDICA',
   prioridad: '',
   personal: '',
   limite: 50,
@@ -95,8 +95,8 @@ export class AtencionMedicaComponent {
       badge: {
         texto: (_value, row) =>
           row.estado_nombre || (row.fecha_hora_llamada_med ? 'En atención' : 'Triaje completado'),
-        clases: (_value, row) =>
-          row.estado_codigo === 'EATE' || row.fecha_hora_llamada_med ? 'success' : 'primary',
+          clases: (_value, row) =>
+            row.estado_codigo === 'SIAT_02' || row.fecha_hora_llamada_med ? 'success' : 'primary',
         size: 'sm',
       },
     },
@@ -129,7 +129,10 @@ export class AtencionMedicaComponent {
     this.catalogoEmergenciaService.obtenerCatalogos(['niveles_triaje']).subscribe({
       next: ({ data }) => {
         data.niveles_triaje.forEach((nivel) =>
-          this.colorPrioridad.set(nivel.value, this.color_nivel_triaje(nivel.value, nivel.color)),
+          this.colorPrioridad.set(
+            nivel.value,
+            this.utilService.color_alerta(nivel.color) ?? 'secondary',
+          ),
         );
       },
       error: (error: { message?: string }) =>
@@ -234,27 +237,10 @@ export class AtencionMedicaComponent {
 
   private priority_badge(priority: string | null): string {
     const color = priority
-      ? (this.colorPrioridad.get(priority) ?? this.color_nivel_triaje(priority))
+      ? (this.colorPrioridad.get(priority) ?? 'secondary')
       : 'secondary';
 
     return `${color} priority-badge-solid`;
   }
 
-  private color_nivel_triaje(codigoPrioridad: string, colorCatalogo?: string | null): string {
-    const normalizado = codigoPrioridad.trim().toUpperCase();
-    if (normalizado === 'I' || normalizado === '1') return 'danger';
-    if (normalizado === 'II' || normalizado === '2') return 'orange';
-    if (normalizado === 'III' || normalizado === '3') return 'warning';
-    if (normalizado === 'IV' || normalizado === '4') return 'success';
-    if (normalizado === 'V' || normalizado === '5') return 'primary';
-
-    const colorNombre = (colorCatalogo ?? '').trim().toUpperCase();
-    if (colorNombre === 'ROJO') return 'danger';
-    if (colorNombre === 'NARANJA') return 'orange';
-    if (colorNombre === 'AMARILLO') return 'warning';
-    if (colorNombre === 'VERDE') return 'success';
-    if (colorNombre === 'AZUL') return 'primary';
-
-    return 'secondary';
-  }
 }

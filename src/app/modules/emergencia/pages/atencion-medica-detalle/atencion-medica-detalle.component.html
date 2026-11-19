@@ -8,22 +8,36 @@
     [sidebarWidth]="'260px'"
     [abierto]="true"
     [mostrarBotonColapsar]="false"
-    [opciones]="acciones_clinicas"
+    [opciones]="acciones_clinicas()"
     (seleccionar)="seleccionar_accion($event)"
   ></app-menu-flotante>
-  <app-emergency-patient-card [paciente]="detalle.paciente" [alergias]="alergias()" />
+   <app-emergency-patient-card
+     [paciente]="detalle.paciente"
+     [alergias]="alergias()"
+     (editarAlergias)="abrir_antecedentes_alergias()"
+   />
+  @if (atencion_cerrada()) {
+    <div class="alert alert-success d-flex align-items-center gap-2 mt-3" role="status">
+      <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+      <span><strong>ATENCIÓN CERRADA / EGRESADA</strong> · {{ fecha_egreso_formateada() }}</span>
+    </div>
+  }
   @if (atencion()) {
     <app-antecedentes
       #antecedentes
       [atencionId]="detalle.atencion_id"
       [habilitado]="!!detalle.fecha_hora_llamada_med"
       (alergiasChange)="alergias.set($event)"
-      (familiaresChange)="antecedentes_familiares.set($event)"
-      (habitosChange)="antecedentes_habitos.set($event)"
-      (repSexChange)="antecedente_rep_sex.set($event)"
+    />
+    <app-hoja-lesiones-modal
+      #hojaLesionesModal
+      [atencionId]="detalle.atencion_id"
+      [habilitado]="!!detalle.fecha_hora_llamada_med"
+      (guardado)="on_hoja_lesiones_guardada()"
     />
   }
   <app-signos-vitales-historial
+    id="seccion-signos-vitales"
     [historial]="signos_vitales()"
     [edad]="detalle.paciente.edad"
     [cargando]="cargandoSignosVitales()"
@@ -31,6 +45,8 @@
     [habilitado]="!!detalle.fecha_hora_llamada_med"
     [errorGuardado]="errorGuardadoSignosVitales()"
     (registrar)="guardar_signos_vitales($event)"
+    (actualizar)="actualizar_signos_vitales($event)"
+    (eliminar)="eliminar_signos_vitales($event)"
   />
   <main class="clinical-main">
     <app-medical-tabs
@@ -45,6 +61,7 @@
       [cargando_examenes_regionales]="cargandoExamenesRegionales()"
       [diagnosticos]="diagnosticos()"
       [tipos_diagnostico]="tipos_diagnostico()"
+      [clasificaciones_diagnostico]="clasificaciones_diagnostico()"
       [resultados_diagnostico]="resultados_diagnostico()"
       [cargando_diagnosticos]="cargandoDiagnosticos()"
       [buscando_diagnostico]="buscandoDiagnostico()"
@@ -110,80 +127,122 @@
 </section>
 
 <app-modal
-  #modalFinalizacion
-  [title]="paso_finalizacion() === 'alta' ? 'Alta médica' : 'Finalizar atención'"
-  [icon]="
-    paso_finalizacion() === 'alta'
-      ? 'fa-solid fa-house-medical-circle-check'
-      : 'fa-solid fa-circle-check'
-  "
-  size="xxl"
-  [scrollable]="true"
+  #modalDestino
+  title="Finalizar atención"
+  icon="fa-solid fa-circle-check"
+  size="md"
+  dialogClass="modal-destino-paciente"
+  [scrollable]="false"
+  [showFooter]="true"
+  [footerEstandar]="true"
 >
-  @if (paso_finalizacion() === 'destino') {
-    <section class="finalizacion-atencion" aria-label="Selección del destino del paciente">
-      <header class="finalizacion-atencion__encabezado">
-        <span class="finalizacion-atencion__icono" aria-hidden="true">
-          <i class="fa-solid fa-route"></i>
-        </span>
-        <div>
-          <h2>Definir destino del paciente</h2>
-          <p>
-            Seleccione el desenlace clínico para continuar con el flujo que corresponda. Esta acción
-            todavía no cerrará la atención.
-          </p>
+  <section class="finalizacion-atencion" aria-label="Selección del destino del paciente">
+    <div class="finalizacion-atencion__contenido">
+      <app-select
+        label="Destino del paciente"
+        placeholder="Seleccione el destino..."
+        size="sm"
+        [required]="true"
+        [searchable]="true"
+        searchPlaceholder="Buscar destino..."
+        [options]="opciones_destino_finalizacion()"
+        [selectedValue]="destino_finalizacion()"
+        (selectedValueChange)="destino_finalizacion.set($event)"
+      />
+
+      @if (destino_finalizacion() === 'DOMICILIO') {
+        <div class="finalizacion-atencion__aviso finalizacion-atencion__aviso--alta">
+          <i class="fa-solid fa-house-medical-circle-check" aria-hidden="true"></i>
+          <div>
+            <strong>Alta médica</strong>
+            <span>Se abrirá el formulario de Alta para completar los datos de egreso.</span>
+          </div>
         </div>
-      </header>
-
-      <div class="finalizacion-atencion__contenido">
-        <app-select
-          label="Destino"
-          placeholder="Seleccione el destino del paciente"
-          size="sm"
-          [required]="true"
-          [options]="opciones_destino_finalizacion"
-          [selectedValue]="destino_finalizacion()"
-          (selectedValueChange)="destino_finalizacion.set($event)"
-        />
-
-        @if (destino_finalizacion() === 'DOMICILIO') {
-          <div class="finalizacion-atencion__aviso finalizacion-atencion__aviso--alta">
-            <i class="fa-solid fa-house-medical-circle-check" aria-hidden="true"></i>
-            <div>
-              <strong>Alta médica</strong>
-              <span>Se abrirá el formulario de Alta para completar los datos de egreso.</span>
-            </div>
+      } @else if (destino_finalizacion() === 'ALTA_VOLUNTARIA') {
+        <div class="finalizacion-atencion__aviso finalizacion-atencion__aviso--alta">
+          <i class="fa-solid fa-person-walking-arrow-right" aria-hidden="true"></i>
+          <div>
+            <strong>Alta voluntaria</strong>
+            <span>Se abrirá el formulario de Alta para registrar el egreso voluntario.</span>
           </div>
-        } @else if (destino_finalizacion()) {
-          <div class="finalizacion-atencion__aviso">
-            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-            <div>
-              <strong>Flujo independiente</strong>
-              <span>Este destino continuará en su módulo clínico correspondiente.</span>
-            </div>
+        </div>
+      } @else if (destino_finalizacion()) {
+        <div class="finalizacion-atencion__aviso">
+          <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+          <div>
+            <strong>Flujo asistencial</strong>
+            <span>Este destino continuará en su módulo clínico correspondiente.</span>
           </div>
-        }
-      </div>
+        </div>
+      }
+    </div>
+  </section>
 
-      <footer class="finalizacion-atencion__acciones">
-        <app-button
-          texto="Continuar"
-          icon="fa-solid fa-arrow-right"
-          color="primary"
-          size="sm"
-          [disabled]="!destino_finalizacion()"
-          (clicked)="continuar_finalizacion()"
-        />
-        <app-button action="close" size="sm" (clicked)="modalFinalizacion.close()" />
-      </footer>
-    </section>
-  } @else {
-    <app-alta-paciente
-      [detalle]="detalle"
-      [formulario]="evaluacion_form()"
-      [diagnosticos]="diagnosticos()"
-      (guardar)="informar_alta_sin_persistencia()"
-      (cerrar)="modalFinalizacion.close()"
+  <div modal-footer>
+    <app-button
+      modal-footer-close
+      action="close"
+      size="sm"
+      variant="outline"
+      color="secondary"
+      (clicked)="modalDestino.close()"
     />
-  }
+    <app-button
+      texto="Continuar"
+      icon="fa-solid fa-arrow-right"
+      color="primary"
+      size="sm"
+      [disabled]="!destino_finalizacion()"
+      (clicked)="continuar_finalizacion()"
+    />
+  </div>
+</app-modal>
+
+<app-modal
+  #modalAlta
+  title="Alta médica"
+  icon="fa-solid fa-house-medical-circle-check"
+  size="xxl"
+  customClass="modal-alta-paciente"
+  [scrollable]="true"
+  [showFooter]="true"
+  [footerEstandar]="true"
+>
+  <div modal-header class="modal-alta-paciente__paciente-header">
+    <span class="modal-alta-paciente__separador">|</span>
+    <span class="modal-alta-paciente__nombre">{{ paciente_alta_nombre() }}</span>
+    @if (paciente_alta_datos()) {
+      <span class="modal-alta-paciente__punto">&middot;</span>
+      <span class="modal-alta-paciente__datos">{{ paciente_alta_datos() }}</span>
+    }
+  </div>
+
+  <app-alta-paciente
+    #altaPaciente
+    [detalle]="detalle"
+    [formulario]="evaluacion_form()"
+    [diagnosticos]="diagnosticos()"
+    [destinoCodigo]="destino_finalizacion()?.toString() ?? ''"
+    [guardando]="guardandoAlta()"
+    (guardar_alta)="ejecutar_guardar_alta($event)"
+    (ver_pdf_descanso)="ver_pdf_descanso_medico($event)"
+    (cerrar)="modalAlta.close()"
+  />
+
+  <div modal-footer>
+    <app-button
+      modal-footer-close
+      action="close"
+      size="sm"
+      [disabled]="guardandoAlta()"
+      (clicked)="modalAlta.close()"
+    />
+    <app-button
+      action="save"
+      label="Confirmar Alta Médica"
+      size="sm"
+      [loading]="guardandoAlta()"
+      (clicked)="altaPaciente.confirmar_guardar_alta()"
+    />
+  </div>
 </app-modal>

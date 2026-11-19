@@ -8,104 +8,10 @@
   gap: 1rem;
 }
 
-.alta-paciente__encabezado,
 .alta-paciente__seccion {
   background: var(--palette-white);
   border: 1px solid var(--palette-primary-fap-100);
   border-radius: 0.7rem;
-}
-
-.alta-paciente__encabezado {
-  overflow: hidden;
-}
-
-.alta-paciente__titulo {
-  align-items: center;
-  background: var(--palette-primary-fap);
-  color: var(--palette-white);
-  display: flex;
-  justify-content: space-between;
-  padding: 0.7rem 1rem;
-}
-
-.alta-paciente__titulo h2 {
-  font-size: 1.05rem;
-  margin: 0.1rem 0 0;
-}
-
-.alta-paciente__eyebrow {
-  color: var(--palette-primary-fap-100);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.alta-paciente__estado {
-  background: var(--palette-white);
-  border-radius: 999px;
-  color: var(--palette-primary-fap);
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0.3rem 0.65rem;
-}
-
-.alta-paciente__resumen {
-  display: grid;
-  grid-template-columns: 1.35fr repeat(3, minmax(0, 1fr));
-}
-
-.alta-paciente__paciente,
-.alta-paciente__dato {
-  min-width: 0;
-  padding: 0.85rem 1rem;
-}
-
-.alta-paciente__paciente {
-  align-items: center;
-  border-right: 1px solid var(--palette-primary-fap-100);
-  display: flex;
-  gap: 0.8rem;
-}
-
-.alta-paciente__avatar {
-  align-items: center;
-  background: var(--palette-primary-fap-50);
-  border: 1px solid var(--palette-primary-fap-100);
-  border-radius: 50%;
-  color: var(--palette-primary-fap);
-  display: flex;
-  flex: 0 0 3.2rem;
-  font-size: 1.25rem;
-  height: 3.2rem;
-  justify-content: center;
-}
-
-.alta-paciente__paciente > div:last-child,
-.alta-paciente__dato {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.alta-paciente__paciente strong,
-.alta-paciente__dato strong {
-  color: var(--palette-gray-900);
-  font-size: 0.82rem;
-}
-
-.alta-paciente__paciente span:not(.alta-paciente__dato-label),
-.alta-paciente__dato span:not(.alta-paciente__dato-label) {
-  color: var(--palette-gray-600);
-  font-size: 0.72rem;
-}
-
-.alta-paciente__dato {
-  border-right: 1px solid var(--palette-primary-fap-100);
-}
-
-.alta-paciente__dato:last-child {
-  border-right: 0;
 }
 
 .alta-paciente__dato-label,
@@ -143,11 +49,8 @@
 }
 
 .alta-paciente__grid--egreso {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.alta-paciente__medico {
-  grid-column: span 2;
+  align-items: start;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) 1.4fr auto;
 }
 
 .alta-paciente__actividad {
@@ -197,6 +100,160 @@
 .alta-paciente__acciones > div {
   display: flex;
   gap: 0.5rem;
+}
+
+.alta-paciente__seccion--descanso {
+  background: #fbfdff;
+  border-color: #b8d5ea;
+}
+
+.alta-paciente__toggle-descanso {
+  align-items: center;
+  background: var(--palette-white);
+  border: 1px solid var(--palette-gray-200);
+  border-radius: 0.5rem;
+  display: flex;
+  margin-bottom: 0.75rem;
+  padding: 0.6rem 0.85rem;
+}
+
+.alta-paciente__descanso-existente {
+  align-items: center;
+  background: #eef8f2;
+  border: 1px solid #c2e8d1;
+  border-radius: 0.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+}
+
+.alta-paciente__descanso-info {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.alta-paciente__descanso-info strong {
+  color: #1b4d3e;
+}
+
+.alta-paciente__descanso-info p {
+  color: var(--palette-gray-700);
+  font-size: 0.75rem;
+  margin: 0.2rem 0 0;
+}
+
+.alta-paciente__excepciones-badges {
+  margin-top: 0.35rem !important;
+}
+
+.alta-paciente__descanso-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.alta-paciente__grid--descanso {
+  align-items: start;
+  grid-template-columns: 1.8fr 1fr 1fr 1fr;
+}
+
+.alta-paciente__modalidad-contenedor {
+  background: var(--palette-white);
+  border: 1px solid var(--palette-gray-200);
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+}
+
+.alta-paciente__modalidad-header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
+.alta-paciente__militar-badge {
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+}
+
+.alta-paciente__militar-badge--activo {
+  background: #def7ec;
+  border: 1px solid #31c48d;
+  color: #03543f;
+}
+
+.alta-paciente__militar-badge--inactivo {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #4b5563;
+}
+
+.alta-paciente__radios--modalidad {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.alta-paciente__excepciones-contenedor {
+  background: var(--palette-white);
+  border: 1px solid var(--palette-gray-200);
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.alta-paciente__excepciones-contenedor--highlight {
+  border-color: var(--palette-primary-fap);
+  box-shadow: 0 0 0 1px var(--palette-primary-fap-100);
+}
+
+.alta-paciente__excepciones-contenedor--disabled {
+  background: #fafafa;
+  opacity: 0.65;
+}
+
+.alta-paciente__excepciones-header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.alta-paciente__excepciones-alerta {
+  color: #c81e1e;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.alta-paciente__excepciones-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+@media (max-width: 1199.98px) {
+  .alta-paciente__grid--descanso {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767.98px) {
+  .alta-paciente__descanso-existente {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .alta-paciente__grid--descanso {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 1199.98px) {

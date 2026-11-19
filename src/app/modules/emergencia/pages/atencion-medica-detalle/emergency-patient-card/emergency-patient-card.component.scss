@@ -36,8 +36,14 @@
   }
 
   .patient-titular-card {
-    flex: 0 1 14rem !important;
-    max-width: 18rem !important;
+    flex: 1 1 22rem !important;
+    min-width: min(100%, 16rem) !important;
+    max-width: min(100%, 32rem) !important;
+  }
+
+  ::ng-deep .patient-titular-card .app-summary-card__value {
+    white-space: normal;
+    word-break: break-word;
   }
 }
 
@@ -54,6 +60,17 @@
   padding: 0.35rem 0.65rem;
   max-width: 28rem;
   animation: allergy-pulse 1.8s infinite ease-in-out;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+}
+
+.patient-allergy-alert:hover,
+.patient-allergy-alert:focus-visible {
+  filter: brightness(0.97);
+  outline: 3px solid var(--palette-danger-200, #f5b5bb);
+  outline-offset: 2px;
 }
 
 @keyframes allergy-pulse {

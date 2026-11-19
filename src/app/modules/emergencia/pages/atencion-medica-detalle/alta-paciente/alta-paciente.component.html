@@ -1,97 +1,37 @@
 <section class="alta-paciente" aria-label="Formulario de alta médica">
-  <header class="alta-paciente__encabezado">
-    <div class="alta-paciente__titulo">
-      <div>
-        <span class="alta-paciente__eyebrow">HCE - Emergencia</span>
-        <h2>Alta médica</h2>
-      </div>
-      <span class="alta-paciente__estado">Sin registrar</span>
-    </div>
-
-    <div class="alta-paciente__resumen">
-      <article class="alta-paciente__paciente">
-        <div class="alta-paciente__avatar" aria-hidden="true">
-          <i class="fa-solid fa-user"></i>
-        </div>
-        <div>
-          <span class="alta-paciente__dato-label">Paciente</span>
-          <strong>{{ detalle().paciente.nombre_completo }}</strong>
-          <span>HC: {{ detalle().paciente.numero_historia || 'No registrada' }}</span>
-          <span>
-            {{ detalle().paciente.sexo || 'Sexo no registrado' }} ·
-            {{
-              detalle().paciente.edad === null
-                ? 'Edad no registrada'
-                : detalle().paciente.edad + ' años'
-            }}
-          </span>
-        </div>
-      </article>
-
-      <article class="alta-paciente__dato">
-        <span class="alta-paciente__dato-label">
-          <i class="fa-solid fa-notes-medical" aria-hidden="true"></i>
-          Motivo de consulta
-        </span>
-        <strong>{{ formulario().motivo_consulta || 'No registrado' }}</strong>
-      </article>
-
-      <article class="alta-paciente__dato">
-        <span class="alta-paciente__dato-label">
-          <i class="fa-regular fa-calendar" aria-hidden="true"></i>
-          Fecha de ingreso
-        </span>
-        <strong>{{ detalle().fecha_hora_ingreso || 'No registrada' }}</strong>
-      </article>
-
-      <article class="alta-paciente__dato">
-        <span class="alta-paciente__dato-label">
-          <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
-          Episodio
-        </span>
-        <strong>{{ detalle().codigo_episodio }}</strong>
-        <span>{{ detalle().estado_nombre || 'Estado no registrado' }}</span>
-      </article>
-    </div>
-  </header>
 
   <fieldset class="alta-paciente__seccion">
     <legend>Datos de egreso</legend>
 
     <div class="alta-paciente__grid alta-paciente__grid--egreso">
       <app-select
-        label="Destino"
-        placeholder="Catálogo pendiente"
-        size="sm"
-        [required]="true"
-        [disabled]="true"
-      />
-      <app-select
         label="Tipo de alta"
-        placeholder="Catálogo pendiente"
+        [options]="tiposAltaOptions()"
+        [selectedValue]="tipoAltaId"
+        (selectedValueChange)="tipoAltaId = $event"
         size="sm"
         [required]="true"
-        [disabled]="true"
       />
       <app-select
-        label="Condición de alta"
-        placeholder="Catálogo pendiente"
+        label="Destino de egreso"
+        [options]="destinosEgresoOptions()"
+        [selectedValue]="egresoId"
+        (selectedValueChange)="egresoId = $event"
         size="sm"
         [required]="true"
-        [disabled]="true"
       />
-      <app-input-text
-        label="Servicio de egreso"
-        placeholder="Pendiente de integración"
+      <app-select
+        label="Condición al alta"
+        [options]="condicionesAltaOptions()"
+        [selectedValue]="condiAltaId"
+        (selectedValueChange)="condiAltaId = $event"
         size="sm"
-        [readonly]="true"
+        [required]="true"
       />
-      <app-input-date label="Fecha de alta" size="sm" [readonly]="true" />
-      <app-input-date label="Hora de alta" type="time" size="sm" [readonly]="true" />
       <app-input-text
         class="alta-paciente__medico"
-        label="Médico de alta"
-        placeholder="Pendiente de integración"
+        label="Médico tratante"
+        [value]="medicoTratanteNombre()"
         size="sm"
         [readonly]="true"
       />
@@ -119,6 +59,7 @@
     </div>
   </fieldset>
 
+
   <fieldset class="alta-paciente__seccion">
     <legend>Resumen clínico</legend>
 
@@ -132,7 +73,7 @@
         placeholder="No se registraron diagnósticos iniciales"
       />
       <app-text-area
-        label="Diagnóstico final"
+        label="Diagnóstico final (Definitivo)"
         [rows]="3"
         resize="none"
         [readonly]="true"
@@ -143,40 +84,200 @@
 
     <div class="alta-paciente__grid alta-paciente__grid--textos">
       <app-text-area
-        label="Indicaciones generales"
-        [rows]="5"
+        label="Indicaciones generales (Plan de tratamiento)"
+        [rows]="4"
         [maxlength]="500"
         resize="vertical"
+        [readonly]="true"
         [value]="formulario().plan_tratamiento"
-        placeholder="Ingrese las indicaciones para el paciente"
+        placeholder="Indicaciones registradas en la evaluación médica"
       />
       <app-text-area
         label="Resumen de egreso"
-        [rows]="5"
+        [rows]="4"
         [maxlength]="500"
         resize="vertical"
         [(value)]="resumen_egreso"
-        placeholder="Describa la evolución y condición de egreso"
+        placeholder="Describa la evolución y condición de egreso del paciente"
       />
       <app-text-area
-        label="Observaciones"
-        [rows]="5"
+        label="Observaciones adicionales"
+        [rows]="4"
         [maxlength]="200"
         resize="vertical"
         [(value)]="observaciones"
-        placeholder="Ingrese observaciones adicionales"
+        placeholder="Observaciones adicionales de alta"
       />
     </div>
   </fieldset>
 
+
+  <fieldset class="alta-paciente__seccion alta-paciente__seccion--descanso">
+    <legend>
+      <i class="fa-solid fa-bed-pulse me-1"></i>
+      Descanso Médico (Opcional - RF-019)
+    </legend>
+
+    @if (descansoExistente(); as dm) {
+      <div class="alta-paciente__descanso-existente">
+        <div class="alta-paciente__descanso-info">
+          <i class="fa-solid fa-circle-check text-success fs-5"></i>
+          <div>
+            <strong>Descanso Médico Registrado (DM-{{ dm.descanso_id }})</strong>
+            <p>
+              Tipo: <strong>{{ dm.tipo_nombre }}</strong> &middot; Periodo:
+              <strong>{{ dm.fecha_inicio }}</strong> al <strong>{{ dm.fecha_fin }}</strong> &middot;
+              Duración:
+              <strong class="badge bg-primary text-white">{{ dm.total_dias }} día(s)</strong>
+            </p>
+            @if (dm.excepciones && dm.excepciones.length > 0) {
+              <p class="alta-paciente__excepciones-badges">
+                Excepciones:
+                @for (exc of dm.excepciones; track exc.excepcion_id) {
+                  <span class="badge bg-secondary me-1">{{ exc.nombre }}</span>
+                }
+              </p>
+            }
+          </div>
+        </div>
+        <app-button
+          action="print"
+          size="sm"
+          text="Ver Certificado PDF"
+          (clicked)="ver_pdf_descanso.emit(dm.descanso_id)"
+        />
+      </div>
+    } @else {
+      <div class="alta-paciente__toggle-descanso">
+        <app-check-toggle
+          label="Emitir Certificado de Descanso Médico para esta atención"
+          [checked]="requiereDescansoMedico()"
+          (checkedChange)="toggle_requiere_descanso($event)"
+          color="primary"
+          size="sm"
+        />
+      </div>
+
+      @if (requiereDescansoMedico()) {
+        <div class="alta-paciente__descanso-form">
+
+          <div class="alta-paciente__modalidad-contenedor">
+            <div class="alta-paciente__modalidad-header">
+              <span class="alta-paciente__control-label">Modalidad de la Papeleta:</span>
+              @if (esPersonalMilitarActividad()) {
+                <span class="alta-paciente__militar-badge alta-paciente__militar-badge--activo">
+                  <i class="fa-solid fa-person-military-pointing me-1"></i>
+                  Personal Militar FAP en Actividad
+                </span>
+              } @else {
+                <span class="alta-paciente__militar-badge alta-paciente__militar-badge--inactivo">
+                  <i class="fa-solid fa-user me-1"></i>
+                  Paciente Civil / Derechohabiente
+                </span>
+              }
+            </div>
+            <div class="alta-paciente__radios alta-paciente__radios--modalidad">
+              <app-radio
+                name="indicador_descanso"
+                label="Indicador 1: Descanso Médico (Reposo / Días de incapacidad)"
+                value="1"
+                size="sm"
+                [checked]="indicadorDescanso() === 1"
+                (checkedChange)="$event && seleccionar_indicador(1)"
+              />
+              <app-radio
+                name="indicador_descanso"
+                label="Indicador 2: Excepción de Actividades (Exoneración militar)"
+                value="2"
+                size="sm"
+                [checked]="indicadorDescanso() === 2"
+                (checkedChange)="$event && seleccionar_indicador(2)"
+              />
+            </div>
+          </div>
+
+          <div class="alta-paciente__grid alta-paciente__grid--descanso">
+            <app-select
+              label="Tipo de Descanso Médico"
+              placeholder="Seleccione el tipo de descanso"
+              [options]="tiposDescansoOptions()"
+              [selectedValue]="tipoDescansoId"
+              (selectedValueChange)="tipoDescansoId = $event"
+              size="sm"
+              [required]="true"
+            />
+            <app-input-date
+              label="Fecha de inicio"
+              [value]="fechaInicioDescanso()"
+              (valueChange)="actualizar_fecha_inicio_descanso($event)"
+              [min]="fechaIngresoAtencion()"
+              size="sm"
+              [required]="true"
+            />
+            <app-input-date
+              label="Fecha de fin"
+              [value]="fechaFinDescanso()"
+              (valueChange)="actualizar_fecha_fin_descanso($event)"
+              [min]="fechaInicioDescanso() || fechaIngresoAtencion()"
+              size="sm"
+              [required]="true"
+            />
+            <app-input-text
+              label="Duración"
+              [value]="duracionDescansoTexto()"
+              size="sm"
+              [readonly]="true"
+            />
+          </div>
+
+          @if (excepcionesDisponibles().length > 0) {
+            <div
+              class="alta-paciente__excepciones-contenedor"
+              [class.alta-paciente__excepciones-contenedor--highlight]="indicadorDescanso() === 2"
+              [class.alta-paciente__excepciones-contenedor--disabled]="!esPersonalMilitarActividad()"
+            >
+              <div class="alta-paciente__excepciones-header">
+                <span class="alta-paciente__control-label">
+                  Excepciones de actividades de servicio:
+                </span>
+                @if (!esPersonalMilitarActividad()) {
+                  <span class="alta-paciente__excepciones-alerta">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                    Solo para personal militar en actividad
+                  </span>
+                }
+              </div>
+              <div class="alta-paciente__excepciones-checks">
+                @for (exc of excepcionesDisponibles(); track exc.excepcion_id) {
+                  <app-check
+                    [label]="exc.nombre"
+                    [checked]="excepcion_marcada(exc.excepcion_id)"
+                    (checkedChange)="toggle_excepcion(exc.excepcion_id)"
+                    size="sm"
+                  />
+                }
+              </div>
+            </div>
+          }
+
+          <app-text-area
+            label="Justificación clínica / Observaciones del descanso"
+            [rows]="3"
+            [maxlength]="500"
+            [(value)]="descripcionClinicaDescanso"
+            placeholder="Describa el motivo clínico o consideraciones del reposo médico prescrito..."
+          />
+        </div>
+      }
+    }
+  </fieldset>
+
+
   <footer class="alta-paciente__acciones">
     <span>
-      <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-      El guardado se habilitará cuando el contrato de Alta esté disponible.
+      <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+      Al confirmar el alta médica se finalizará la atención y se estampará el egreso oficial del
+      episodio.
     </span>
-    <div>
-      <app-button action="save" size="sm" (clicked)="guardar.emit()" />
-      <app-button action="close" size="sm" (clicked)="cerrar.emit()" />
-    </div>
   </footer>
 </section>

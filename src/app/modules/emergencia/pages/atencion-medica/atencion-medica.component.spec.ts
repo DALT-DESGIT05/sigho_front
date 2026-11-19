@@ -106,12 +106,12 @@ describe('AtencionMedicaComponent', () => {
     expect(element.textContent).toContain('Área/Especialidad');
     expect(element.textContent).not.toContain('Médico responsable');
 
-    // Patient 1 (active)
+
     expect(element.textContent).toContain('COR MORIANO SAUÑE Anderson');
-    // Patient 2 (retired)
+
     expect(element.textContent).toContain('TIP (r) BIZARRO ALEJOS Luis Marino');
 
-    // Area formatting
+
     expect(element.textContent).toContain('Consultorio de Emergencia');
     expect(element.textContent).toContain('Tópico');
     expect(element.textContent).not.toContain('Tópico de Enfemeria');
@@ -156,7 +156,7 @@ function crear_atencion(
       paciente_id: cambios.atencion_id,
       tipo_documento: 'DNI',
       numero_documento: '46825137',
-      numero_historia: `HC-${cambios.atencion_id}`,
+      numero_historia: `HC:${cambios.atencion_id}`,
       nombre_completo: `PACIENTE ${cambios.atencion_id}`,
       edad: 36,
       es_nn: false,

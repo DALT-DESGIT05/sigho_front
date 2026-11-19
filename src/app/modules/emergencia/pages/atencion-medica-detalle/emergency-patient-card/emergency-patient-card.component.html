@@ -20,23 +20,28 @@
         [nombre]="nombre_paciente()"
         [parentesco]="parentesco_paciente()"
         [hcNsa]="hc_nsa()"
+        [estadoAfiliacion]="es_afiliado_paciente() ? 'AFILIADO' : 'NO AFILIADO'"
         [condicionesEspeciales]="condiciones_especiales()"
         [etiqueta]="etiqueta_paciente()"
         [situacion]="paciente().situacion || null"
+        [esAfiliadoInput]="es_afiliado_paciente()"
+        [mostrarAfiliacion]="true"
       />
       <div class="d-flex align-items-center gap-2 ms-auto">
         @if (alergias().length > 0) {
-          <div
+          <button
+            type="button"
             class="patient-allergy-alert patient-allergy-alert--danger mb-0"
-            role="alert"
+            aria-label="Abrir edición de alergias"
             [attr.title]="resumenAlergias()"
+            (click)="editarAlergias.emit()"
           >
             <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
             <div>
               <span>Alerta de alergia</span>
               <strong>{{ resumenAlergias() }}</strong>
             </div>
-          </div>
+          </button>
         }
       </div>
     </div>
@@ -98,6 +103,7 @@
           etiqueta="Titular"
           [valor]="nombre_titular_completo()"
           [valueTitle]="nombre_titular_completo()"
+          [wide]="true"
           icon="fa-solid fa-user-shield"
           actionIcon="fa-solid fa-address-book"
           actionText="Ver datos"
@@ -118,6 +124,7 @@
   [keyboard]="false"
   [ignoreBackdropClick]="true"
   [showFooter]="true"
+  [footerEstandar]="true"
   [showCloseButton]="!guardando_contacto()"
   (closed)="limpiar_modal_contacto()"
 >
@@ -131,17 +138,18 @@
   />
   <div modal-footer>
     <app-button
+      modal-footer-close
+      action="close"
+      size="sm"
+      [disabled]="guardando_contacto()"
+      (clicked)="contacto_modal.close()"
+    />
+    <app-button
       action="save"
       size="sm"
       color="primary"
       [loading]="guardando_contacto()"
       (clicked)="guardar_contacto()"
-    />
-    <app-button
-      action="close"
-      size="sm"
-      [disabled]="guardando_contacto()"
-      (clicked)="contacto_modal.close()"
     />
   </div>
 </app-modal>
@@ -153,6 +161,7 @@
   size="lg"
   [keyboard]="true"
   [showFooter]="true"
+  [footerEstandar]="true"
   [showCloseButton]="true"
 >
   <div class="affiliate-modal-content">
@@ -209,6 +218,6 @@
     </div>
   </div>
   <div modal-footer>
-    <app-button action="close" size="sm" color="primary" (clicked)="datos_titular_modal.close()" />
+    <app-button modal-footer-close action="close" size="sm" (clicked)="datos_titular_modal.close()" />
   </div>
 </app-modal>

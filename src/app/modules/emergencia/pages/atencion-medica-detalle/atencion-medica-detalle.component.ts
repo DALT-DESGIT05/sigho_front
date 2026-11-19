@@ -1,7 +1,6 @@
 import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize } from 'rxjs';
-import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
+import { finalize, firstValueFrom } from 'rxjs';
 import { MESSAGE_CONFIRMATION_DEFAULT, TITLE_MODAL } from '../../../../config/constants';
 import { ButtonComponent } from '../../../../components/button/button.component';
 import { MenuFlotanteComponent } from '../../../../components/menu-flotante/menu-flotante.component';
@@ -12,11 +11,12 @@ import {
   SelectOption,
   SelectValue,
 } from '../../../../components/select/select.component';
-import { AltaPacienteComponent } from './alta-paciente/alta-paciente.component';
+import { AltaPacienteComponent, GuardarAltaEvent } from './alta-paciente/alta-paciente.component';
 import { MedicalTabsComponent } from './medical-tabs/medical-tabs.component';
 import { EmergencyPatientCardComponent } from './emergency-patient-card/emergency-patient-card.component';
 import { SignosVitalesHistorialComponent } from './signos-vitales-historial/signos-vitales-historial.component';
 import { AntecedentesComponent } from './antecedentes/antecedentes.component';
+import { HojaLesionesModalComponent } from './hoja-lesiones-modal/hoja-lesiones-modal.component';
 import {
   DetalleAtencionResponse,
   EvaluacionMedicaData,
@@ -46,23 +46,25 @@ import {
   OrdenInterconsulta,
   AreaInterconsulta,
   AlergiaPaciente,
-  AntecedenteFamiliarPaciente,
-  HabitoPaciente,
-  RepSexPerfil,
   EspecialidadInterconsulta,
   PersonalInterconsulta,
   ControlVitalHistorial,
   TriajeDetalleRequest,
+  DestinoCierreAtencion,
 } from '../../../../interfaces/emergencia/triaje.interface';
 import { DiagnosticoService } from '../../../../services/emergencia/diagnostico.service';
 import { EvaluacionService } from '../../../../services/emergencia/evaluacion.service';
 import { AlergiaService } from '../../../../services/emergencia/alergia.service';
-import { HospitalizacionService } from '../../../../services/emergencia/hospitalizacion.service';
-import { ImagenService } from '../../../../services/emergencia/imagen.service';
+import { HospitalizacionService } from '../../../../services/hospitalizacion/hospitalizacion.service';
+import { ImagenService } from '../../../../services/imagenologia/imagen.service';
 import { InterconsultaService } from '../../../../services/emergencia/interconsulta.service';
-import { LaboratorioService } from '../../../../services/emergencia/laboratorio.service';
+import { LaboratorioService } from '../../../../services/laboratorio/laboratorio.service';
 import { ProcedimientoEnfermeriaService } from '../../../../services/emergencia/procedimiento-enfermeria.service';
 import { SignosVitalesService } from '../../../../services/emergencia/signos-vitales.service';
+import { CierreAtencionService } from '../../../../services/emergencia/cierre-atencion.service';
+import { DescansoMedicoService } from '../../../../services/emergencia/descanso-medico.service';
+import { AltaPacienteService } from '../../../../services/hospitalizacion/alta-paciente.service';
+import { LesionService } from '../../../../services/emergencia/lesion.service';
 import { TriajeService } from '../../../../services/emergencia/triaje.service';
 import { UtilService } from '../../../../services/util.service';
 
@@ -78,6 +80,7 @@ import { UtilService } from '../../../../services/util.service';
     SelectComponent,
     SignosVitalesHistorialComponent,
     AntecedentesComponent,
+    HojaLesionesModalComponent,
   ],
   templateUrl: './atencion-medica-detalle.component.html',
   styleUrl: './atencion-medica-detalle.component.scss',
@@ -95,9 +98,18 @@ export class AtencionMedicaDetalleComponent {
   private readonly laboratorioService = inject(LaboratorioService);
   private readonly procedimientoEnfermeriaService = inject(ProcedimientoEnfermeriaService);
   private readonly signosVitalesService = inject(SignosVitalesService);
+  private readonly cierreAtencionService = inject(CierreAtencionService);
+  private readonly descansoMedicoService = inject(DescansoMedicoService);
+  private readonly altaPacienteService = inject(AltaPacienteService);
+  private readonly lesionService = inject(LesionService);
   private readonly utilService = inject(UtilService);
   private readonly antecedentes = viewChild<AntecedentesComponent>('antecedentes');
-  private readonly modalFinalizacion = viewChild<ModalComponent>('modalFinalizacion');
+  private readonly hojaLesionesModal = viewChild(HojaLesionesModalComponent);
+  private readonly modalDestino = viewChild<ModalComponent>('modalDestino');
+  private readonly modalAlta = viewChild<ModalComponent>('modalAlta');
+
+  readonly guardandoAlta = signal<boolean>(false);
+  readonly tiene_hoja_lesiones = signal<boolean>(false);
 
   readonly atencion = signal<DetalleAtencionResponse | null>(null);
   readonly evaluacion = signal<EvaluacionMedicaResponse | null>(null);
@@ -106,6 +118,7 @@ export class AtencionMedicaDetalleComponent {
   readonly estados_examen_regional = signal<EstadoExamenRegional[]>([]);
   readonly diagnosticos = signal<Diagnostico[]>([]);
   readonly tipos_diagnostico = signal<TipoDiagnostico[]>([]);
+  readonly clasificaciones_diagnostico = signal<TipoDiagnostico[]>([]);
   readonly resultados_diagnostico = signal<DiagnosticoCatalogo[]>([]);
   readonly ordenes_imagen = signal<OrdenImagen[]>([]);
   readonly prioridades_orden = signal<PrioridadOrdenMedica[]>([]);
@@ -124,44 +137,16 @@ export class AtencionMedicaDetalleComponent {
   readonly personal_interconsulta = signal<PersonalInterconsulta[]>([]);
   readonly signos_vitales = signal<ControlVitalHistorial[]>([]);
   readonly alergias = signal<AlergiaPaciente[]>([]);
-  readonly antecedentes_familiares = signal<AntecedenteFamiliarPaciente[]>([]);
-  readonly antecedentes_habitos = signal<HabitoPaciente[]>([]);
-  readonly antecedente_rep_sex = signal<RepSexPerfil | null>(null);
   readonly errorGuardadoSignosVitales = signal<string | null>(null);
   readonly paso_finalizacion = signal<'destino' | 'alta'>('destino');
   readonly destino_finalizacion = signal<SelectValue>(null);
-  readonly opciones_destino_finalizacion: SelectOption[] = [
-    { value: 'DOMICILIO', label: 'Domicilio', icon: 'fa-solid fa-house' },
-    { value: 'HOSPITALIZACION', label: 'Hospitalización', icon: 'fa-solid fa-bed-pulse' },
-    { value: 'UCI', label: 'UCI', icon: 'fa-solid fa-heart-pulse' },
-    {
-      value: 'CENTRO_QUIRURGICO',
-      label: 'Centro Quirúrgico',
-      icon: 'fa-solid fa-user-doctor',
-    },
-    {
-      value: 'REFERENCIA',
-      label: 'Referencia a otra IPRESS',
-      icon: 'fa-solid fa-arrow-right-arrow-left',
-    },
-    {
-      value: 'CONTRARREFERENCIA',
-      label: 'Contrarreferencia',
-      icon: 'fa-solid fa-rotate-left',
-    },
-    { value: 'FALLECIMIENTO', label: 'Fallecimiento', icon: 'fa-solid fa-file-medical' },
-    {
-      value: 'OBSERVACION_PROLONGADA',
-      label: 'Observación prolongada',
-      icon: 'fa-regular fa-clock',
-    },
-    {
-      value: 'ALTA_VOLUNTARIA',
-      label: 'Alta voluntaria',
-      icon: 'fa-solid fa-person-walking-arrow-right',
-    },
-    { value: 'OTRO', label: 'Otro', icon: 'fa-solid fa-ellipsis' },
-  ];
+  readonly destinos_cierre = signal<DestinoCierreAtencion[]>([]);
+  readonly opciones_destino_finalizacion = computed<SelectOption[]>(() =>
+    this.destinos_cierre().map((destino) => ({
+      value: destino.cod_estado,
+      label: destino.des_estado,
+    })),
+  );
   readonly evaluacion_form = signal<EvaluacionMedicaData>(this.formularioInicial());
   readonly evaluacion_regional_registrada = computed(() => {
     const eva = this.evaluacion();
@@ -199,25 +184,124 @@ export class AtencionMedicaDetalleComponent {
   readonly pestana_activa = signal('enfermedad');
   readonly detalle_vista = computed(() => this.atencion() ?? DETALLE_ATENCION_INICIAL);
 
-  readonly acciones_clinicas: MenuFlotanteOption[] = [
-    { id: 'antecedentes', label: 'Antecedentes', icon: 'fa-solid fa-clipboard-list' },
-    { id: 'historial_medico', label: 'Historial médico', icon: 'fa-solid fa-clock-rotate-left' },
-    { id: 'resultados', label: 'Resultados', icon: 'fa-solid fa-file-medical' },
-    {
-      id: 'hoja_atencion',
-      label: 'Hoja de atención',
-      icon: 'fa-solid fa-file-lines',
-      variant: 'destacada',
-    },
-    { id: 'medicamentos', label: 'Medicamentos dispensados', icon: 'fa-solid fa-pills' },
-    {
-      id: 'finalizar',
-      label: 'Finalizar atención',
-      icon: 'fa-solid fa-circle-check',
-      posicion: 'inferior',
-      variant: 'advertencia',
-    },
-  ];
+  readonly atencion_cerrada = computed(() => this.detalle_vista().fecha_hora_egr !== null);
+
+  readonly fecha_egreso_formateada = computed(() => {
+    const fecha = this.detalle_vista().fecha_hora_egr;
+    return fecha ? new Date(fecha.replace(' ', 'T')).toLocaleString('es-PE') : '';
+  });
+
+  readonly paciente_alta_nombre = computed<string>(() => {
+    const pac = this.detalle_vista().paciente;
+    if (!pac) return '';
+    const grado = pac.grado_codigo?.toUpperCase()?.trim() || null;
+    const situacion = pac.situacion?.toUpperCase()?.trim();
+    const esTitular = Boolean(grado) || pac.parentesco?.toUpperCase()?.trim() === 'TITULAR';
+    const sufijoSituacion = esTitular && grado && situacion === 'RETIRO' ? '(r)' : null;
+    const partesGrado = [grado, sufijoSituacion].filter(Boolean).join(' ');
+
+    let nombre = '';
+    if (pac.apellido_paterno || pac.apellido_materno || pac.nombres) {
+      const apellidos = [pac.apellido_paterno, pac.apellido_materno]
+        .map((v) => v?.toUpperCase()?.trim())
+        .filter(Boolean)
+        .join(' ');
+      const nombres = (pac.nombres || '')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+        .join(' ');
+      nombre = [apellidos, nombres].filter(Boolean).join(' ');
+    } else {
+      nombre = pac.nombre_completo?.trim() || '';
+    }
+
+    return [partesGrado, nombre].filter(Boolean).join(' ');
+  });
+
+  readonly paciente_alta_datos = computed<string>(() => {
+    const pac = this.detalle_vista().paciente;
+    if (!pac) return '';
+    const partes: string[] = [];
+    if (pac.edad !== null && pac.edad !== undefined) {
+      partes.push(`${pac.edad} años`);
+    }
+    if (pac.sexo) {
+      partes.push(pac.sexo.toUpperCase());
+    }
+    if (pac.numero_historia) {
+      partes.push(`HC:${pac.numero_historia}`);
+    }
+    return partes.join(' · ');
+  });
+
+  readonly es_caso_agresion = computed(() => {
+    const detalle = this.detalle_vista();
+    const motivo = (detalle.motivo_ingreso ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+    const motivoConsulta = (detalle.motivo_consulta ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+    return (
+      motivo.includes('agres') ||
+      motivoConsulta.includes('agres') ||
+      detalle.motivo_ingreso_id === 3
+    );
+  });
+
+  readonly acciones_clinicas = computed<MenuFlotanteOption[]>(() => {
+    const esAgresion = this.es_caso_agresion();
+    const opciones: MenuFlotanteOption[] = [
+      { id: 'antecedentes', label: 'Antecedentes', icon: 'fa-solid fa-clipboard-list' },
+      { id: 'historial_medico', label: 'Historial médico', icon: 'fa-solid fa-clock-rotate-left' },
+    ];
+
+    if (esAgresion) {
+      const registrada = this.tiene_hoja_lesiones();
+      opciones.push({
+        id: 'hoja_lesiones',
+        label: 'Agresión',
+        icon: 'fa-solid fa-user-injured',
+        variant: registrada ? undefined : 'parpadeo',
+        tooltip: registrada
+          ? 'Hoja médico-legal de lesiones registrada'
+          : 'Paciente ingresó por agresión - Hoja médico-legal pendiente',
+      });
+    }
+
+    opciones.push(
+      { id: 'resultados', label: 'Resultados', icon: 'fa-solid fa-file-medical' },
+      {
+        id: 'hoja_atencion',
+        label: 'Atención Médica',
+        icon: 'fa-solid fa-file-lines',
+        variant: 'destacada',
+      },
+      {
+        id: 'descanso_medico',
+        label: 'Descanso médico',
+        icon: 'fa-solid fa-bed-pulse',
+        tooltip: 'Ver o imprimir el certificado de descanso médico registrado',
+      },
+      { id: 'medicamentos', label: 'Medicamentos dispensados', icon: 'fa-solid fa-pills' },
+    );
+
+    if (!this.atencion_cerrada()) {
+      opciones.push({
+        id: 'finalizar',
+        label: 'Finalizar atención',
+        icon: 'fa-solid fa-circle-check',
+        posicion: 'inferior',
+        variant: 'advertencia',
+      });
+    }
+
+    return opciones;
+  });
   private readonly atencionId: number;
   private iniciar_atencion_al_abrir = false;
   private evaluacion_solicitada = false;
@@ -267,6 +351,8 @@ export class AtencionMedicaDetalleComponent {
       } else if (pestana === 'interconsulta') {
         this.cargar_diagnosticos();
         this.cargar_interconsultas();
+      } else if (pestana === 'receta') {
+        this.cargar_diagnosticos();
       }
     });
 
@@ -278,9 +364,25 @@ export class AtencionMedicaDetalleComponent {
     this.evaluacion_form.update((actual) => ({ ...actual, [campo]: valor }));
   }
 
+  abrir_hoja_lesiones(): void {
+    if (!this.es_caso_agresion()) {
+      return;
+    }
+    this.hojaLesionesModal()?.abrir();
+  }
+
+  abrir_antecedentes_alergias(): void {
+    this.antecedentes()?.abrir();
+  }
+
   seleccionar_accion(accion: string): void {
     if (accion === 'antecedentes') {
-      this.antecedentes()?.abrir();
+      this.abrir_antecedentes_alergias();
+      return;
+    }
+
+    if (accion === 'hoja_lesiones') {
+      this.abrir_hoja_lesiones();
       return;
     }
 
@@ -289,8 +391,14 @@ export class AtencionMedicaDetalleComponent {
       return;
     }
 
+    if (accion === 'descanso_medico') {
+      this.ver_pdf_descanso_medico();
+      return;
+    }
+
     if (accion === 'finalizar') {
-      this.abrir_finalizacion();
+      if (this.atencion_cerrada()) return;
+      void this.abrir_finalizacion();
       return;
     }
 
@@ -433,19 +541,17 @@ export class AtencionMedicaDetalleComponent {
   }
 
   imprimir_hoja_atencion(): void {
-    this.evaluacionService
-      .descargar_hoja_atencion(this.atencionId, true)
-      .subscribe({
-        next: (blob: Blob) => {
-          const url = window.URL.createObjectURL(blob);
-          window.open(url, '_blank');
-        },
-        error: (error: { message?: string }) => {
-          this.utilService.mostrar_error(
-            error.message ?? 'No se pudo generar la Hoja de Atención de Emergencia.',
-          );
-        },
-      });
+    this.evaluacionService.descargar_hoja_atencion(this.atencionId, true).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      },
+      error: (error: { message?: string }) => {
+        this.utilService.mostrar_error(
+          error.message ?? 'No se pudo generar la Hoja de Atención de Emergencia.',
+        );
+      },
+    });
   }
 
   private cargar_atencion(): void {
@@ -459,12 +565,99 @@ export class AtencionMedicaDetalleComponent {
           this.cargar_signos_vitales();
           this.cargar_alergias_inicial();
           this.iniciar_atencion_si_corresponde(data.fecha_hora_llamada_med);
+          this.verificar_alerta_agresion();
         },
         error: (error: { message?: string }) => {
           this.utilService.mostrar_error(error.message ?? 'No se pudo consultar la atención.');
           void this.volver_a_cola();
         },
       });
+  }
+
+  on_hoja_lesiones_guardada(): void {
+    this.tiene_hoja_lesiones.set(true);
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.setItem(`agresion_alerta_vista_${this.atencionId}`, '1');
+    }
+  }
+
+  private verificar_alerta_agresion(): void {
+    if (!this.es_caso_agresion()) {
+      return;
+    }
+
+    this.lesionService.obtener_lesiones(this.atencionId).subscribe({
+      next: ({ data }) => {
+        const yaRegistrada = Boolean(data && data.id_atencion_lesion);
+        this.tiene_hoja_lesiones.set(yaRegistrada);
+
+        if (yaRegistrada) {
+          if (typeof window !== 'undefined' && window.sessionStorage) {
+            window.sessionStorage.setItem(`agresion_alerta_vista_${this.atencionId}`, '1');
+          }
+          return;
+        }
+
+        const prompt_agresion = async () => {
+          const yaVista =
+            typeof window !== 'undefined' &&
+            window.sessionStorage?.getItem(`agresion_alerta_vista_${this.atencionId}`) === '1';
+
+          if (yaVista) {
+            return;
+          }
+
+          const confirmed = await this.utilService.confirmar_accion({
+            title: 'Paciente ingresó por agresión',
+            text: 'El paciente fue registrado en triaje con motivo de agresión. ¿Desea llenar la Hoja de Registro de Lesiones ahora?',
+            icon: 'warning',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fa-solid fa-user-injured me-1"></i> Llenar hoja de lesiones',
+            cancelButtonText: 'Continuar atención normal',
+            reverseButtons: true,
+            allowOutsideClick: true,
+          });
+
+          if (typeof window !== 'undefined' && window.sessionStorage) {
+            window.sessionStorage.setItem(`agresion_alerta_vista_${this.atencionId}`, '1');
+          }
+
+          if (confirmed) {
+            this.abrir_hoja_lesiones();
+          }
+        };
+
+        void prompt_agresion();
+      },
+      error: () => {
+        const yaVista =
+          typeof window !== 'undefined' &&
+          window.sessionStorage?.getItem(`agresion_alerta_vista_${this.atencionId}`) === '1';
+        if (yaVista) return;
+
+        void this.utilService
+          .confirmar_accion({
+            title: 'Paciente ingresó por agresión',
+            text: 'El paciente fue registrado en triaje con motivo de agresión. ¿Desea llenar la Hoja de Registro de Lesiones ahora?',
+            icon: 'warning',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fa-solid fa-user-injured me-1"></i> Llenar hoja de lesiones',
+            cancelButtonText: 'Continuar atención normal',
+            reverseButtons: true,
+            allowOutsideClick: true,
+          })
+          .then((confirmed) => {
+            if (typeof window !== 'undefined' && window.sessionStorage) {
+              window.sessionStorage.setItem(`agresion_alerta_vista_${this.atencionId}`, '1');
+            }
+            if (confirmed) {
+              this.abrir_hoja_lesiones();
+            }
+          });
+      },
+    });
   }
 
   private iniciar_atencion_si_corresponde(fecha_hora_llamada_med: string | null): void {
@@ -574,6 +767,7 @@ export class AtencionMedicaDetalleComponent {
         next: ({ data }) => {
           this.diagnosticos.set(data.diagnosticos);
           this.tipos_diagnostico.set(data.tipos);
+          this.clasificaciones_diagnostico.set(data.clasificaciones ?? []);
         },
         error: (error: { message?: string }) => {
           this.diagnosticos_solicitados = false;
@@ -725,15 +919,15 @@ export class AtencionMedicaDetalleComponent {
   }): Promise<void> {
     if (this.guardandoLaboratorio()) return;
 
-    const confirmacion = await Swal.fire({
-      title: TITLE_MODAL,
-      text: MESSAGE_CONFIRMATION_DEFAULT,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, continuar',
-      cancelButtonText: 'No',
+    const confirmado = await this.utilService.confirmar_accion({
+      title: '¿Registrar orden de laboratorio?',
+      text: 'Se enviará la solicitud de exámenes de laboratorio seleccionados.',
+      confirmButtonText: 'Sí, registrar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#6c757d',
     });
-    if (!confirmacion.isConfirmed) return;
+    if (!confirmado) return;
 
     this.guardandoLaboratorio.set(true);
     this.laboratorioService
@@ -798,15 +992,11 @@ export class AtencionMedicaDetalleComponent {
   async eliminar_interconsulta(interconsulta_id: number): Promise<void> {
     if (this.guardandoInterconsulta()) return;
 
-    const confirmacion = await Swal.fire({
-      title: TITLE_MODAL,
-      text: MESSAGE_CONFIRMATION_DEFAULT,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, continuar',
-      cancelButtonText: 'No',
+    const confirmado = await this.utilService.confirmar_eliminacion({
+      title: '¿Eliminar solicitud de interconsulta?',
+      text: 'Se eliminará la interconsulta seleccionada de la atención médica.',
     });
-    if (!confirmacion.isConfirmed) return;
+    if (!confirmado) return;
 
     this.guardandoInterconsulta.set(true);
     this.interconsultaService
@@ -825,15 +1015,11 @@ export class AtencionMedicaDetalleComponent {
   async eliminar_laboratorio(laboratorio_id: number): Promise<void> {
     if (this.guardandoLaboratorio()) return;
 
-    const confirmacion = await Swal.fire({
-      title: TITLE_MODAL,
-      text: MESSAGE_CONFIRMATION_DEFAULT,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, continuar',
-      cancelButtonText: 'No',
+    const confirmado = await this.utilService.confirmar_eliminacion({
+      title: '¿Eliminar orden de laboratorio?',
+      text: 'Se eliminará la solicitud de laboratorio de la atención médica.',
     });
-    if (!confirmacion.isConfirmed) return;
+    if (!confirmado) return;
 
     this.guardandoLaboratorio.set(true);
     this.laboratorioService
@@ -912,15 +1098,11 @@ export class AtencionMedicaDetalleComponent {
   async eliminar_procedimiento_enfermeria(procedimiento_id: number): Promise<void> {
     if (this.guardandoProcedEnf()) return;
 
-    const confirmacion = await Swal.fire({
-      title: TITLE_MODAL,
-      text: MESSAGE_CONFIRMATION_DEFAULT,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, continuar',
-      cancelButtonText: 'No',
+    const confirmado = await this.utilService.confirmar_eliminacion({
+      title: '¿Eliminar actividad de enfermería?',
+      text: 'Se eliminará la orden de procedimiento seleccionada.',
     });
-    if (!confirmacion.isConfirmed) return;
+    if (!confirmado) return;
 
     this.guardandoProcedEnf.set(true);
     this.procedimientoEnfermeriaService
@@ -1000,15 +1182,11 @@ export class AtencionMedicaDetalleComponent {
   async eliminar_hospitalizacion(orden_hospitalizacion_id: number): Promise<void> {
     if (this.guardandoHospitalizacion()) return;
 
-    const confirmacion = await Swal.fire({
-      title: TITLE_MODAL,
-      text: MESSAGE_CONFIRMATION_DEFAULT,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, continuar',
-      cancelButtonText: 'No',
+    const confirmado = await this.utilService.confirmar_eliminacion({
+      title: '¿Eliminar orden de hospitalización?',
+      text: 'Se eliminará la orden de hospitalización seleccionada.',
     });
-    if (!confirmacion.isConfirmed) return;
+    if (!confirmado) return;
 
     this.guardandoHospitalizacion.set(true);
     this.hospitalizacionService
@@ -1077,6 +1255,55 @@ export class AtencionMedicaDetalleComponent {
           const mensaje = error.message ?? 'No se pudieron registrar los signos vitales.';
           this.errorGuardadoSignosVitales.set(mensaje);
           this.utilService.mostrar_error(mensaje);
+        },
+      });
+  }
+
+  actualizar_signos_vitales(evento: {
+    control_vital_id: number;
+    detalles: TriajeDetalleRequest[];
+    observaciones: string | null;
+  }): void {
+    if (this.guardandoSignosVitales()) return;
+
+    this.errorGuardadoSignosVitales.set(null);
+    this.guardandoSignosVitales.set(true);
+    this.signosVitalesService
+      .actualizar_signos_vitales(
+        this.atencionId,
+        evento.control_vital_id,
+        evento.detalles,
+        evento.observaciones,
+        true,
+      )
+      .pipe(finalize(() => this.guardandoSignosVitales.set(false)))
+      .subscribe({
+        next: ({ data }) => {
+          this.signos_vitales.set(data);
+          this.utilService.mostrar_alerta('Signos vitales actualizados correctamente.', 'success');
+        },
+        error: (error: { message?: string }) => {
+          const mensaje = error.message ?? 'No se pudieron actualizar los signos vitales.';
+          this.errorGuardadoSignosVitales.set(mensaje);
+          this.utilService.mostrar_error(mensaje);
+        },
+      });
+  }
+
+  eliminar_signos_vitales(control: ControlVitalHistorial): void {
+    if (this.guardandoSignosVitales()) return;
+
+    this.guardandoSignosVitales.set(true);
+    this.signosVitalesService
+      .anular_signos_vitales(this.atencionId, control.id_control_vital, null, true)
+      .pipe(finalize(() => this.guardandoSignosVitales.set(false)))
+      .subscribe({
+        next: ({ data }) => {
+          this.signos_vitales.set(data);
+          this.utilService.mostrar_alerta('Control de signos vitales anulado correctamente.', 'success');
+        },
+        error: (error: { message?: string }) => {
+          this.utilService.mostrar_error(error.message ?? 'No se pudo anular el control de signos vitales.');
         },
       });
   }
@@ -1182,6 +1409,7 @@ export class AtencionMedicaDetalleComponent {
           next: ({ data }) => {
             this.diagnosticos.set(data.diagnosticos);
             this.tipos_diagnostico.set(data.tipos);
+            this.clasificaciones_diagnostico.set(data.clasificaciones ?? []);
             this.resultados_diagnostico.set([]);
             procesarSiguiente(index + 1);
           },
@@ -1204,8 +1432,14 @@ export class AtencionMedicaDetalleComponent {
     window.setTimeout(() => this.guardandoDiagnostico.set(false), restante);
   }
 
-  eliminar_diagnostico(diagnostico_id: number): void {
+  async eliminar_diagnostico(diagnostico_id: number): Promise<void> {
     if (this.guardandoDiagnostico()) return;
+
+    const confirmado = await this.utilService.confirmar_eliminacion({
+      title: '¿Eliminar diagnóstico?',
+      text: '¿Está seguro de eliminar este diagnóstico de la atención médica?',
+    });
+    if (!confirmado) return;
 
     this.guardandoDiagnostico.set(true);
     this.diagnosticoService
@@ -1215,6 +1449,7 @@ export class AtencionMedicaDetalleComponent {
         next: ({ data }) => {
           this.diagnosticos.set(data.diagnosticos);
           this.tipos_diagnostico.set(data.tipos);
+          this.clasificaciones_diagnostico.set(data.clasificaciones ?? []);
           this.utilService.mostrar_alerta('Diagnóstico eliminado correctamente.', 'success');
         },
         error: (error: { message?: string }) =>
@@ -1239,53 +1474,149 @@ export class AtencionMedicaDetalleComponent {
     };
   }
 
-  informar_alta_sin_persistencia(): void {
-    this.utilService.mostrar_alerta(
-      'La interfaz de Alta está disponible. El guardado se habilitará cuando exista el contrato de backend.',
-      'info',
-    );
+  async ejecutar_guardar_alta(evento: GuardarAltaEvent): Promise<void> {
+    const atencionId = this.atencionId;
+    if (!atencionId || this.guardandoAlta()) return;
+
+    const confirmado = await this.utilService.confirmar_accion({
+      title: '¿Confirmar Alta Médica?',
+      text: 'Se procederá con el cierre de la atención médica y el egreso del paciente. Esta acción no se puede deshacer.',
+      icon: 'question',
+      confirmButtonText: 'Sí, confirmar alta',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#6c757d',
+    });
+
+    if (!confirmado) return;
+
+    this.guardandoAlta.set(true);
+
+    this.altaPacienteService
+      .registrar(atencionId, {
+        tipo_alta_id: evento.tipo_alta_id,
+        egreso_id: evento.egreso_id,
+        condi_alta_id: evento.condi_alta_id,
+        resumen_egreso: evento.resumen_egreso,
+        observaciones: evento.observaciones,
+        ind_act_fisica: evento.actividad_fisica,
+        descanso_medico: evento.descanso_medico,
+      })
+      .pipe(finalize(() => this.guardandoAlta.set(false)))
+      .subscribe({
+        next: () => {
+          this.modalAlta()?.close();
+          this.utilService.mostrar_alerta('Alta médica registrada correctamente.', 'success');
+
+          this.cargar_atencion();
+        },
+        error: (error: { message?: string }) => {
+          this.utilService.mostrar_error(error.message ?? 'No se pudo cerrar la atención médica.');
+        },
+      });
   }
 
-  abrir_finalizacion(): void {
+  ver_pdf_descanso_medico(descansoId?: number): void {
+    const atencionId = this.atencionId;
+    if (!atencionId) return;
+
+    this.descansoMedicoService.descargar_pdf_descanso(atencionId, descansoId, true).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      },
+      error: (error: { message?: string }) => {
+        this.utilService.mostrar_error(
+          error.message ?? 'No se pudo generar el Certificado de Descanso Médico.',
+        );
+      },
+    });
+  }
+
+  async abrir_finalizacion(): Promise<void> {
+    try {
+        const { data } = await firstValueFrom(
+        this.diagnosticoService.obtener_diagnosticos(this.atencionId, true),
+      );
+      this.diagnosticos.set(data.diagnosticos);
+      this.tipos_diagnostico.set(data.tipos);
+      this.clasificaciones_diagnostico.set(data.clasificaciones ?? []);
+    } catch (error: any) {
+      this.utilService.mostrar_error(
+        error?.message ?? 'No se pudieron consultar los diagnósticos de la atención.',
+      );
+      return;
+    }
+
     const form = this.evaluacion_form();
-    const tieneEnfermedad = Boolean(form.tiempo_enfermedad?.trim() && form.motivo_consulta?.trim() && form.anamnesis?.trim());
-    const tieneExamenClinico = Boolean(form.signos_y_sintomas?.trim());
+    const tieneEnfermedad = Boolean(
+      form.tiempo_enfermedad?.trim() && form.motivo_consulta?.trim() && form.anamnesis?.trim(),
+    );
     const tieneDiagnosticos = this.diagnosticos().length > 0;
 
-    if (!tieneEnfermedad || !tieneExamenClinico || !tieneDiagnosticos) {
+    if (!tieneEnfermedad || !tieneDiagnosticos) {
       const pendientes: string[] = [];
       if (!tieneEnfermedad) pendientes.push('Enfermedad Actual (tiempo, motivo y síntomas)');
-      if (!tieneExamenClinico) pendientes.push('Evaluación (examen clínico)');
       if (!tieneDiagnosticos) pendientes.push('Al menos un Diagnóstico CIE-10');
 
-      Swal.fire({
+      void this.utilService.mostrar_aviso({
         title: 'Atención incompleta',
         html: `Para finalizar la atención debe completar y guardar:<br><ul style="text-align:left;margin-top:10px;">${pendientes.map((p) => `<li>${p}</li>`).join('')}</ul>`,
         icon: 'warning',
-        confirmButtonText: 'Entendido',
-        confirmButtonColor: '#002060',
       });
       return;
     }
 
-    this.paso_finalizacion.set('destino');
-    this.destino_finalizacion.set(null);
-    this.modalFinalizacion()?.open();
+    if (this.es_caso_agresion() && !this.tiene_hoja_lesiones()) {
+      const confirmacion = await this.utilService.confirmar_accion({
+        title: 'Hoja de lesiones pendiente',
+        text: 'El paciente ingresó por motivo de agresión y aún no se ha registrado la Hoja de Registro de Lesiones médico-legal. ¿Desea registrarla antes de finalizar la atención?',
+        icon: 'warning',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: '<i class="fa-solid fa-user-injured me-1"></i> Llenar hoja de lesiones',
+        cancelButtonText: 'Omitir y continuar finalización',
+        reverseButtons: true,
+      });
+
+      if (confirmacion) {
+        this.abrir_hoja_lesiones();
+        return;
+      }
+    }
+
+    const atencionId = this.atencionId;
+    if (!atencionId) return;
+
+    this.cierreAtencionService.obtener_cierre_atencion(atencionId, true).subscribe({
+      next: ({ data }) => {
+        if (!data.puede_cerrar) {
+          const listaMotivos = (data.motivos ?? []).map((m: string) => `<li>${m}</li>`).join('');
+          void this.utilService.mostrar_aviso({
+            title: 'Atención incompleta',
+            html: `Para finalizar la atención debe subsanar:<br><ul style="text-align:left;margin-top:10px;">${listaMotivos}</ul>`,
+            icon: 'warning',
+          });
+          return;
+        }
+
+        this.destinos_cierre.set(data.destinos ?? []);
+        this.paso_finalizacion.set('alta');
+        this.modalAlta()?.open();
+      },
+      error: (error: { message?: string }) => {
+        this.utilService.mostrar_error(error.message ?? 'No se pudieron consultar los requisitos de cierre.');
+      },
+    });
   }
 
   continuar_finalizacion(): void {
     const destino = this.destino_finalizacion();
     if (!destino) return;
 
-    if (destino === 'DOMICILIO') {
-      this.paso_finalizacion.set('alta');
-      return;
-    }
-
-    this.utilService.mostrar_alerta(
-      'El destino seleccionado continuará en su flujo clínico correspondiente cuando esté disponible.',
-      'info',
-    );
+    this.modalDestino()?.close();
+    this.paso_finalizacion.set('alta');
+    setTimeout(() => this.modalAlta()?.open(), 150);
   }
 
   volver_a_cola(): Promise<boolean> {
@@ -1299,10 +1630,14 @@ const DETALLE_ATENCION_INICIAL: DetalleAtencionResponse = {
   codigo_episodio: 'Cargando atención',
   fecha_hora_ingreso: '',
   fecha_hora_llamada_med: null,
+  fecha_hora_egr: null,
   estado_codigo: null,
   estado_nombre: 'Consultando información',
   estado_seguimiento: 'TRIADO',
   triaje_registrado: true,
+  motivo_ingreso_id: null,
+  motivo_ingreso: null,
+  motivo_consulta: null,
   paciente: {
     paciente_id: 0,
     tipo_documento_id: null,

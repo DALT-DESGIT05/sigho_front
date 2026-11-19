@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, input, output, signal, viewChild } from '@angular/core';
 import { disabled, email, form, FormField, required } from '@angular/forms/signals';
 import {
   AlergiaPaciente,
@@ -12,7 +12,7 @@ import { ModalComponent } from '../../../../../components/modal/modal.component'
 import { PatientIdentityComponent } from '../../../../../components/patient-identity/patient-identity.component';
 import { SummaryCardComponent } from '../../../../../components/summary-card/summary-card.component';
 import { SummaryCardGroupComponent } from '../../../../../components/summary-card-group/summary-card-group.component';
-import { PacienteService } from '../../../../../services/emergencia/paciente.service';
+import { PacienteService } from '../../../../../services/pacientes/paciente.service';
 
 @Component({
   selector: 'app-emergency-patient-card',
@@ -33,6 +33,7 @@ import { PacienteService } from '../../../../../services/emergencia/paciente.ser
 export class EmergencyPatientCardComponent {
   readonly paciente = input.required<DetalleAtencionPaciente>();
   readonly alergias = input<AlergiaPaciente[]>([]);
+  readonly editarAlergias = output<void>();
   private readonly paciente_service = inject(PacienteService);
 
   private readonly celular_override = signal<string | null>(null);
@@ -45,10 +46,7 @@ export class EmergencyPatientCardComponent {
 
   readonly es_afiliado_paciente = computed(() => {
     const pac = this.paciente();
-    if (pac.cod_situ !== null && pac.cod_situ !== undefined) {
-      return [1, 11, 12].includes(Number(pac.cod_situ));
-    }
-    return Boolean(pac.codigo_afiliado);
+    return pac.es_afiliado === true;
   });
 
   readonly es_fap = computed(() => {
@@ -129,11 +127,11 @@ export class EmergencyPatientCardComponent {
     if (nsa) {
       const nsaLetra =
         letra && !nsa.toUpperCase().endsWith(letra) ? `${nsa}${letra}` : nsa.toUpperCase();
-      return `HC - ${nsaLetra}`;
+      return `HC:${nsaLetra}`;
     }
     if (pac.numero_historia) {
       const his = pac.numero_historia.trim();
-      return his.toUpperCase().startsWith('HC') ? his : `HC - ${his}`;
+      return his.toUpperCase().startsWith('HC') ? his : `HC:${his}`;
     }
     return null;
   });

@@ -9,7 +9,7 @@ import {
   AlergiaPaciente,
   RegistrarAlergiaRequest,
 } from '../../../../../interfaces/emergencia/triaje.interface';
-import { TableColumn } from '../../../../../interfaces/util.interface';
+import { TableActionEvent, TableColumn, TableRowAction } from '../../../../../interfaces/util.interface';
 import { AlergiaService } from '../../../../../services/emergencia/alergia.service';
 import { UtilService } from '../../../../../services/util.service';
 
@@ -51,11 +51,17 @@ export class AntecedentesAlergiasComponent implements OnInit {
   readonly formulario = signal({ ...FORMULARIO_INICIAL });
   readonly cargando = signal(false);
   readonly guardando = signal(false);
+  readonly alergia_editando = signal<number | null>(null);
 
   readonly alergias = computed(() => this.contexto().alergias);
   readonly sustanciasFiltradas = computed(() => {
     const tipoId = this.formulario().tipo_id;
-    const registradas = new Set(this.alergias().map((alergia) => alergia.sustancia_id));
+    const alergiaEditando = this.alergia_editando();
+    const registradas = new Set(
+      this.alergias()
+        .filter((alergia) => alergia.alergia_id !== alergiaEditando)
+        .map((alergia) => alergia.sustancia_id),
+    );
     return this.contexto().sustancias.filter(
       (sustancia) => sustancia.tipo_id === tipoId && !registradas.has(sustancia.sustancia_id),
     );
@@ -86,6 +92,23 @@ export class AntecedentesAlergiasComponent implements OnInit {
       key: 'descripcion_adicional',
       label: 'Detalle',
       formatter: (valor) => String(valor ?? '-'),
+    },
+  ];
+
+  readonly acciones: TableRowAction<AlergiaPaciente>[] = [
+    {
+      id: 'editar',
+      icon: 'fa-solid fa-pen-to-square',
+      color: 'primary',
+      iconOnly: true,
+      title: 'Editar alergia',
+    },
+    {
+      id: 'eliminar',
+      icon: 'fa-solid fa-trash-can',
+      color: 'danger',
+      iconOnly: true,
+      title: 'Eliminar alergia',
     },
   ];
 
@@ -141,22 +164,75 @@ export class AntecedentesAlergiasComponent implements OnInit {
       descripcion_adicional: formulario.descripcion_adicional.trim() || null,
     };
 
+    const alergiaId = this.alergia_editando();
+    if (alergiaId !== null) request.alergia_id = alergiaId;
+
     this.guardando.set(true);
-    this.alergiaService
-      .guardar_alergia(request)
+    const operacion = alergiaId === null
+      ? this.alergiaService.guardar_alergia(request)
+      : this.alergiaService.actualizar_alergia({ ...request, alergia_id: alergiaId });
+
+    operacion
       .pipe(finalize(() => this.guardando.set(false)))
       .subscribe({
         next: ({ data, message }) => {
           this.establecerContexto(data);
           this.formulario.set({ ...FORMULARIO_INICIAL });
+          this.alergia_editando.set(null);
           this.utilService.mostrar_alerta(
-            message ?? 'Alergia registrada correctamente.',
+            message ?? (alergiaId === null ? 'Alergia registrada correctamente.' : 'Alergia actualizada correctamente.'),
             'success',
           );
         },
         error: (error: { message?: string }) =>
           this.utilService.mostrar_error(error.message ?? 'No se pudo registrar la alergia.'),
       });
+  }
+
+  manejar_accion(evento: TableActionEvent<AlergiaPaciente>): void {
+    if (evento.action === 'editar') {
+      this.editar(evento.row);
+      return;
+    }
+
+    if (evento.action === 'eliminar') this.eliminar(evento.row);
+  }
+
+  editar(alergia: AlergiaPaciente): void {
+    this.alergia_editando.set(alergia.alergia_id);
+    this.formulario.set({
+      tipo_id: alergia.tipo_id,
+      sustancia_id: alergia.sustancia_id,
+      gravedad_id: alergia.gravedad_id,
+      via_administracion_id: alergia.via_administracion_id,
+      reaccion: alergia.reaccion ?? '',
+      edad_reaccion: alergia.edad_reaccion?.toString() ?? '',
+      fecha_ultima_reaccion: alergia.fecha_ultima_reaccion ?? '',
+      descripcion_adicional: alergia.descripcion_adicional ?? '',
+    });
+  }
+
+  async eliminar(alergia: AlergiaPaciente): Promise<void> {
+    if (this.guardando()) return;
+
+    const confirmado = await this.utilService.confirmar_eliminacion({
+      title: '¿Eliminar alergia?',
+      text: `¿Está seguro de eliminar la alergia a ${alergia.sustancia_nombre}?`,
+    });
+    if (!confirmado) return;
+
+    this.guardando.set(true);
+      this.alergiaService
+        .eliminar_alergia(this.atencionId(), alergia.alergia_id)
+        .pipe(finalize(() => this.guardando.set(false)))
+        .subscribe({
+          next: ({ data, message }) => {
+            this.establecerContexto(data);
+            this.utilService.mostrar_alerta(message ?? 'Alergia eliminada correctamente.', 'success');
+          },
+          error: (error: { message?: string }) =>
+            this.utilService.mostrar_error(error.message ?? 'No se pudo eliminar la alergia.'),
+        });
   }
 
   private establecerContexto(contexto: AlergiaContexto): void {

@@ -61,6 +61,10 @@ export class SignosVitalesHistorialComponent {
   readonly errorGuardado = input<string | null>(null);
 
   readonly registrar = output<{ detalles: TriajeDetalleRequest[]; observaciones: string | null }>();
+  readonly actualizar = output<{ control_vital_id: number; detalles: TriajeDetalleRequest[]; observaciones: string | null }>();
+  readonly eliminar = output<ControlVitalHistorial>();
+
+  readonly control_vital_id_editando = signal<number | null>(null);
 
   private readonly modal = viewChild<ModalComponent>('modal');
   private readonly modalGrafico = viewChild<ModalComponent>('modalGrafico');
@@ -155,14 +159,14 @@ export class SignosVitalesHistorialComponent {
         data: ['TA Sistólica', 'FC (lpm)', 'FR (rpm)'],
         top: 2,
         icon: 'circle',
-        itemGap: 16,
-        textStyle: { fontSize: 11, color: '#374151', fontWeight: 600 },
+        itemGap: 10,
+        textStyle: { fontSize: 10, color: '#374151', fontWeight: 600 },
       },
       grid: {
-        top: 36,
-        left: 36,
-        right: 20,
-        bottom: 24,
+        top: 24,
+        left: 30,
+        right: 12,
+        bottom: 18,
         containLabel: false,
       },
       xAxis: {
@@ -170,7 +174,7 @@ export class SignosVitalesHistorialComponent {
         data: categoriasX,
         boundaryGap: false,
         axisLine: { lineStyle: { color: '#e5e7eb' } },
-        axisLabel: { color: '#4b5563', fontSize: 11, fontWeight: 500 },
+        axisLabel: { color: '#4b5563', fontSize: 10, fontWeight: 500 },
         axisTick: { show: false },
       },
       yAxis: {
@@ -181,7 +185,7 @@ export class SignosVitalesHistorialComponent {
           show: true,
           lineStyle: { color: '#f3f4f6', type: 'dashed' },
         },
-        axisLabel: { color: '#6b7280', fontSize: 10 },
+        axisLabel: { color: '#6b7280', fontSize: 9 },
       },
       series: [
         {
@@ -425,6 +429,8 @@ export class SignosVitalesHistorialComponent {
   private readonly frTpl = viewChild<TemplateRef<TableCellContext<ControlVitalHistorial>>>('frTpl');
   private readonly imcTpl =
     viewChild<TemplateRef<TableCellContext<ControlVitalHistorial>>>('imcTpl');
+  private readonly accionesTpl =
+    viewChild<TemplateRef<TableCellContext<ControlVitalHistorial>>>('accionesTpl');
 
   readonly plantillasCelda = computed<
     Record<string, TemplateRef<TableCellContext<ControlVitalHistorial>>>
@@ -443,6 +449,7 @@ export class SignosVitalesHistorialComponent {
     asignar('fc', this.fcTpl());
     asignar('fr', this.frTpl());
     asignar('imc', this.imcTpl());
+    asignar('acciones', this.accionesTpl());
 
     return plantillas;
   });
@@ -475,6 +482,7 @@ export class SignosVitalesHistorialComponent {
       formatter: (_valor, fila) => `${this.valor(fila.detalles, 'TALLA') ?? '-'}`,
     },
     { key: 'imc', label: 'IMC' },
+    { key: 'acciones', label: 'Acciones', align: 'center' },
   ];
 
   constructor() {
@@ -523,14 +531,18 @@ export class SignosVitalesHistorialComponent {
     return this.utilService.color_alerta(detalle?.alerta_color ?? '') ?? 'secondary';
   }
 
-  imcColorFila(detalles: SignoVitalDetalleHistorial[]): PaletteColor {
-    const valor = this.imcFila(detalles);
+  imcColorFila(fila: ControlVitalHistorial): PaletteColor {
+    const valor = this.imcFila(fila);
     return valor === '-' ? 'secondary' : this.utilService.imc_status(valor);
   }
 
-  imcFila(detalles: SignoVitalDetalleHistorial[]): string {
-    const peso = this.valor(detalles, 'PESO');
-    const talla = this.valor(detalles, 'TALLA');
+  imcFila(fila: ControlVitalHistorial): string {
+    if (fila.valor_imc) {
+      return fila.valor_imc;
+    }
+
+    const peso = this.valor(fila.detalles, 'PESO');
+    const talla = this.valor(fila.detalles, 'TALLA');
     if (!peso || !talla) return '-';
 
     const valor = this.utilService.calculate_imc(peso, talla);
@@ -649,13 +661,44 @@ export class SignosVitalesHistorialComponent {
     return this.utilService.progress_bar_classes(color);
   }
 
+  editar_registro(fila: ControlVitalHistorial): void {
+    if (!this.habilitado() || this.guardando()) return;
+    this.control_vital_id_editando.set(fila.id_control_vital);
+    this.temperatura = this.valor(fila.detalles, 'TEMP')?.toString() ?? '';
+    this.paSistolica = this.valor(fila.detalles, 'PA', 'PAS')?.toString() ?? '';
+    this.paDiastolica = this.valor(fila.detalles, 'PA', 'PAD')?.toString() ?? '';
+    this.saturacion = this.valor(fila.detalles, 'SATO2')?.toString() ?? '';
+    this.fc = this.valor(fila.detalles, 'FC')?.toString() ?? '';
+    this.fr = this.valor(fila.detalles, 'FR')?.toString() ?? '';
+    this.peso = this.valor(fila.detalles, 'PESO')?.toString() ?? '';
+    this.talla = this.valor(fila.detalles, 'TALLA')?.toString() ?? '';
+    this.observaciones = fila.observaciones ?? '';
+    this.modal()?.open();
+  }
+
+  async eliminar_registro(fila: ControlVitalHistorial): Promise<void> {
+    if (!this.habilitado() || this.guardando()) return;
+
+    const confirmado = await this.utilService.confirmar_eliminacion({
+      title: '¿Anular control de signos vitales?',
+      text: 'Se anulará el registro seleccionado. Esta acción quedará registrada en auditoría clínica.',
+      confirmButtonText: 'Sí, anular',
+    });
+
+    if (confirmado) {
+      this.eliminar.emit(fila);
+    }
+  }
+
   abrir_modal(): void {
+    this.control_vital_id_editando.set(null);
     this.precargar_antropometria_previa();
     this.modal()?.open();
   }
 
   cerrar_modal(): void {
     this.modal()?.close();
+    this.control_vital_id_editando.set(null);
     this.limpiar();
   }
 
@@ -717,7 +760,16 @@ export class SignosVitalesHistorialComponent {
     }
 
     this.intentoGuardado = true;
-    this.registrar.emit({ detalles, observaciones: this.observaciones.trim() || null });
+    const editandoId = this.control_vital_id_editando();
+    if (editandoId !== null) {
+      this.actualizar.emit({
+        control_vital_id: editandoId,
+        detalles,
+        observaciones: this.observaciones.trim() || null,
+      });
+    } else {
+      this.registrar.emit({ detalles, observaciones: this.observaciones.trim() || null });
+    }
   }
 
   formatearFecha(fechaHora: string): string {
@@ -766,6 +818,7 @@ export class SignosVitalesHistorialComponent {
   }
 
   private limpiar(): void {
+    this.control_vital_id_editando.set(null);
     this.temperatura = '';
     this.paSistolica = '';
     this.paDiastolica = '';

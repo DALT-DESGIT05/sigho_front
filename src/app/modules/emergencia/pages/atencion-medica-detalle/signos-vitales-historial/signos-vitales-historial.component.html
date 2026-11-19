@@ -1,19 +1,19 @@
 <div class="vitales-layout">
   <div class="vitales-tabla-col">
     <div class="vitales-header">
-      <h3>Signos vitales</h3>
+      <h3>Signos Vitales</h3>
       <app-button
         texto="Añadir"
         action="create"
         color="primary"
-        size="sm"
+        size="xs"
         [disabled]="!habilitado()"
         (clicked)="abrir_modal()"
       />
     </div>
 
     <app-table
-      size="sm"
+      size="xs"
       [scrollHeight]="null"
       [columns]="columnas"
       [cellTemplates]="plantillasCelda()"
@@ -82,17 +82,39 @@
 </ng-template>
 
 <ng-template #imcTpl let-fila>
-  <span class="vital-celda" [ngClass]="'vital-celda--' + imcColorFila(fila.detalles)">
-    {{ imcFila(fila.detalles) }}
+  <span class="vital-celda" [ngClass]="'vital-celda--' + imcColorFila(fila)">
+    {{ imcFila(fila) }}
   </span>
+</ng-template>
+
+<ng-template #accionesTpl let-fila>
+  <div class="d-flex justify-content-center gap-1">
+    <app-button
+      action="edit"
+      size="xs"
+      [soloIcono]="true"
+      title="Editar signos vitales"
+      [disabled]="!habilitado() || guardando()"
+      (clicked)="editar_registro(fila)"
+    />
+    <app-button
+      action="delete"
+      size="xs"
+      [soloIcono]="true"
+      title="Eliminar registro"
+      [disabled]="!habilitado() || guardando()"
+      (clicked)="eliminar_registro(fila)"
+    />
+  </div>
 </ng-template>
 
 <app-modal
   #modal
-  title="Registrar signos vitales"
+  [title]="control_vital_id_editando() ? 'Editar signos vitales' : 'Registrar signos vitales'"
   icon="fa-solid fa-heart-pulse"
   size="lg"
   [showFooter]="true"
+  [footerEstandar]="true"
 >
   <div class="row g-2">
     <div class="col-6 col-lg-3">
@@ -272,6 +294,7 @@
     </div>
   </div>
   <div modal-footer>
+    <app-button modal-footer-close action="close" size="sm" (clicked)="cerrar_modal()" />
     <app-button
       texto="Registrar"
       action="save"
@@ -281,7 +304,6 @@
       [disabled]="hayCamposFueraDeRango()"
       (clicked)="agregar()"
     />
-    <app-button action="close" size="sm" (clicked)="cerrar_modal()" />
   </div>
 </app-modal>
 

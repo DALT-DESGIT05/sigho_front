@@ -57,7 +57,7 @@
   margin-left: .75rem;
 }
 
-/* Los resultados de un autocompletado pueden extenderse sobre el cuerpo del modal. */
+
 .modal-content:has(.auto-complete__menu),
 .modal-body:has(.auto-complete__menu) {
   overflow: visible;
@@ -89,8 +89,8 @@
   margin-left: 0;
 }
 
-/* El servicio de ngx-bootstrap comparte un solo backdrop entre modales.
-   Esta capa devuelve la separación visual cuando un app-modal abre otro. */
+
+
 modal-container:has(.app-modal--separated)::before {
   background: rgba(10, 30, 55, .42);
   content: '';
@@ -111,7 +111,21 @@ modal-container:has(.app-modal--separated)::before {
   min-height: 0;
 }
 
-/* Modal Diagnóstico Compacto */
+
+
+
+.modal-hoja-lesiones.modal-dialog-scrollable {
+  .modal-content:has(.auto-complete__menu) {
+    overflow: hidden;
+  }
+
+  .modal-body:has(.auto-complete__menu) {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
+
+
 .modal-diagnostico {
   .app-modal__header {
     min-height: 46px;
@@ -165,9 +179,9 @@ modal-container:has(.app-modal--separated)::before {
   }
 }
 
-/* =========================================
-   ENCABEZADO DESTACADO
-========================================= */
+
+
+
 
 .app-modal__header--destacado {
   padding: 1rem 1.5rem;
@@ -212,7 +226,7 @@ modal-container:has(.app-modal--separated)::before {
   }
 }
 
-/* ALINEAR SUBTÍTULO CON EL TÍTULO */
+
 
 .app-modal__header--destacado {
 
@@ -246,4 +260,65 @@ modal-container:has(.app-modal--separated)::before {
   }
 }
 
+
+.modal-alta-paciente {
+  .app-modal__header {
+    align-items: center;
+    min-height: 3.25rem;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+
+  .app-modal__header-content {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.75rem 1rem;
+    padding-right: 3rem;
+  }
+
+  .app-modal__title-row {
+    align-items: center;
+    display: inline-flex;
+    flex-shrink: 0;
+    gap: 0.5rem;
+  }
+
+  .modal-alta-paciente__paciente-header {
+    align-items: center;
+    color: var(--palette-primary-fap-50, #f0f6fc);
+    display: inline-flex;
+    flex-wrap: wrap;
+    font-size: 0.88rem;
+    gap: 0.55rem;
+  }
+
+  .modal-alta-paciente__separador {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 1.05rem;
+    font-weight: 300;
+  }
+
+  .modal-alta-paciente__nombre {
+    color: var(--palette-white);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .modal-alta-paciente__punto {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.95rem;
+  }
+
+  .modal-alta-paciente__datos {
+    font-weight: 500;
+    opacity: 0.95;
+  }
+
+  .app-modal__close {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
 

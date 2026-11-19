@@ -12,10 +12,10 @@ import { ComponentSize, PaletteColor } from '../../interfaces/util.interface';
 export class AlertComponent {
   readonly texto = input('');
   readonly color = input<PaletteColor>('primary');
-  /** Si no se indica, se usa un icono coherente con el color de la alerta. */
+
   readonly icon = input('');
   readonly dismissible = input(false);
-  /** Permite al padre ocultar o volver a mostrar la alerta. */
+
   readonly visible = input(true);
   readonly size = input<ComponentSize>('md');
 
@@ -33,7 +33,7 @@ export class AlertComponent {
 
   constructor() {
     effect(() => {
-      // Un cambio explícito del padre a visible=true restablece la alerta descartada.
+
       if (this.visible()) this.descartada.set(false);
     });
   }

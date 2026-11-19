@@ -24,9 +24,9 @@ import { PaginationComponent } from '../pagination/pagination.component';
   styleUrl: './table.component.scss'
 })
 export class TableComponent<T extends object = object> {
-  /** Si no se indican columnas, se crean a partir de las propiedades del primer registro. */
+
   readonly columns = input<TableColumn<T>[]>([]);
-  /** Plantillas de celda por clave de columna. Permite renderizar cualquier contenido Angular. */
+
   readonly cellTemplates = input<Record<string, TemplateRef<TableCellContext<T>>>>({});
   readonly headerRows = input<TableHeaderCell[][]>([]);
   readonly rows = input<readonly T[]>([]);
@@ -35,19 +35,19 @@ export class TableComponent<T extends object = object> {
   readonly loading = input(false);
   readonly emptyMessage = input(MESSAGE_DEFAULT_TABLE);
   readonly actionsLabel = input('Acciones');
-  /** Tamano visual: xs, sm, md o lg. */
+
   readonly size = input<TableSize>('md');
   readonly paginationSize = input<ComponentSize>('md');
-  /** Alto del area desplazable. Use null para que la tabla crezca sin limite. */
+
   readonly scrollHeight = input<string | null>('400px');
   readonly selectionMode = input<TableSelectionMode>('none');
-  /** Muestra el checkbox de selección masiva solo cuando la pantalla lo permite. */
+
   readonly showSelectAll = input(true);
   readonly selectionKey = input('id');
   readonly selectedKeys = input<Array<string | number>>([]);
-  /** Fila resaltada externamente. Use `selectionKey` para identificarla. */
+
   readonly highlightedRowKey = input<string | number | null>(null);
-  /** Plantillas opcionales para personalizar el control de seleccion. */
+
   readonly selectionHeaderTemplate = input<TemplateRef<TableSelectionTemplateContext<T>>>();
   readonly selectionCellTemplate = input<TemplateRef<TableSelectionTemplateContext<T>>>();
 

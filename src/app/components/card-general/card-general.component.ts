@@ -8,9 +8,9 @@ import { Component, computed, input } from '@angular/core';
   styleUrl: './card-general.component.scss',
 })
 export class CardGeneralComponent {
-  /** Título que se muestra en el encabezado. */
+
   readonly title = input('');
-  /** Alias en español para el título. */
+
   readonly titulo = input('');
   readonly showHeader = input(true);
   readonly showFooter = input(false);

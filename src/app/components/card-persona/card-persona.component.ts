@@ -11,9 +11,9 @@ import { ImageLazyComponent, TipoImagenLazy } from '../image-lazy/image-lazy.com
   styleUrl: './card-persona.component.scss',
 })
 export class CardPersonaComponent {
-  /** URL ya resuelta; se usa como respaldo cuando no se configura la carga diferida. */
+
   readonly imagen = input('');
-  /** Tipo de foto que resolverá app-image-lazy mediante ImageService y su caché. */
+
   readonly tipoImagen = input<TipoImagenLazy | null>(null);
   readonly identificador = input('');
   readonly nombre = input('');

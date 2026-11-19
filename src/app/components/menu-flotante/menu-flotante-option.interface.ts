@@ -4,7 +4,7 @@ export interface MenuFlotanteOption {
   icon: string;
   visible?: boolean;
   disabled?: boolean;
-  variant?: 'normal' | 'destacada' | 'advertencia';
+  variant?: 'normal' | 'destacada' | 'advertencia' | 'parpadeo';
   tooltip?: string;
   posicion?: 'normal' | 'inferior';
 }

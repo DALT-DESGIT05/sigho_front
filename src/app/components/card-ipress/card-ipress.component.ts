@@ -20,7 +20,7 @@ export class CardIpressComponent {
   readonly useClick = input(false);
   readonly clickEvent = output<void>();
 
-  // Propiedades opcionales
+
   readonly mostrarSeleccionar = input(false);
   readonly elevacion = input(false);
   readonly variant = input<'default' | 'reserva'>('default');

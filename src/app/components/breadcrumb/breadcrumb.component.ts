@@ -4,9 +4,9 @@ import { ComponentSize, PaletteColor } from '../../interfaces/util.interface';
 
 export interface BreadcrumbItem {
   label: string;
-  /** Ruta interna de Angular. */
+
   link?: string | unknown[];
-  /** URL externa. Tiene prioridad sobre `link`. */
+
   href?: string;
   icon?: string;
   color?: PaletteColor;

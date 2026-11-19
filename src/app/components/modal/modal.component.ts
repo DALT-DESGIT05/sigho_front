@@ -25,7 +25,7 @@ import { ModalSize } from '../../interfaces/util.interface';
 export class ModalComponent {
   readonly title = input('');
   readonly titulo = input('');
-  /** Ícono Font Awesome opcional que se muestra antes del título. */
+
   readonly icon = input('');
   readonly size = input<ModalSize>('md');
   readonly centered = input(true);
@@ -35,9 +35,9 @@ export class ModalComponent {
   readonly showCloseButton = input(true);
   readonly showFooter = input(false);
   readonly footer_estandar = input(false, { alias: 'footerEstandar' });
-  /** Permite que el alto del modal se ajuste a su contenido. */
+
   readonly fitContent = input(false);
-  /** Oscurece el modal que queda detrás cuando este modal se abre encima de otro. */
+
   readonly separateFromParent = input(false);
   readonly customClass = input('');
   readonly dialogClass = input('');
@@ -78,7 +78,7 @@ export class ModalComponent {
     this.opened.emit();
   }
 
-  /** Compatibilidad con el API anterior. Si se pasa template, lo abre directamente. */
+
   openModal(template?: TemplateRef<unknown>): void {
     if (template) {
       this.modalRef = this.modalService.show(template, { class: this.modalDialogClasses(), backdrop: true });

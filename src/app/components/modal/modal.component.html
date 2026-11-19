@@ -10,7 +10,7 @@
       <ng-content select="[modal-header]"></ng-content>
     </div>
     @if (showCloseButton()) {
-      <app-button class="app-modal__close" [iconOnly]="true" hoverColor="danger" icon="fa-solid fa-xmark" color="secondary" variant="outline" size="sm" ariaLabel="Cerrar" (click)="close()"></app-button>
+       <app-button class="app-modal__close" [iconOnly]="true" hoverColor="danger" icon="fa-solid fa-xmark" color="secondary" variant="outline" size="sm" ariaLabel="Cerrar" (clicked)="close()"></app-button>
     }
   </div>
 

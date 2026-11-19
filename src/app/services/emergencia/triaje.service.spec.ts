@@ -31,7 +31,7 @@ describe('TriajeService', () => {
       atencion: {
         tipo_paciente_id: 1,
         especialidad_id: 13,
-        procedencia_id: 1,
+        tipo_atencion_id: 126,
         numero_historia: '654321',
       },
     };

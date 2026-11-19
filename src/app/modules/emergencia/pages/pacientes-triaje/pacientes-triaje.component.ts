@@ -6,6 +6,7 @@ import { finalize, filter, switchMap, timer } from 'rxjs';
 import { ButtonComponent } from '../../../../components/button/button.component';
 import { CardGeneralComponent } from '../../../../components/card-general/card-general.component';
 import { InputTextComponent } from '../../../../components/input-text/input-text.component';
+import { ImagenPipe } from '../../../../pipes/imagen.pipe';
 import { ModalComponent } from '../../../../components/modal/modal.component';
 import { SelectComponent, SelectOption } from '../../../../components/select/select.component';
 import { TableComponent } from '../../../../components/table/table.component';
@@ -24,6 +25,8 @@ import { CatalogoEmergenciaService } from '../../../../services/emergencia/catal
 import { TriajeService } from '../../../../services/emergencia/triaje.service';
 import { UtilService } from '../../../../services/util.service';
 import { formatear_nombre_paciente as formatear_nombre } from '../../utils/nombre-paciente.util';
+import { formatear_nombre_medico } from '../../utils/nombre-medico.util';
+import { etiqueta_sexo } from '../../utils/sexo.util';
 import { RegistroTriajeComponent } from '../registro-triaje/registro-triaje.component';
 
 const FILTROS_INICIALES: FiltrosSeguimientoTriaje = {
@@ -42,6 +45,7 @@ const FILTROS_INICIALES: FiltrosSeguimientoTriaje = {
     FormField,
     ButtonComponent,
     CardGeneralComponent,
+    ImagenPipe,
     InputTextComponent,
     ModalComponent,
     RegistroTriajeComponent,
@@ -90,11 +94,9 @@ export class PacientesTriajeComponent {
     );
   });
 
-  readonly estadoOptions: SelectOption[] = [
+  readonly estadoOptions = signal<SelectOption[]>([
     { value: '', label: 'Todos' },
-    { value: 'PENDIENTE_TRIAJE', label: 'Pendiente de triaje' },
-    { value: 'TRIADO', label: 'Triado' },
-  ];
+  ]);
 
   readonly columns: TableColumn<SeguimientoTriaje>[] = [
     { key: 'codigo_episodio', label: 'Registro' },
@@ -102,11 +104,11 @@ export class PacientesTriajeComponent {
     {
       key: 'paciente.nombre_completo',
       label: 'Paciente',
-      formatter: (_value, row) => formatear_nombre(row.paciente),
+      formatter: (_value, row) => this.formatear_dato_paciente(row.paciente),
     },
     { key: 'paciente.edad', label: 'Edad', align: 'center' },
     { key: 'motivo_ingreso', label: 'Motivo de Ingreso' },
-    { key: 'destino', label: 'Destino' },
+    { key: 'destino', label: 'Área / Especialidad' },
     {
       key: 'prioridad',
       label: 'Prioridad',
@@ -120,11 +122,7 @@ export class PacientesTriajeComponent {
     {
       key: 'medico',
       label: 'Médico',
-      badge: {
-        texto: (_value, row) => row.medico?.trim() || 'Por asignar',
-        clases: (_value, row) => (row.medico ? 'info' : 'secondary'),
-        size: 'sm',
-      },
+      formatter: (_value, row) => formatear_nombre_medico(row.medico) || 'Por Asignar',
     },
     {
       key: 'estado_nombre',
@@ -132,7 +130,18 @@ export class PacientesTriajeComponent {
       align: 'center',
       badge: {
         texto: (value) => String(value ?? '-'),
-        clases: (_value, row) => (row.estado_seguimiento === 'TRIADO' ? 'success' : 'secondary'),
+        clases: (_value, row) => {
+          if (row.estado_codigo === 'TRI' || row.estado_seguimiento === 'TRIADO') {
+            return 'success';
+          }
+          if (row.estado_codigo === 'ETRI') {
+            return 'warning';
+          }
+          if (row.estado_codigo === 'REEV') {
+            return 'danger';
+          }
+          return 'secondary';
+        },
         size: 'sm',
       },
     },
@@ -146,7 +155,11 @@ export class PacientesTriajeComponent {
       icon: 'fa-solid fa-stethoscope',
       color: 'primary',
       iconOnly: true,
-      visible: (seguimiento) => seguimiento.estado_seguimiento === 'PENDIENTE_TRIAJE',
+      visible: (seguimiento) =>
+        seguimiento.estado_seguimiento === 'PENDIENTE_TRIAJE' ||
+        seguimiento.estado_codigo === 'PTRI' ||
+        seguimiento.estado_codigo === 'ETRI' ||
+        seguimiento.estado_codigo === 'REEV',
     },
     {
       id: 'ver_ticket',
@@ -155,13 +168,15 @@ export class PacientesTriajeComponent {
       icon: 'fa-solid fa-ticket',
       color: 'secondary',
       iconOnly: true,
-      visible: (seguimiento) => seguimiento.estado_seguimiento === 'TRIADO',
+      visible: (seguimiento) =>
+        seguimiento.estado_seguimiento === 'TRIADO' ||
+        seguimiento.estado_codigo === 'TRI',
       disabled: () => this.cargando_ticket_atencion_id() !== null,
     },
   ];
 
   constructor() {
-    this.catalogoEmergenciaService.obtenerCatalogos(['niveles_triaje']).subscribe({
+    this.catalogoEmergenciaService.obtenerCatalogos(['niveles_triaje', 'estados_triaje']).subscribe({
       next: ({ data }) => {
         this.prioridadOptions.set([
           { value: '', label: 'Todas' },
@@ -173,13 +188,22 @@ export class PacientesTriajeComponent {
         data.niveles_triaje.forEach((nivel) =>
           this.colorPrioridad.set(
             nivel.value,
-            this.color_nivel_triaje(nivel.value, nivel.color),
+            this.utilService.color_alerta(nivel.color) ?? 'secondary',
           ),
         );
+        if (data.estados_triaje && data.estados_triaje.length > 0) {
+          this.estadoOptions.set([
+            { value: '', label: 'Todos' },
+            ...data.estados_triaje.map((estado) => ({
+              value: estado.codigo,
+              label: estado.label,
+            })),
+          ]);
+        }
       },
       error: (error: { message?: string }) =>
         this.utilService.mostrar_error(
-          error.message ?? 'No se pudieron cargar las prioridades de triaje.',
+          error.message ?? 'No se pudieron cargar los catálogos de triaje.',
         ),
     });
     this.iniciar_seguimiento_en_tiempo_real();
@@ -258,12 +282,21 @@ export class PacientesTriajeComponent {
   }
 
   ejecutar_accion(event: TableActionEvent<SeguimientoTriaje>): void {
-    if (event.action === 'triar' && event.row.estado_seguimiento === 'PENDIENTE_TRIAJE') {
+    if (
+      event.action === 'triar' &&
+      (event.row.estado_seguimiento === 'PENDIENTE_TRIAJE' ||
+        event.row.estado_codigo === 'PTRI' ||
+        event.row.estado_codigo === 'ETRI' ||
+        event.row.estado_codigo === 'REEV')
+    ) {
       this.abrir_modal_triaje(event.row);
       return;
     }
 
-    if (event.action === 'ver_ticket' && event.row.estado_seguimiento === 'TRIADO') {
+    if (
+      event.action === 'ver_ticket' &&
+      (event.row.estado_seguimiento === 'TRIADO' || event.row.estado_codigo === 'TRI')
+    ) {
       this.abrir_ticket(event.row);
     }
   }
@@ -272,11 +305,8 @@ export class PacientesTriajeComponent {
     return formatear_nombre(paciente);
   }
 
-  formatear_sexo(sexo: string | null | undefined, sexo_codigo: string | null | undefined): string {
-    const valor = (sexo || sexo_codigo || '').trim().toLowerCase();
-    if (valor.startsWith('m')) return 'Masculino';
-    if (valor.startsWith('f')) return 'Femenino';
-    return (sexo || sexo_codigo || '').trim();
+  formatear_dato_paciente(paciente: PacienteSeguimientoTriaje | null | undefined): string {
+    return this.formatear_nombre_paciente(paciente);
   }
 
   titulo_modal_triaje(atencion: SeguimientoTriaje): string {
@@ -288,7 +318,7 @@ export class PacientesTriajeComponent {
       partesInfo.push(`${paciente.edad} ${paciente.edad === 1 ? 'año' : 'años'}`);
     }
 
-    const sexo = this.formatear_sexo(paciente?.sexo, paciente?.sexo_codigo);
+    const sexo = etiqueta_sexo(paciente?.sexo, paciente?.sexo_codigo);
     if (sexo) {
       partesInfo.push(sexo);
     }
@@ -328,7 +358,7 @@ export class PacientesTriajeComponent {
             ? {
                 ...item,
                 estado_seguimiento: 'TRIADO',
-                estado_codigo: 'ETRI',
+                estado_codigo: 'TRI',
                 estado_nombre: 'Triado',
                 prioridad: ticket.prioridad_codigo ?? item.prioridad,
                 prioridad_nombre: ticket.prioridad_nombre ?? item.prioridad_nombre,
@@ -514,42 +544,35 @@ export class PacientesTriajeComponent {
 
   private priority_badge(priority: string | null): string {
     const color = priority
-      ? (this.colorPrioridad.get(priority) ?? this.color_nivel_triaje(priority))
+      ? (this.colorPrioridad.get(priority) ?? 'secondary')
       : 'secondary';
 
     return `${color} priority-badge-solid`;
   }
 
-  private color_nivel_triaje(codigoPrioridad: string, colorCatalogo?: string | null): string {
-    const normalizado = codigoPrioridad.trim().toUpperCase();
-    if (normalizado === 'I' || normalizado === '1') return 'danger';
-    if (normalizado === 'II' || normalizado === '2') return 'orange';
-    if (normalizado === 'III' || normalizado === '3') return 'warning';
-    if (normalizado === 'IV' || normalizado === '4') return 'success';
-    if (normalizado === 'V' || normalizado === '5') return 'primary';
-
-    const colorNombre = (colorCatalogo ?? '').trim().toUpperCase();
-    if (colorNombre === 'ROJO') return 'danger';
-    if (colorNombre === 'NARANJA') return 'orange';
-    if (colorNombre === 'AMARILLO') return 'warning';
-    if (colorNombre === 'VERDE') return 'success';
-    if (colorNombre === 'AZUL') return 'primary';
-
-    return 'secondary';
-  }
-
   private actualizar_opciones_personal(seguimientos: SeguimientoTriaje[]): void {
-    const personales = Array.from(
-      new Set(
-        seguimientos
-          .map((seguimiento) => seguimiento.medico?.trim())
-          .filter((personal): personal is string => Boolean(personal)),
-      ),
-    ).sort((a, b) => a.localeCompare(b, 'es')) as string[];
+    const mapaPersonales = new Map<string, string>();
 
-    this.personalOptions.set([
+    for (const seguimiento of seguimientos) {
+      const raw = seguimiento.medico?.trim();
+      if (raw) {
+        const formateado = formatear_nombre_medico(raw);
+        if (formateado && !mapaPersonales.has(raw)) {
+          mapaPersonales.set(raw, formateado);
+        }
+      }
+    }
+
+    const opciones: SelectOption[] = [
       { value: '', label: 'Todos' },
-      ...personales.map((personal) => ({ value: personal, label: personal })),
-    ]);
+      ...Array.from(mapaPersonales.entries())
+        .sort((a, b) => a[1].localeCompare(b[1], 'es'))
+        .map(([raw, formateado]) => ({
+          value: raw,
+          label: formateado,
+        })),
+    ];
+
+    this.personalOptions.set(opciones);
   }
 }

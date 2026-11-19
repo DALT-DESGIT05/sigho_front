@@ -14,7 +14,7 @@
         size="sm"
         label="Estado"
         placeholder="-- Seleccione --"
-        [options]="estadoOptions"
+        [options]="estadoOptions()"
         [showEmptyOption]="true"
         emptyOptionLabel="-- Seleccione --"
         [formField]="filtros_form.estado"
@@ -30,7 +30,7 @@
       />
       <app-input-text
         size="sm"
-        label="Documento / Historia / NSA"
+        label="Documento / NSA"
         placeholder="Buscar por documento, historia o NSA"
         [formField]="filtros_form.documento"
       />
@@ -91,6 +91,8 @@
     [ignoreBackdropClick]="true"
     [keyboard]="false"
     [showCloseButton]="!registro_triaje_guardando()"
+    [showFooter]="true"
+    [footerEstandar]="true"
     (closed)="cerrar_modal_triaje()"
   >
     <app-registro-triaje
@@ -100,6 +102,22 @@
       (triaje_registrado)="completar_triaje($event)"
       (cerrado)="modal_triaje.close()"
     />
+    <div modal-footer>
+      <app-button
+        modal-footer-close
+        action="close"
+        size="sm"
+        [disabled]="registro_triaje_guardando()"
+        (clicked)="modal_triaje.close()"
+      />
+      <app-button
+        action="save"
+        size="sm"
+        [loading]="registro_triaje_guardando()"
+        [disabled]="registro_triaje.registroGuardado() || registro_triaje.triaje_bloqueado() || registro_triaje_guardando() || !registro_triaje.formulario_completo_y_valido()"
+        (clicked)="registro_triaje.guardar_triaje()"
+      />
+    </div>
   </app-modal>
 }
 
@@ -111,16 +129,17 @@
     size="md"
     [fitContent]="true"
     [showFooter]="true"
+    [footerEstandar]="true"
     (closed)="cerrar_modal_ticket()"
   >
     <article #ticket_impresion class="triage-ticket" aria-label="Ticket de triaje">
       <header class="triage-ticket__header">
-        <div class="triage-ticket__logo" aria-hidden="true">FAP</div>
+        <img class="triage-ticket__logo" [src]="'logo_fap' | imagen" alt="Logo FAP" />
         <div>
           <strong>Sistema de Salud FAP</strong>
           <span>IPRESS Hospital Central FAP</span>
         </div>
-        <div class="triage-ticket__logo" aria-hidden="true">IPRESS</div>
+        <img class="triage-ticket__logo" [src]="'logo_hospi' | imagen" alt="Logo IPRESS" />
       </header>
 
       <dl class="triage-ticket__grid">
@@ -197,14 +216,13 @@
     </article>
 
     <div modal-footer>
-      <app-button action="print" size="sm" color="primary" (clicked)="imprimir_ticket()" />
       <app-button
+        modal-footer-close
         action="close"
         size="sm"
-        variant="outline"
-        color="secondary"
         (clicked)="modal_ticket.close()"
       />
+      <app-button action="print" size="sm" (clicked)="imprimir_ticket()" />
     </div>
   </app-modal>
 }

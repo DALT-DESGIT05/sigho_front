@@ -66,10 +66,15 @@ export class TriajeService {
     atencion_id: number,
     mostrar_loading = false,
   ): Observable<ResponseInteface<DetalleAtencionResponse>> {
+    const params = new HttpParams().set('atencion_id', atencion_id.toString());
+
     return this.httpClient
       .get<ResponseInteface<DetalleAtencionResponse>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/contexto-medico`,
-        { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
+        `${this.baseUrl}v1/emergencia/atenciones/contexto-medico`,
+        {
+          params,
+          context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
+        },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
   }
@@ -80,8 +85,8 @@ export class TriajeService {
   ): Observable<ResponseInteface<{ atencion_id: number; iniciada: boolean }>> {
     return this.httpClient
       .post<ResponseInteface<{ atencion_id: number; iniciada: boolean }>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/iniciar`,
-        {},
+        `${this.baseUrl}v1/emergencia/atenciones/iniciar`,
+        { atencion_id },
         { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));

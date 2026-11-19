@@ -24,6 +24,20 @@ describe('RegistroTriajeComponent', () => {
     diastolic_status: vi.fn(() => 'secondary'),
     estado_desde_maestro: vi.fn(() => null),
     progress_bar_classes: vi.fn(() => ''),
+    color_prioridad: vi.fn((color: string) => {
+      const c = String(color ?? '').toUpperCase();
+      if (c === 'ROJO') return 'red';
+      if (c === 'NARANJA') return 'orange';
+      if (c === 'AMARILLO') return 'yellow';
+      if (c === 'VERDE') return 'green';
+      if (c === 'AZUL') return 'blue';
+      return 'secondary';
+    }),
+    imc_descripcion: vi.fn((valor: unknown) => {
+      const n = Number(valor);
+      if (n >= 30 && n < 35) return 'Obesidad grado I';
+      return 'Peso normal';
+    }),
   };
 
   beforeEach(async () => {
@@ -79,7 +93,11 @@ describe('RegistroTriajeComponent', () => {
         },
       },
     });
-    http_testing.expectOne(`${environment.baseUrl}v1/catalogos`).flush({
+    http_testing
+      .expectOne(
+        (request) => request.url === `${environment.baseUrl}v1/catalogos`,
+      )
+      .flush({
       data: {
         tipos_documento: [{ value: 10, codigo: 'DNI', label: 'Documento Nacional de Identidad' }],
         sexos: [
@@ -198,6 +216,22 @@ describe('RegistroTriajeComponent', () => {
 
   afterEach(() => {
     util_service.imc_status.mockReturnValue('secondary');
+    const medicosReqs = http_testing.match((req) => req.url.includes('medicos-programados'));
+    medicosReqs.forEach((req) =>
+      req.flush({
+        data: [
+          {
+            programacion_personal_id: 4,
+            personal_id: 135966,
+            nombre_completo: 'DRA. YURI CAROLA AIQUIPA SANTOS',
+            sexo_sigla: 'F',
+            prefijo: 'Dra.',
+            especialidad_id: 64,
+            turno: '14 - Guardia Diurna',
+          },
+        ],
+      }),
+    );
     http_testing.verify();
   });
 
@@ -494,11 +528,11 @@ describe('RegistroTriajeComponent', () => {
   });
 
   it('calculates BMI accurately handling both cm and meters and suggests priority I on critical vitals', () => {
-    // Test BMI in meters (1.70 m) and with comma
+
     expect(component.calcular_imc('70', '1.70')).toBe('24.22');
     expect(component.calcular_imc('70,5', '170')).toBe('24.39');
 
-    // Test critical vitals alert & automatic priority suggestion
+
     component.triaje_model.update((value) => ({
       ...value,
       prioridad: 'III',
@@ -512,12 +546,51 @@ describe('RegistroTriajeComponent', () => {
     expect(alertas.some((a) => a.parametro === 'FC')).toBe(true);
     expect(alertas.some((a) => a.parametro === 'Sat. O₂')).toBe(true);
 
-    // The effect should suggest and upgrade priority to 'I'
+
     expect(component.triaje_model().prioridad).toBe('I');
 
-    // Verify alert element in template
+
     const alertBox = fixture.nativeElement.querySelector('.alert-danger');
     expect(alertBox).not.toBeNull();
     expect(alertBox.textContent).toContain('Signos vitales críticos');
+  });
+
+  it('automatically delegates scheduled on-duty doctor and displays read-only indicator', () => {
+    component.triaje_model.update((value) => ({
+      ...value,
+      destinoAreaId: 21,
+    }));
+    fixture.detectChanges();
+
+    const req = http_testing.expectOne(
+      (r) => r.url.includes('medicos-programados') && r.params.get('especialidad_id') === '64',
+    );
+    req.flush({
+      data: [
+        {
+          programacion_personal_id: 42,
+          personal_id: 135966,
+          nombre_completo: 'DRA. YURI CAROLA AIQUIPA SANTOS',
+          sexo_sigla: 'F',
+          prefijo: 'Dra.',
+          especialidad_id: 64,
+          turno: '14 - Guardia Diurna',
+        },
+      ],
+    });
+    fixture.detectChanges();
+
+    expect(component.triaje_model().programacionPersonalId).toBe(42);
+    expect(component.medicoAsignado()).toEqual(
+      expect.objectContaining({
+        programacion_personal_id: 42,
+        nombre_completo: 'DRA. YURI CAROLA AIQUIPA SANTOS',
+      }),
+    );
+
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.textContent).toContain('Dra. DRA. YURI CAROLA AIQUIPA SANTOS');
+
+    expect(element.querySelector('app-select[label="Médico de Turno"]')).toBeNull();
   });
 });

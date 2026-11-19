@@ -228,7 +228,7 @@ export class TriajeEvaluadorClinicoService {
     const peso = Number(pesoLimpio);
     const talla = Number(tallaLimpia);
 
-    if (!peso || !talla || peso < 0.5 || peso > 300 || talla < 25 || talla > 250) {
+    if (!peso || !talla || peso < 0.5 || peso > 300) {
       return { imc: '', clasificacion: 'Sin clasificación', estado: 'secondary' };
     }
 

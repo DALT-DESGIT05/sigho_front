@@ -117,14 +117,9 @@
   font-size: 1rem;
 }
 .triage-ticket__logo {
-  align-items: center;
-  border: 1px solid var(--palette-gray-300);
-  border-radius: 50%;
-  display: flex;
-  font-size: 0.65rem;
   height: 3rem;
-  justify-content: center;
   margin: auto;
+  object-fit: contain;
   width: 3rem;
 }
 .triage-ticket dl,

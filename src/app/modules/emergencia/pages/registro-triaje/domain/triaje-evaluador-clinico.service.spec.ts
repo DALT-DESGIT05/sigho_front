@@ -25,9 +25,9 @@ describe('TriajeEvaluadorClinicoService', () => {
       eva: '0',
     });
 
-    expect(decision.tieneCritico).toBeTrue();
+    expect(decision.tieneCritico).toBe(true);
     expect(decision.prioridadSugerida).toBe(CODIGOS_PRIORIDAD.I);
-    expect(decision.prioridad1Bloqueada).toBeFalse();
+    expect(decision.prioridad1Bloqueada).toBe(false);
     expect(decision.alertasCriticas.length).toBeGreaterThan(0);
     expect(decision.alertasCriticas[0].parametro).toBe('Sat. O₂');
   });
@@ -44,9 +44,9 @@ describe('TriajeEvaluadorClinicoService', () => {
       condicionLlegadaCodigo: CODIGOS_CONDICION_LLEGADA.CAMINANDO,
     });
 
-    expect(decision.tieneCritico).toBeFalse();
-    expect(decision.todosNormales).toBeTrue();
-    expect(decision.prioridad1Bloqueada).toBeTrue();
+    expect(decision.tieneCritico).toBe(false);
+    expect(decision.todosNormales).toBe(true);
+    expect(decision.prioridad1Bloqueada).toBe(true);
     expect(decision.prioridadSugerida).toBe(CODIGOS_PRIORIDAD.IV);
   });
 
@@ -57,13 +57,13 @@ describe('TriajeEvaluadorClinicoService', () => {
       paDiastolica: '85',
       fc: '80',
       fr: '18',
-      temperatura: '38.0', // alterado leve
-      eva: '4', // dolor moderado
+      temperatura: '38.0',
+      eva: '4',
       condicionLlegadaCodigo: CODIGOS_CONDICION_LLEGADA.CAMINANDO,
     });
 
-    expect(decision.tieneCritico).toBeFalse();
-    expect(decision.prioridad1Bloqueada).toBeTrue();
+    expect(decision.tieneCritico).toBe(false);
+    expect(decision.prioridad1Bloqueada).toBe(true);
     expect(decision.prioridadSugerida).toBe(CODIGOS_PRIORIDAD.III);
   });
 
@@ -78,7 +78,7 @@ describe('TriajeEvaluadorClinicoService', () => {
       eva: '8',
     });
 
-    expect(decision.tieneCritico).toBeFalse();
+    expect(decision.tieneCritico).toBe(false);
     expect(decision.prioridadSugerida).toBe(CODIGOS_PRIORIDAD.II);
   });
 
@@ -89,6 +89,6 @@ describe('TriajeEvaluadorClinicoService', () => {
     });
 
     expect(decision.prioridadSugerida).toBe(CODIGOS_PRIORIDAD.I);
-    expect(decision.prioridad1Bloqueada).toBeFalse();
+    expect(decision.prioridad1Bloqueada).toBe(false);
   });
 });

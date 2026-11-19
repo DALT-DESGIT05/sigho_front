@@ -8,11 +8,11 @@ import {
   output,
   signal,
   untracked,
+  viewChild,
   type WritableSignal,
 } from '@angular/core';
 import { FormField, form, maxLength, required } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
-import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
 import { finalize } from 'rxjs';
 import { CardGeneralComponent } from '../../../../components/card-general/card-general.component';
 import { ButtonComponent } from '../../../../components/button/button.component';
@@ -20,6 +20,7 @@ import { InputGroupComponent } from '../../../../components/input-group/input-gr
 import { InputTextComponent } from '../../../../components/input-text/input-text.component';
 import { LabelComponent } from '../../../../components/label/label.component';
 import { ProgressBarsComponent } from '../../../../components/progress-bars/progress-bars.component';
+import { AlertDialogComponent } from '../../../../components/alert-dialog/alert-dialog.component';
 import {
   SelectComponent,
   SelectOption,
@@ -31,6 +32,7 @@ import {
 } from '../../../../interfaces/emergencia/catalogo-emergencia.interface';
 import {
   DetalleAtencionResponse,
+  PersonalProgramadoEmergencia,
   RegistrarTriajeRequest,
   RegistroTriajeFormValue,
   TriajeTicket,
@@ -40,6 +42,13 @@ import { PaletteColor } from '../../../../interfaces/util.interface';
 import { CatalogoEmergenciaService } from '../../../../services/emergencia/catalogo-emergencia.service';
 import { TriajeService } from '../../../../services/emergencia/triaje.service';
 import { UtilService } from '../../../../services/util.service';
+import { formatear_nombre_medico } from '../../utils/nombre-medico.util';
+import {
+  CampoSignoVital,
+  validar_rango_signo_vital,
+  validar_consistencia_presion_arterial,
+  formatear_placeholder_rango,
+} from '../../utils/rango-signo-vital.util';
 import {
   CODIGOS_AREA_EMERGENCIA,
   CODIGOS_PARAMETRO_CLINICO,
@@ -109,6 +118,7 @@ interface VitalSignField {
     LabelComponent,
     ProgressBarsComponent,
     SelectComponent,
+    AlertDialogComponent,
   ],
   templateUrl: './registro-triaje.component.html',
   styleUrl: './registro-triaje.component.scss',
@@ -119,6 +129,9 @@ export class RegistroTriajeComponent implements OnInit {
   private readonly triajeService = inject(TriajeService);
   private readonly evaluadorClinico = inject(TriajeEvaluadorClinicoService);
   readonly utilService = inject(UtilService);
+
+  readonly dialogoAlerta = viewChild.required<AlertDialogComponent>('dialogoAlerta');
+  private alerta_rango_abierta = false;
 
   readonly atencion_id = input<number | null>(null);
   readonly embebido = input(false);
@@ -213,8 +226,34 @@ export class RegistroTriajeComponent implements OnInit {
   readonly destinoOptions = this.areasEmergenciaOptions;
   readonly derivarOptions = signal<SelectOption[]>([]);
   readonly derivacionHabilitada = computed(() => this.esAreaConsultorioEmergencia());
+  readonly mostrarMedicoTurno = computed(() => {
+    const model = this.triaje_model();
+    if (!model.destinoAreaId || this.esPacienteNn()) {
+      return false;
+    }
+
+    return !this.esAreaConsultorioEmergencia() || model.destinoEspecialidadId !== null;
+  });
+  readonly medicosProgramados = signal<PersonalProgramadoEmergencia[]>([]);
   readonly medicosProgramadosOptions = signal<SelectOption[]>([]);
   readonly cargandoMedicos = signal(false);
+  readonly medicoAsignado = computed<PersonalProgramadoEmergencia | null>(() => {
+    const progId = this.triaje_model().programacionPersonalId;
+    if (!progId) return null;
+    return (
+      this.medicosProgramados().find(
+        (m) => Number(m.programacion_personal_id) === Number(progId),
+      ) ?? null
+    );
+  });
+  readonly nombreMedicoTurno = computed(() => {
+    const medico = this.medicoAsignado();
+    if (!medico) {
+      return 'Sin médico de guardia programado';
+    }
+
+    return formatear_nombre_medico(medico);
+  });
   readonly prioridades = signal<readonly { value: string; color: string; label: string }[]>([]);
   readonly esPacienteNn = computed(() => this.detalle_atencion()?.paciente.es_nn ?? false);
   readonly prioridadesVisibles = computed(() => {
@@ -222,9 +261,7 @@ export class RegistroTriajeComponent implements OnInit {
       return this.prioridades();
     }
 
-    const prioridadI = this.prioridades().find((prioridad) => prioridad.value === 'I');
-
-    return prioridadI ? [prioridadI] : [{ value: 'I', label: 'Resucitación', color: 'red' }];
+    return this.prioridades().slice(0, 1);
   });
 
   readonly condicionLlegadaCodigoSeleccionada = computed(() => {
@@ -259,7 +296,7 @@ export class RegistroTriajeComponent implements OnInit {
   );
   private ultimaEspecialidadConsultadaMedicos: number | null = null;
 
-  private cargar_medicos_programados_segun_seleccion(): void {
+  private cargar_medicos_programados(): void {
     const actual = this.triaje_model();
     const esConEmer = this.esAreaConsultorioEmergencia();
 
@@ -273,6 +310,7 @@ export class RegistroTriajeComponent implements OnInit {
 
     if (!especialidadId) {
       this.medicosProgramadosOptions.set([]);
+      this.medicosProgramados.set([]);
       this.ultimaEspecialidadConsultadaMedicos = null;
       if (actual.programacionPersonalId !== null) {
         this.update_model({ programacionPersonalId: null });
@@ -292,26 +330,28 @@ export class RegistroTriajeComponent implements OnInit {
       .pipe(finalize(() => this.cargandoMedicos.set(false)))
       .subscribe({
         next: ({ data }) => {
-          const opciones: SelectOption[] = (data ?? []).map((m) => {
+          const lista = data ?? [];
+          this.medicosProgramados.set(lista);
+          const opciones: SelectOption[] = lista.map((m) => {
             return {
               value: m.programacion_personal_id,
-              label: m.nombre_completo,
+              label: formatear_nombre_medico(m),
             };
           });
 
           this.medicosProgramadosOptions.set(opciones);
 
-          if (opciones.length === 1) {
-            this.update_model({ programacionPersonalId: Number(opciones[0].value) });
-          } else if (
-            actual.programacionPersonalId &&
-            !opciones.some((o) => Number(o.value) === actual.programacionPersonalId)
-          ) {
+
+          if (lista.length > 0) {
+            this.update_model({ programacionPersonalId: Number(lista[0].programacion_personal_id) });
+          } else {
             this.update_model({ programacionPersonalId: null });
           }
         },
         error: () => {
           this.medicosProgramadosOptions.set([]);
+          this.medicosProgramados.set([]);
+          this.update_model({ programacionPersonalId: null });
         },
       });
   }
@@ -324,22 +364,12 @@ export class RegistroTriajeComponent implements OnInit {
     required(schema.motivoIngreso);
     required(schema.prioridad);
     required(schema.motivoConsulta);
-    required(schema.temperatura);
-    required(schema.paSistolica);
-    required(schema.paDiastolica);
-    required(schema.saturacion);
-    required(schema.fc);
-    required(schema.fr);
-    required(schema.peso);
-    required(schema.talla);
-    required(schema.eva);
     maxLength(schema.observaciones, 200);
     maxLength(schema.motivoConsulta, 500);
     required(schema.destinoAreaId);
     required(schema.destinoEspecialidadId, {
       when: () => this.esAreaConsultorioEmergencia() && !this.esPacienteNn(),
     });
-    required(schema.programacionPersonalId);
   });
 
   readonly condicionLlegadaOptions = signal<SelectOption[]>([]);
@@ -359,8 +389,8 @@ export class RegistroTriajeComponent implements OnInit {
       title: 'Temperatura',
       unit: '°C',
       type: 'number',
-      min: 36.0,
-      max: 40.0,
+      min: 30.0,
+      max: 45.0,
       step: 0.1,
       colClass: 'col-6 col-lg-2',
     },
@@ -389,8 +419,8 @@ export class RegistroTriajeComponent implements OnInit {
       title: 'Frecuencia cardíaca',
       unit: 'lpm',
       type: 'number',
-      min: 30,
-      max: 220,
+      min: 20,
+      max: 300,
       step: 1,
       colClass: 'col-6 col-lg-2',
     },
@@ -400,8 +430,8 @@ export class RegistroTriajeComponent implements OnInit {
       title: 'Frecuencia respiratoria',
       unit: 'rpm',
       type: 'number',
-      min: 10,
-      max: 40,
+      min: 4,
+      max: 100,
       step: 1,
       colClass: 'col-6 col-lg-2',
     },
@@ -411,8 +441,8 @@ export class RegistroTriajeComponent implements OnInit {
       title: 'Peso',
       unit: 'kg',
       type: 'number',
-      min: 0.5,
-      max: 300.0,
+      min: 0.3,
+      max: 350.0,
       step: 0.1,
       colClass: 'col-6 col-lg-2',
     },
@@ -422,7 +452,7 @@ export class RegistroTriajeComponent implements OnInit {
       title: 'Talla',
       unit: 'cm',
       type: 'number',
-      min: 25.0,
+      min: 20.0,
       max: 250.0,
       step: 0.5,
       colClass: 'col-6 col-lg-2',
@@ -554,7 +584,7 @@ export class RegistroTriajeComponent implements OnInit {
       }
 
       untracked(() => {
-        this.cargar_medicos_programados_segun_seleccion();
+        this.cargar_medicos_programados();
       });
     });
   }
@@ -614,7 +644,7 @@ export class RegistroTriajeComponent implements OnInit {
     this.update_model({ eva: valor });
   }
 
-  actualizar_eva_desde_input(evento: Event): void {
+  async actualizar_eva_desde_input(evento: Event): Promise<void> {
     const input = evento.target as HTMLInputElement;
     let valor = input.value.trim();
 
@@ -626,8 +656,19 @@ export class RegistroTriajeComponent implements OnInit {
 
     let numero = parseInt(valor, 10);
     if (isNaN(numero) || numero < 0 || numero > 10) {
-      if (!Swal.isVisible()) {
-        this.utilService.mostrar_alerta('Escala de Dolor (EVA) debe estar entre 0 y 10.', 'warning');
+      if (!this.alerta_rango_abierta) {
+        this.alerta_rango_abierta = true;
+        try {
+          await this.dialogoAlerta().open({
+            tipo: 'warning',
+            titulo: 'Escala de Dolor (EVA)',
+            mensaje: 'La Escala de Dolor (EVA) debe ser un valor entre 0 y 10.',
+            texto_confirmar: 'Entendido',
+            color_confirmar: 'warning',
+          });
+        } finally {
+          this.alerta_rango_abierta = false;
+        }
       }
       numero = Math.min(Math.max(isNaN(numero) ? 0 : numero, 0), 10);
       input.value = numero.toString();
@@ -823,15 +864,16 @@ export class RegistroTriajeComponent implements OnInit {
       return;
     }
 
-    const confirmacion = await Swal.fire({
-      title: TITLE_MODAL,
-      text: MESSAGE_CONFIRMATION_DEFAULT,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, continuar',
-      cancelButtonText: 'No',
+    const confirmado = await this.dialogoAlerta().open({
+      tipo: 'confirm',
+      titulo: TITLE_MODAL,
+      mensaje: MESSAGE_CONFIRMATION_DEFAULT,
+      texto_confirmar: 'Sí, continuar',
+      texto_cancelar: 'No',
+      color_confirmar: 'primary',
+      mostrar_cancelar: true,
     });
-    if (!confirmacion.isConfirmed) {
+    if (!confirmado) {
       return;
     }
 
@@ -894,7 +936,7 @@ export class RegistroTriajeComponent implements OnInit {
     return descripcion.includes('TRAUMA') && descripcion.includes('SHOCK');
   }
 
-  /** Preselects "Caminando" (sighoweb.m_condi_llegada.cod_condi_llegada = 'PIE') when no condition is chosen yet. */
+
   aplicar_condicion_llegada_por_defecto(condiciones: SelectOption[]): void {
     if (this.triaje_model().condicionLlegada !== null) return;
 
@@ -912,7 +954,7 @@ export class RegistroTriajeComponent implements OnInit {
     }
   }
 
-  /** Preselects "Evaluación Médica" (sighoweb.m_motivo_ingreso.cod_mot_ing = 'EVME') when no reason is chosen yet. */
+
   aplicar_motivo_ingreso_por_defecto(motivos: SelectOption[]): void {
     if (this.triaje_model().motivoIngreso !== null) return;
 
@@ -957,93 +999,27 @@ export class RegistroTriajeComponent implements OnInit {
     }
   }
 
-  error_signo_vital(
-    control:
-      | 'temperatura'
-      | 'paSistolica'
-      | 'paDiastolica'
-      | 'saturacion'
-      | 'fc'
-      | 'fr'
-      | 'peso'
-      | 'talla',
-  ): string {
+  error_signo_vital(control: CampoSignoVital): string {
     const model = this.triaje_model();
-    const valorRaw = model[control];
-    if (valorRaw === null || valorRaw === undefined || String(valorRaw).trim() === '') return '';
-
-    const num = Number(String(valorRaw).replace(',', '.'));
-    if (isNaN(num)) return 'Debe ser un número válido.';
-
-    const paramMap: Record<string, { min: number; max: number; unit: string; name: string }> = {
-      temperatura: { min: 36.0, max: 40.0, unit: '°C', name: 'Temperatura' },
-      paSistolica: { min: 50, max: 240, unit: 'mmHg', name: 'PAS' },
-      paDiastolica: { min: 0, max: 100, unit: 'mmHg', name: 'PAD' },
-      saturacion: { min: 60, max: 100, unit: '%', name: 'Sat. O₂' },
-      fc: { min: 30, max: 220, unit: 'lpm', name: 'FC' },
-      fr: { min: 10, max: 40, unit: 'rpm', name: 'FR' },
-      peso: { min: 0.5, max: 300.0, unit: 'kg', name: 'Peso' },
-      talla: { min: 25.0, max: 250.0, unit: 'cm', name: 'Talla' },
-    };
-
-    const cfg = paramMap[control];
-    if (!cfg) return '';
-
-    let min = cfg.min;
-    let max = cfg.max;
-    if (control === 'temperatura') {
-      const p = this.parametrosClinicos().find((x) => x.codigo === 'TEMP');
-      if (p?.valor_minimo_admisible != null) min = p.valor_minimo_admisible;
-      if (p?.valor_maximo_admisible != null) max = p.valor_maximo_admisible;
-    } else if (control === 'paSistolica' || control === 'paDiastolica') {
-      const p = this.parametrosClinicos().find((x) => x.codigo === 'PA');
-      const compCode = control === 'paSistolica' ? 'PAS' : 'PAD';
-      const c = p?.componentes?.find((x) => x.codigo === compCode);
-      const cMin = c?.puntaje_minimo != null ? Number(c.puntaje_minimo) : null;
-      const cMax = c?.puntaje_maximo != null ? Number(c.puntaje_maximo) : null;
-      if (cMin !== null && (cMin > 0 || (cMax !== null && cMax > 0))) {
-        min = cMin;
-      }
-      if (cMax !== null && ((cMin !== null && cMin > 0) || cMax > 0)) {
-        max = cMax;
-      }
-    } else if (control === 'saturacion') {
-      const p = this.parametrosClinicos().find((x) => x.codigo === 'SATO2');
-      if (p?.valor_minimo_admisible != null) min = p.valor_minimo_admisible;
-      if (p?.valor_maximo_admisible != null) max = p.valor_maximo_admisible;
-    } else if (control === 'fc') {
-      const p = this.parametrosClinicos().find((x) => x.codigo === 'FC');
-      if (p?.valor_minimo_admisible != null) min = p.valor_minimo_admisible;
-      if (p?.valor_maximo_admisible != null) max = p.valor_maximo_admisible;
-    } else if (control === 'fr') {
-      const p = this.parametrosClinicos().find((x) => x.codigo === 'FR');
-      if (p?.valor_minimo_admisible != null) min = p.valor_minimo_admisible;
-      if (p?.valor_maximo_admisible != null) max = p.valor_maximo_admisible;
-    } else if (control === 'peso') {
-      const p = this.parametrosClinicos().find((x) => x.codigo === 'PESO');
-      if (p?.valor_minimo_admisible != null) min = p.valor_minimo_admisible;
-      if (p?.valor_maximo_admisible != null) max = p.valor_maximo_admisible;
-    } else if (control === 'talla') {
-      const p = this.parametrosClinicos().find((x) => x.codigo === 'TALLA');
-      if (p?.valor_minimo_admisible != null) min = p.valor_minimo_admisible;
-      if (p?.valor_maximo_admisible != null) max = p.valor_maximo_admisible;
-    }
-
-    if (num < min || num > max) {
-      const minText = control === 'temperatura' || control === 'peso' || control === 'talla' ? min.toFixed(1) : String(min);
-      const maxText = control === 'temperatura' || control === 'peso' || control === 'talla' ? max.toFixed(1) : String(max);
-      return `${cfg.name} debe estar entre ${minText} y ${maxText} ${cfg.unit}.`;
+    const errorRango = validar_rango_signo_vital(control, model[control], this.parametrosClinicos());
+    if (errorRango) {
+      return errorRango;
     }
 
     if (control === 'paDiastolica' || control === 'paSistolica') {
-      const pas = Number(model.paSistolica);
-      const pad = Number(model.paDiastolica);
-      if (model.paSistolica && model.paDiastolica && pas <= pad) {
-        return 'PAS debe ser mayor que PAD.';
-      }
+      return validar_consistencia_presion_arterial(model.paSistolica, model.paDiastolica);
     }
 
     return '';
+  }
+
+  rango_placeholder(campo: CampoSignoVital): string {
+    return formatear_placeholder_rango(campo, this.parametrosClinicos());
+  }
+
+  rango_sublabel(campo: CampoSignoVital): string {
+    const rango = this.rango_placeholder(campo);
+    return rango ? `[${rango}]` : '';
   }
 
   readonly signos_vitales_invalidos = computed(() => {
@@ -1065,30 +1041,31 @@ export class RegistroTriajeComponent implements OnInit {
     return this.triajeForm().valid() && !this.signos_vitales_invalidos();
   });
 
-  validar_extremo_al_salir(
-    campo:
-      | 'temperatura'
-      | 'paSistolica'
-      | 'paDiastolica'
-      | 'saturacion'
-      | 'fc'
-      | 'fr'
-      | 'peso'
-      | 'talla',
-  ): void {
-    if (Swal.isVisible()) {
+  async validar_extremo_al_salir(campo: CampoSignoVital): Promise<void> {
+    if (this.alerta_rango_abierta) {
       return;
     }
     const error = this.error_signo_vital(campo);
     if (error) {
-      this.utilService.mostrar_alerta(error, 'warning');
+      this.alerta_rango_abierta = true;
+      try {
+        await this.dialogoAlerta().open({
+          tipo: 'warning',
+          titulo: 'Parámetro fuera de rango admisible',
+          mensaje: error,
+          texto_confirmar: 'Entendido',
+          color_confirmar: 'warning',
+        });
+      } finally {
+        this.alerta_rango_abierta = false;
+      }
       this.update_model({ [campo]: '' });
       try {
         if (this.triajeForm[campo]) {
           this.triajeForm[campo]().value.set('');
         }
       } catch {
-        // Safe fallback
+
       }
       if (campo === 'peso' || campo === 'talla') {
         this.recalcular_imc_al_salir();
@@ -1134,11 +1111,15 @@ export class RegistroTriajeComponent implements OnInit {
       return api_error;
     }
 
-    const control = this.triajeForm[campo]();
-    if (!control.touched()) {
+    if (!this.validacion_solicitada()) {
       return '';
     }
 
+    if (campo === 'programacionPersonalId') {
+      return '';
+    }
+
+    const control = this.triajeForm[campo]();
     if (control.errors().some((error) => error.kind === 'required')) {
       return 'Este campo es obligatorio.';
     }
@@ -1155,11 +1136,11 @@ export class RegistroTriajeComponent implements OnInit {
       return api_error;
     }
 
-    const control = this.triajeForm.observaciones();
-    if (!control.touched()) {
+    if (!this.validacion_solicitada()) {
       return '';
     }
 
+    const control = this.triajeForm.observaciones();
     return control.errors().some((error) => error.kind === 'maxLength')
       ? 'La observación no debe superar los 200 caracteres.'
       : '';

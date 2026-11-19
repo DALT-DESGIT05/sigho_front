@@ -27,6 +27,8 @@ describe('PacientesTriajeComponent', () => {
         numero_documento: '46825137',
         numero_historia: 'HC-105842',
         nombre_completo: 'PÉREZ GARCÍA JUAN CARLOS',
+        sexo_codigo: 'M',
+        sexo: 'Masculino',
         edad: 36,
         es_nn: false,
       },
@@ -57,6 +59,8 @@ describe('PacientesTriajeComponent', () => {
         numero_documento: null,
         numero_historia: null,
         nombre_completo: 'NN NN',
+        sexo_codigo: null,
+        sexo: null,
         edad: null,
         es_nn: true,
       },
@@ -160,6 +164,13 @@ describe('PacientesTriajeComponent', () => {
       { value: '', label: 'Todos' },
       { value: 'RAMÍREZ SOTO LUIS', label: 'RAMÍREZ SOTO LUIS' },
     ]);
+  });
+
+  it('displays the patient name without sex in the patient list', () => {
+    expect(component.formatear_dato_paciente(seguimientos[0].paciente)).toBe(
+       'PÉREZ GARCÍA Juan Carlos',
+    );
+    expect(component.formatear_dato_paciente(seguimientos[1].paciente)).toBe('NN NN');
   });
 
   it('sends document, state and priority filters to the backend', () => {

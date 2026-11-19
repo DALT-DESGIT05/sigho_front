@@ -2,7 +2,7 @@ import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError } from 'rxjs';
 import { environment } from '../../../environments/environments';
-import { HospitalizacionContexto } from '../../interfaces/emergencia/triaje.interface';
+import { HospitalizacionContexto } from '../../interfaces/hospitalizacion/hospitalizacion.interface';
 import { ResponseInteface } from '../../interfaces/response.interface';
 import { MOSTRAR_LOADING } from '../../interceptors/loading.interceptor';
 import { procesar_error } from '../../utils/http_error.util';
@@ -18,8 +18,11 @@ export class HospitalizacionService {
   ): Observable<ResponseInteface<HospitalizacionContexto>> {
     return this.httpClient
       .get<ResponseInteface<HospitalizacionContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/hospitalizacion`,
-        { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
+        `${this.baseUrl}v1/hospitalizacion/atenciones/hospitalizacion`,
+        {
+          params: { atencion_id },
+          context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
+        },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
   }
@@ -33,8 +36,8 @@ export class HospitalizacionService {
   ): Observable<ResponseInteface<HospitalizacionContexto>> {
     return this.httpClient
       .post<ResponseInteface<HospitalizacionContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/hospitalizacion`,
-        { diagnostico_id, motivo_id, observacion },
+        `${this.baseUrl}v1/hospitalizacion/atenciones/hospitalizacion`,
+        { atencion_id, diagnostico_id, motivo_id, observacion },
         { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
@@ -47,15 +50,19 @@ export class HospitalizacionService {
   ): Observable<ResponseInteface<HospitalizacionContexto>> {
     return this.httpClient
       .delete<ResponseInteface<HospitalizacionContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/hospitalizacion/${orden_hospitalizacion_id}`,
-        { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
+        `${this.baseUrl}v1/hospitalizacion/atenciones/hospitalizacion`,
+        {
+          params: { atencion_id, orden_hospitalizacion_id },
+          context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
+        },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
   }
 
   descargar_reporte_pdf(atencion_id: number, mostrar_loading = true): Observable<Blob> {
     return this.httpClient
-      .get(`${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/reporte-orden-hospitalizacion`, {
+      .get(`${this.baseUrl}v1/reportes/ordenes/hospitalizacion`, {
+        params: { atencion_id },
         responseType: 'blob',
         context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
       })

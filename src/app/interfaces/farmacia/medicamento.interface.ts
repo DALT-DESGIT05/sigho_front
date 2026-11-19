@@ -95,3 +95,20 @@ export interface HistorialRecetaDetalle {
   duracion: number;
   indicaciones: string;
 }
+
+export interface PayloadStoreMedicamento {
+  atencion_id: number | string;
+  codigo_diagnostico: string;
+  codigo_medicamento: string;
+  duracion: number;
+  dosis: number | string;
+  frecuencia: number | string;
+  cantidad: number;
+  indicacion: string;
+  via_administracion: number | string;
+  codigo_farmacia: number;
+}
+
+export interface PayloadUpdateMedicamento extends PayloadStoreMedicamento {
+  idtemrec?: number;
+}

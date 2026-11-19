@@ -1,12 +1,12 @@
 import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError } from 'rxjs';
+import { Observable, catchError, from, switchMap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environments';
 import {
   HistorialLaboratorioContexto,
   LaboratorioContexto,
   ResultadosLaboratorioContexto,
-} from '../../interfaces/emergencia/triaje.interface';
+} from '../../interfaces/laboratorio/laboratorio.interface';
 import { ResponseInteface } from '../../interfaces/response.interface';
 import { MOSTRAR_LOADING } from '../../interceptors/loading.interceptor';
 import { procesar_error } from '../../utils/http_error.util';
@@ -22,8 +22,11 @@ export class LaboratorioService {
   ): Observable<ResponseInteface<LaboratorioContexto>> {
     return this.httpClient
       .get<ResponseInteface<LaboratorioContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/laboratorio`,
-        { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
+        `${this.baseUrl}v1/laboratorio/atenciones/laboratorio`,
+        {
+          params: { atencion_id },
+          context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
+        },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
   }
@@ -34,8 +37,11 @@ export class LaboratorioService {
   ): Observable<ResponseInteface<HistorialLaboratorioContexto>> {
     return this.httpClient
       .get<ResponseInteface<HistorialLaboratorioContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/laboratorio/historial`,
-        { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
+        `${this.baseUrl}v1/laboratorio/atenciones/laboratorio/historial`,
+        {
+          params: { atencion_id },
+          context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
+        },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
   }
@@ -46,8 +52,11 @@ export class LaboratorioService {
   ): Observable<ResponseInteface<ResultadosLaboratorioContexto>> {
     return this.httpClient
       .get<ResponseInteface<ResultadosLaboratorioContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/laboratorio/resultados`,
-        { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
+        `${this.baseUrl}v1/laboratorio/atenciones/laboratorio/resultados`,
+        {
+          params: { atencion_id },
+          context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
+        },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
   }
@@ -61,8 +70,8 @@ export class LaboratorioService {
   ): Observable<ResponseInteface<LaboratorioContexto>> {
     return this.httpClient
       .post<ResponseInteface<LaboratorioContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/laboratorio`,
-        { prioridad_id, diagnostico_id, servicios },
+        `${this.baseUrl}v1/laboratorio/atenciones/laboratorio`,
+        { atencion_id, prioridad_id, diagnostico_id, servicios },
         { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
@@ -75,18 +84,42 @@ export class LaboratorioService {
   ): Observable<ResponseInteface<LaboratorioContexto>> {
     return this.httpClient
       .delete<ResponseInteface<LaboratorioContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/laboratorio/${laboratorio_id}`,
-        { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
+        `${this.baseUrl}v1/laboratorio/atenciones/laboratorio`,
+        {
+          params: { atencion_id, orden_id: laboratorio_id },
+          context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
+        },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
   }
 
   descargar_reporte_pdf(atencion_id: number, mostrar_loading = true): Observable<Blob> {
     return this.httpClient
-      .get(`${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/reporte-orden-laboratorio`, {
+      .get(`${this.baseUrl}v1/reportes/ordenes/laboratorio`, {
+        params: { atencion_id },
         responseType: 'blob',
         context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
       })
-      .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          if (!(error.error instanceof Blob)) {
+            return procesar_error(error);
+          }
+
+          return from(error.error.text()).pipe(
+            switchMap((body: string) => {
+              let response: Record<string, unknown> = {};
+
+              try {
+                response = JSON.parse(body) as Record<string, unknown>;
+              } catch {
+                response = {};
+              }
+
+              return throwError(() => ({ ...response, statusCode: error.status }));
+            }),
+          );
+        }),
+      );
   }
 }

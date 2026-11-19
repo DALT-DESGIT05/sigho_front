@@ -5,7 +5,7 @@ import { environment } from '../../../environments/environments';
 import {
   ApoyoDiagnosticoContexto,
   ServicioImagen,
-} from '../../interfaces/emergencia/triaje.interface';
+} from '../../interfaces/imagenologia/imagen.interface';
 import { ResponseInteface } from '../../interfaces/response.interface';
 import { MOSTRAR_LOADING } from '../../interceptors/loading.interceptor';
 import { procesar_error } from '../../utils/http_error.util';
@@ -21,8 +21,11 @@ export class ImagenService {
   ): Observable<ResponseInteface<ApoyoDiagnosticoContexto>> {
     return this.httpClient
       .get<ResponseInteface<ApoyoDiagnosticoContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/apoyo-diagnostico`,
-        { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
+        `${this.baseUrl}v1/emergencia/atenciones/apoyo-diagnostico`,
+        {
+          params: { atencion_id },
+          context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
+        },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
   }
@@ -39,7 +42,7 @@ export class ImagenService {
 
     return this.httpClient
       .get<ResponseInteface<ServicioImagen[]>>(
-        `${this.baseUrl}v1/emergencia/apoyo-diagnostico/servicios-imagen`,
+        `${this.baseUrl}v1/imagenologia/servicios`,
         {
           params,
           context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
@@ -60,8 +63,9 @@ export class ImagenService {
   ): Observable<ResponseInteface<ApoyoDiagnosticoContexto>> {
     return this.httpClient
       .post<ResponseInteface<ApoyoDiagnosticoContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/apoyo-diagnostico/imagenes`,
+        `${this.baseUrl}v1/imagenologia/atenciones/apoyo-diagnostico/imagenes`,
         {
+          atencion_id,
           prioridad_id,
           diagnostico_id,
           servicio_codigo,
@@ -75,12 +79,14 @@ export class ImagenService {
   }
 
   descargar_reporte_pdf(atencion_id: number, imagen_id?: number | null, mostrar_loading = true): Observable<Blob> {
-    const url = imagen_id
-      ? `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/reporte-orden-imagen/${imagen_id}`
-      : `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/reporte-orden-imagen`;
+    const params: Record<string, string | number> = { atencion_id };
+    if (imagen_id !== null && imagen_id !== undefined) {
+      params['imagen_id'] = imagen_id;
+    }
 
     return this.httpClient
-      .get(url, {
+      .get(`${this.baseUrl}v1/reportes/ordenes/imagen`, {
+        params,
         responseType: 'blob',
         context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
       })

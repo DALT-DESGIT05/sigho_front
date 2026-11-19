@@ -1,8 +1,8 @@
 import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map } from 'rxjs';
+import { Observable, catchError } from 'rxjs';
 import { environment } from '../../../environments/environments';
-import { ResponseInteface } from '../../interfaces/response.interface';
+import { MOSTRAR_LOADING } from '../../interceptors/loading.interceptor';
 import {
   Dosis,
   Farmacia,
@@ -10,17 +10,19 @@ import {
   HistorialReceta,
   HistorialRecetaDetalle,
   Medicamento,
+  PayloadStoreMedicamento,
+  PayloadUpdateMedicamento,
   RecetaMedicaMedicamento,
   RecetaResponse,
   ViaAdministracion,
-} from '../../interfaces/emergencia/receta.interface';
-import { MOSTRAR_LOADING } from '../../interceptors/loading.interceptor';
+} from '../../interfaces/farmacia/medicamento.interface';
+import { ResponseInteface } from '../../interfaces/response.interface';
 import { procesar_error } from '../../utils/http_error.util';
 
 @Injectable({
   providedIn: 'root',
 })
-export class RecetaEmergenciaService {
+export class MedicamentoService {
   private readonly baseUrl = environment.baseUrl;
   private readonly httpClient = inject(HttpClient);
 
@@ -28,7 +30,7 @@ export class RecetaEmergenciaService {
     codigo_consultorio?: string | null,
     mostrar_loading = false,
   ): Observable<ResponseInteface<Farmacia[]>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/list_farmacias`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/list_farmacias`;
     return this.httpClient
       .get<ResponseInteface<Farmacia[]>>(url, {
         params: codigo_consultorio ? { codigo_consultorio } : {},
@@ -42,7 +44,7 @@ export class RecetaEmergenciaService {
     codigo_farmacia: number,
     mostrar_loading = false,
   ): Observable<ResponseInteface<Medicamento[]>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/list_medicamentos_by_texto`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/list_medicamentos_by_texto`;
     return this.httpClient
       .get<ResponseInteface<Medicamento[]>>(url, {
         params: { nombre_medicamento, codigo_farmacia: codigo_farmacia.toString() },
@@ -52,7 +54,7 @@ export class RecetaEmergenciaService {
   }
 
   list_dosis(mostrar_loading = false): Observable<ResponseInteface<Dosis[]>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/list_dosis`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/list_dosis`;
     return this.httpClient
       .get<ResponseInteface<Dosis[]>>(url, {
         context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
@@ -61,7 +63,7 @@ export class RecetaEmergenciaService {
   }
 
   list_frecuencia(mostrar_loading = false): Observable<ResponseInteface<Frecuencia[]>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/list_frecuencia`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/list_frecuencia`;
     return this.httpClient
       .get<ResponseInteface<Frecuencia[]>>(url, {
         context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
@@ -72,7 +74,7 @@ export class RecetaEmergenciaService {
   list_via_administracion(
     mostrar_loading = false,
   ): Observable<ResponseInteface<ViaAdministracion[]>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/list_via_administracion`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/list_via_administracion`;
     return this.httpClient
       .get<ResponseInteface<ViaAdministracion[]>>(url, {
         context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
@@ -86,7 +88,7 @@ export class RecetaEmergenciaService {
     fecha_atencion?: string | null,
     mostrar_loading = false,
   ): Observable<ResponseInteface<RecetaResponse>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/list_receta`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/list_receta`;
     return this.httpClient
       .get<ResponseInteface<RecetaResponse>>(url, {
         params: {
@@ -100,21 +102,10 @@ export class RecetaEmergenciaService {
   }
 
   store_medicamento(
-    payload: {
-      atencion_id: number | string;
-      codigo_diagnostico: string;
-      codigo_medicamento: string;
-      duracion: number;
-      dosis: number | string;
-      frecuencia: number | string;
-      cantidad: number;
-      indicacion: string;
-      via_administracion: number | string;
-      codigo_farmacia: number;
-    },
+    payload: PayloadStoreMedicamento,
     mostrar_loading = false,
   ): Observable<ResponseInteface<any>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/store_medicamento`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/store_medicamento`;
     return this.httpClient
       .post<ResponseInteface<any>>(
         url,
@@ -137,21 +128,10 @@ export class RecetaEmergenciaService {
 
   update_medicamento(
     idtemrec: number,
-    payload: {
-      atencion_id: number | string;
-      codigo_diagnostico: string;
-      codigo_medicamento: string;
-      duracion: number;
-      dosis: number | string;
-      frecuencia: number | string;
-      cantidad: number;
-      indicacion: string;
-      via_administracion: number | string;
-      codigo_farmacia: number;
-    },
+    payload: PayloadStoreMedicamento,
     mostrar_loading = false,
   ): Observable<ResponseInteface<any>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/udpate_medicamento`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/udpate_medicamento`;
     return this.httpClient
       .put<ResponseInteface<any>>(
         url,
@@ -177,7 +157,7 @@ export class RecetaEmergenciaService {
     idtemrec: number,
     mostrar_loading = false,
   ): Observable<ResponseInteface<RecetaMedicaMedicamento>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/get_receta_medicamento`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/get_receta_medicamento`;
     return this.httpClient
       .get<ResponseInteface<RecetaMedicaMedicamento>>(url, {
         params: { idtemrec: idtemrec.toString() },
@@ -190,7 +170,7 @@ export class RecetaEmergenciaService {
     idtemrec: number,
     mostrar_loading = false,
   ): Observable<ResponseInteface<any>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/eliminar_medicamento`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/eliminar_medicamento`;
     return this.httpClient
       .delete<ResponseInteface<any>>(url, {
         params: { idtemrec: idtemrec.toString() },
@@ -203,7 +183,7 @@ export class RecetaEmergenciaService {
     atencion_id: number | string,
     mostrar_loading = false,
   ): Observable<ResponseInteface<any>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/insertar_receta`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/insertar_receta`;
     return this.httpClient
       .post<ResponseInteface<any>>(
         url,
@@ -219,7 +199,7 @@ export class RecetaEmergenciaService {
     fecha_atencion?: string | null,
     mostrar_loading = false,
   ): Observable<ResponseInteface<any>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/verificar_receta`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/verificar_receta`;
     return this.httpClient
       .get<ResponseInteface<any>>(url, {
         params: {
@@ -238,7 +218,7 @@ export class RecetaEmergenciaService {
     fecha_atencion?: string | null,
     mostrar_loading = false,
   ): Observable<ResponseInteface<any>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/enable_editing_receta`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/enable_editing_receta`;
     return this.httpClient
       .put<ResponseInteface<any>>(
         url,
@@ -259,7 +239,7 @@ export class RecetaEmergenciaService {
     fecha_atencion?: string | null,
     mostrar_loading = false,
   ): Observable<ResponseInteface<any>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/add_indicacion_general`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/add_indicacion_general`;
     return this.httpClient
       .post<ResponseInteface<any>>(
         url,
@@ -279,7 +259,7 @@ export class RecetaEmergenciaService {
     codigo_farmacia: number,
     mostrar_loading = false,
   ): Observable<ResponseInteface<HistorialReceta[]>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/list_prescriptions_previous`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/list_prescriptions_previous`;
     return this.httpClient
       .get<ResponseInteface<HistorialReceta[]>>(url, {
         params: {
@@ -297,7 +277,7 @@ export class RecetaEmergenciaService {
     fecha_atencion?: string | null,
     mostrar_loading = false,
   ): Observable<ResponseInteface<HistorialRecetaDetalle[]>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/get_prescriptions_info`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/get_prescriptions_info`;
     return this.httpClient
       .get<ResponseInteface<HistorialRecetaDetalle[]>>(url, {
         params: {
@@ -316,7 +296,7 @@ export class RecetaEmergenciaService {
     codigo_farmacia: number,
     mostrar_loading = false,
   ): Observable<ResponseInteface<any>> {
-    const url = `${this.baseUrl}v1/consultorio/medicamento/store_receta_from_previous`;
+    const url = `${this.baseUrl}v1/farmacia/medicamento/store_receta_from_previous`;
     return this.httpClient
       .put<ResponseInteface<any>>(
         url,
@@ -335,7 +315,7 @@ export class RecetaEmergenciaService {
     codigo_farmacia: number,
     fecha_atencion?: string | null,
   ): Observable<Blob> {
-    const url = `${this.baseUrl}v1/consultorio/pdf/receta_medica`;
+    const url = `${this.baseUrl}v1/farmacia/pdf/receta_medica`;
     return this.httpClient.get(url, {
       responseType: 'blob',
       params: {

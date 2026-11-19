@@ -1,8 +1,8 @@
-import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError } from 'rxjs';
 import { environment } from '../../../environments/environments';
-import { InterconsultaContexto } from '../../interfaces/emergencia/triaje.interface';
+import { InterconsultaContexto } from '../../interfaces/emergencia/interconsulta.interface';
 import { ResponseInteface } from '../../interfaces/response.interface';
 import { MOSTRAR_LOADING } from '../../interceptors/loading.interceptor';
 import { procesar_error } from '../../utils/http_error.util';
@@ -16,10 +16,15 @@ export class InterconsultaService {
     atencion_id: number,
     mostrar_loading = false,
   ): Observable<ResponseInteface<InterconsultaContexto>> {
+    const params = new HttpParams().set('atencion_id', atencion_id.toString());
+
     return this.httpClient
       .get<ResponseInteface<InterconsultaContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/interconsultas`,
-        { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
+        `${this.baseUrl}v1/emergencia/atenciones/interconsultas`,
+        {
+          params,
+          context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
+        },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
   }
@@ -37,8 +42,9 @@ export class InterconsultaService {
   ): Observable<ResponseInteface<InterconsultaContexto>> {
     return this.httpClient
       .post<ResponseInteface<InterconsultaContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/interconsultas`,
+        `${this.baseUrl}v1/emergencia/atenciones/interconsultas`,
         {
+          atencion_id,
           prioridad_id,
           diagnostico_id,
           especialidad_id,
@@ -57,21 +63,35 @@ export class InterconsultaService {
     interconsulta_id: number,
     mostrar_loading = false,
   ): Observable<ResponseInteface<InterconsultaContexto>> {
+    const params = new HttpParams()
+      .set('atencion_id', atencion_id.toString())
+      .set('interconsulta_id', interconsulta_id.toString());
+
     return this.httpClient
       .delete<ResponseInteface<InterconsultaContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/interconsultas/${interconsulta_id}`,
-        { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
+        `${this.baseUrl}v1/emergencia/atenciones/interconsultas`,
+        {
+          params,
+          body: { atencion_id, interconsulta_id },
+          context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
+        },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
   }
 
-  descargar_reporte_pdf(atencion_id: number, interconsulta_id?: number | null, mostrar_loading = true): Observable<Blob> {
-    const url = interconsulta_id
-      ? `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/reporte-orden-interconsulta/${interconsulta_id}`
-      : `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/reporte-orden-interconsulta`;
+  descargar_reporte_pdf(
+    atencion_id: number,
+    interconsulta_id?: number | null,
+    mostrar_loading = true,
+  ): Observable<Blob> {
+    let params = new HttpParams().set('atencion_id', atencion_id.toString());
+    if (interconsulta_id) {
+      params = params.set('interconsulta_id', interconsulta_id.toString());
+    }
 
     return this.httpClient
-      .get(url, {
+      .get(`${this.baseUrl}v1/emergencia/atenciones/reporte-orden-interconsulta`, {
+        params,
         responseType: 'blob',
         context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
       })

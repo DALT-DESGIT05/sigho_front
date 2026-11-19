@@ -1,8 +1,8 @@
-import { HttpClient, HttpContext, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError } from 'rxjs';
 import { environment } from '../../../environments/environments';
-import { CierreAtencionEstado } from '../../interfaces/emergencia/triaje.interface';
+import { CierreAtencionEstado } from '../../interfaces/emergencia/cierre-atencion.interface';
 import { ResponseInteface } from '../../interfaces/response.interface';
 import { MOSTRAR_LOADING } from '../../interceptors/loading.interceptor';
 import { procesar_error } from '../../utils/http_error.util';
@@ -16,10 +16,15 @@ export class CierreAtencionService {
     atencion_id: number,
     mostrar_loading = false,
   ): Observable<ResponseInteface<CierreAtencionEstado>> {
+    const params = new HttpParams().set('atencion_id', atencion_id.toString());
+
     return this.httpClient
       .get<ResponseInteface<CierreAtencionEstado>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/cierre`,
-        { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
+        `${this.baseUrl}v1/emergencia/atenciones/cierre`,
+        {
+          params,
+          context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
+        },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
   }
@@ -31,8 +36,8 @@ export class CierreAtencionService {
   ): Observable<ResponseInteface<CierreAtencionEstado>> {
     return this.httpClient
       .post<ResponseInteface<CierreAtencionEstado>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/cierre`,
-        { destino_codigo },
+        `${this.baseUrl}v1/emergencia/atenciones/cierre`,
+        { atencion_id, destino_codigo },
         { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));

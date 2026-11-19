@@ -18,11 +18,11 @@ export class CatalogoEmergenciaService {
   private signosVitalesCache: CatalogosSignosVitales | null = null;
   private cargandoSignosVitales$: Observable<ResponseInteface<CatalogosSignosVitales>> | null = null;
 
-  /**
-   * Obtiene únicamente los catálogos solicitados. Si ya están en memoria, los devuelve sin HTTP.
-   * Si faltan algunos, solicita solo los faltantes vía ?tablas=a,b.
-   * Si no se pasan tablas, garantiza la carga de todos (retrocompatibilidad).
-   */
+
+
+
+
+
   obtenerCatalogos(tablas?: (keyof CatalogosEmergencia)[]): Observable<ResponseInteface<CatalogosEmergencia>> {
     if (!tablas || tablas.length === 0) {
       return this.httpClient.get<ResponseInteface<CatalogosEmergencia>>(`${this.baseUrl}v1/catalogos`).pipe(

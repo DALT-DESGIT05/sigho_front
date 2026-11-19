@@ -1,9 +1,9 @@
 import { PacienteSeguimientoTriaje } from '../../../interfaces/emergencia/triaje.interface';
 
-/**
- * Formats a patient name as "GRADE [(r)] SURNAMES Given Names".
- * Example: "COR MORIANO SAUÑE Anderson" or, when retired, "COR (r) MORIANO SAUÑE Anderson".
- */
+
+
+
+
 export function formatear_nombre_paciente(
   paciente: PacienteSeguimientoTriaje | null | undefined,
 ): string {

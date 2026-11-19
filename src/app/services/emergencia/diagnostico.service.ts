@@ -5,7 +5,7 @@ import { environment } from '../../../environments/environments';
 import {
   DiagnosticoCatalogo,
   DiagnosticoContexto,
-} from '../../interfaces/emergencia/triaje.interface';
+} from '../../interfaces/emergencia/diagnostico.interface';
 import { ResponseInteface } from '../../interfaces/response.interface';
 import { MOSTRAR_LOADING } from '../../interceptors/loading.interceptor';
 import { procesar_error } from '../../utils/http_error.util';
@@ -19,10 +19,15 @@ export class DiagnosticoService {
     atencion_id: number,
     mostrar_loading = false,
   ): Observable<ResponseInteface<DiagnosticoContexto>> {
+    const params = new HttpParams().set('atencion_id', atencion_id.toString());
+
     return this.httpClient
       .get<ResponseInteface<DiagnosticoContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/diagnosticos`,
-        { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
+        `${this.baseUrl}v1/emergencia/atenciones/diagnosticos`,
+        {
+          params,
+          context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
+        },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
   }
@@ -51,8 +56,8 @@ export class DiagnosticoService {
   ): Observable<ResponseInteface<DiagnosticoContexto>> {
     return this.httpClient
       .post<ResponseInteface<DiagnosticoContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/diagnosticos`,
-        { cie10_id, tipo_id, clasificacion_id, observacion },
+        `${this.baseUrl}v1/emergencia/atenciones/diagnosticos`,
+        { atencion_id, cie10_id, tipo_id, clasificacion_id, observacion },
         { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
@@ -63,10 +68,18 @@ export class DiagnosticoService {
     diagnostico_id: number,
     mostrar_loading = false,
   ): Observable<ResponseInteface<DiagnosticoContexto>> {
+    const params = new HttpParams()
+      .set('atencion_id', atencion_id.toString())
+      .set('diagnostico_id', diagnostico_id.toString());
+
     return this.httpClient
       .delete<ResponseInteface<DiagnosticoContexto>>(
-        `${this.baseUrl}v1/emergencia/atenciones/${atencion_id}/diagnosticos/${diagnostico_id}`,
-        { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
+        `${this.baseUrl}v1/emergencia/atenciones/diagnosticos`,
+        {
+          params,
+          body: { atencion_id, diagnostico_id },
+          context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
+        },
       )
       .pipe(catchError((error: HttpErrorResponse) => procesar_error(error)));
   }

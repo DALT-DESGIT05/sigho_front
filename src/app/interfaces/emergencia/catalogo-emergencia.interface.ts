@@ -28,10 +28,13 @@ export interface CatalogosEmergencia {
   especialidades: CatalogoEmergenciaOption[];
   ipress: CatalogoEmergenciaOption[];
   procedencias: CatalogoEmergenciaCodigoOption[];
+  modalidades_atencion: CatalogoEmergenciaCodigoOption[];
+  tipos_atencion: CatalogoEmergenciaCodigoOption[];
   areas_emergencia: CatalogoEmergenciaCodigoOption[];
   destinos_consultorio: CatalogoEmergenciaOption[];
   areas?: CatalogoEmergenciaCodigoOption[];
   niveles_triaje: CatalogoNivelTriajeOption[];
+  estados_triaje?: CatalogoEmergenciaCodigoOption[];
 }
 
 export interface CatalogoComponenteClinico {

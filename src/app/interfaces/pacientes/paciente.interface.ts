@@ -15,9 +15,7 @@ export interface PacienteBusqueda {
   nombres: string | null;
   nsa: string | null;
   parentesco: string | null;
-  /** Kinship code from sifsa1.fstafiliado (A = titular, B = padre, D = cónyuge...). */
   codigo_parentesco?: string | null;
-  /** True when the patient already has a companion linked (sighoweb.t_paciente_acompanante). */
   tiene_acompanante?: boolean;
   tipo_afiliado: 'TITULAR' | 'FAMILIAR' | null;
   celular: string | null;
@@ -32,6 +30,7 @@ export interface PacienteBusqueda {
   sexo: string;
   edad: number | null;
   ind_discapacitado: boolean;
+  ind_defensor_patria?: boolean | number | null;
 }
 
 export interface ActualizarContactoPacienteRequest {

@@ -6,7 +6,7 @@ import {
   AcompananteBusqueda,
   RegistrarAcompananteRequest,
   RegistrarAcompananteResponse,
-} from '../../interfaces/emergencia/acompanante.interface';
+} from '../../interfaces/admision/acompanante.interface';
 import { ResponseInteface } from '../../interfaces/response.interface';
 import { MOSTRAR_LOADING } from '../../interceptors/loading.interceptor';
 import { procesar_error } from '../../utils/http_error.util';
@@ -28,7 +28,7 @@ export class AcompananteService {
     }
 
     return this.httpClient
-      .get<ResponseInteface<AcompananteBusqueda[]>>(`${this.baseUrl}v1/acompanantes/buscar`, {
+      .get<ResponseInteface<AcompananteBusqueda[]>>(`${this.baseUrl}v1/admision/acompanante/buscar`, {
         params,
         context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading),
       })
@@ -41,7 +41,7 @@ export class AcompananteService {
   ): Observable<ResponseInteface<RegistrarAcompananteResponse>> {
     return this.httpClient
       .post<ResponseInteface<RegistrarAcompananteResponse>>(
-        `${this.baseUrl}v1/acompanantes`,
+        `${this.baseUrl}v1/admision/acompanante/store`,
         request,
         { context: new HttpContext().set(MOSTRAR_LOADING, mostrar_loading) },
       )

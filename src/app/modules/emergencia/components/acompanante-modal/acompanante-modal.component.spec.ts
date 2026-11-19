@@ -3,7 +3,7 @@ import { BsModalService } from 'ngx-bootstrap/modal';
 import { firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
 import { AfiliadoService } from '../../../../services/citas/afiliado.service';
-import { AcompananteService } from '../../../../services/emergencia/acompanante.service';
+import { AcompananteService } from '../../../../services/admision/acompanante.service';
 import { UtilService } from '../../../../services/util.service';
 import { AcompananteModalComponent } from './acompanante-modal.component';
 

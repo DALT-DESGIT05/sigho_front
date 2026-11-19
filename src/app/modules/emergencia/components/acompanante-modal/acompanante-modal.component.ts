@@ -17,12 +17,12 @@ import {
   AcompananteFormValue,
   RegistrarAcompananteRequest,
   RegistrarAcompananteResponse,
-} from '../../../../interfaces/emergencia/acompanante.interface';
+} from '../../../../interfaces/admision/acompanante.interface';
 import {
   AcompananteBusquedaService,
   AcompananteOpcion,
-} from '../../../../services/emergencia/acompanante-busqueda.service';
-import { AcompananteService } from '../../../../services/emergencia/acompanante.service';
+} from '../../../../services/admision/acompanante-busqueda.service';
+import { AcompananteService } from '../../../../services/admision/acompanante.service';
 import { UtilService } from '../../../../services/util.service';
 
 const ACOMPANANTE_INICIAL: AcompananteFormValue = {

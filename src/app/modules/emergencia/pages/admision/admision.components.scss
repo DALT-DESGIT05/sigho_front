@@ -40,7 +40,7 @@
 }
 
 .admission-actions {
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .patient-search-row {
@@ -80,6 +80,17 @@
   .patient-email-card {
     flex: 0 1 12rem !important;
     max-width: 13rem !important;
+  }
+
+  .patient-titular-card {
+    flex: 1 1 22rem !important;
+    min-width: min(100%, 16rem) !important;
+    max-width: min(100%, 32rem) !important;
+  }
+
+  ::ng-deep .patient-titular-card .app-summary-card__value {
+    white-space: normal;
+    word-break: break-word;
   }
 }
 
@@ -238,32 +249,6 @@
 .priority-badge-info--blue {
   background-color: var(--palette-primary-10, #ebf5ff);
   border: 1px solid var(--palette-primary, #1a56db);
-  color: var(--palette-primary, #1a56db);
-}
-
-.affiliate-modal-content {
-  display: grid;
-  gap: 1rem;
-}
-
-.affiliate-section {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.affiliate-section-title {
-  align-items: center;
-  border-bottom: 1px solid var(--palette-primary-200, #b6d4fe);
-  color: var(--palette-primary-fap-text);
-  display: flex;
-  font-size: 0.8rem;
-  font-weight: 600;
-  gap: 0.45rem;
-  margin: 0;
-  padding-bottom: 0.35rem;
-}
-
-.affiliate-section-title i {
   color: var(--palette-primary, #1a56db);
 }
 

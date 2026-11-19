@@ -293,20 +293,13 @@
               [codSitu]="paciente.cod_situ ?? null"
               [nombre]="nombre_paciente_seleccionado()"
               [parentesco]="paciente.parentesco || null"
-              [nsaLetra]="nsa_letra_paciente_seleccionado()"
+              [hcNsa]="'HC:' + (nsa_letra_paciente_seleccionado() || paciente.nsa)"
               [estadoAfiliacion]="estado_afiliacion_paciente_seleccionado()"
+              [esAfiliadoInput]="es_afiliado_paciente_seleccionado()"
+              [condicionesEspeciales]="condiciones_especiales_paciente_seleccionado()"
               [mostrarAfiliacion]="true"
               [situacion]="paciente.situacion || null"
             />
-            @if (es_derechohabiente(paciente.parentesco)) {
-              <app-button
-                text="Ver datos"
-                icon="fa-solid fa-address-book"
-                size="sm"
-                color="primary"
-                (clicked)="abrir_modal_datos_titular()"
-              />
-            }
           </div>
           <app-summary-card-group minWidth="9rem">
             <app-summary-card
@@ -362,6 +355,16 @@
               actionAriaLabel="Actualizar correo electrónico"
               (actionClicked)="abrir_modal_contacto('correo_electronico')"
             />
+            @if (es_derechohabiente(paciente.parentesco)) {
+              <app-summary-card
+                class="patient-titular-card"
+                etiqueta="Titular"
+                [valor]="nombre_titular_completo()"
+                [valueTitle]="nombre_titular_completo()"
+                [wide]="true"
+                icon="fa-solid fa-user-shield"
+              />
+            }
           </app-summary-card-group>
         </section>
       }
@@ -372,17 +375,17 @@
         <div class="col-12 col-md-6">
           <app-select
             size="sm"
-            label="Procedencia"
+            label="Tipo de atención"
             [requerido]="true"
             placeholder="-- Seleccione --"
-            [options]="procedencia_options()"
+            [options]="tipo_atencion_options()"
             [showEmptyOption]="true"
             emptyOptionLabel="-- Seleccione --"
-            [selectedValue]="admision_model().procedencia_id"
-            (selectedValueChange)="actualizar_procedencia($event)"
-            [formField]="admision_form.procedencia_id"
-            [invalid]="!!error_campo('procedencia_id', 'atencion.procedencia_id')"
-            [error]="error_campo('procedencia_id', 'atencion.procedencia_id')"
+            [selectedValue]="admision_model().tipo_atencion_id"
+            (selectedValueChange)="actualizar_tipo_atencion($event)"
+            [formField]="admision_form.tipo_atencion_id"
+            [invalid]="!!error_campo('tipo_atencion_id', 'atencion.tipo_atencion_id')"
+            [error]="error_campo('tipo_atencion_id', 'atencion.tipo_atencion_id')"
           />
         </div>
       </div>
@@ -400,7 +403,13 @@
 
     <footer class="admission-actions">
       <app-button
-        text="Registrar  admisión"
+        action="close"
+        type="button"
+        [disabled]="guardando()"
+        (clicked)="volver_a_cola()"
+      />
+      <app-button
+        text="Guardar"
         icon="fa-solid fa-floppy-disk"
         color="primary"
         type="submit"
@@ -417,6 +426,7 @@
     [keyboard]="false"
     [ignoreBackdropClick]="true"
     [showFooter]="true"
+    [footerEstandar]="true"
     [showCloseButton]="!guardando_contacto()"
     (closed)="limpiar_modal_contacto()"
   >
@@ -430,94 +440,18 @@
     />
     <div modal-footer>
       <app-button
-        action="save"
-        size="sm"
-        color="primary"
-        [loading]="guardando_contacto()"
-        (clicked)="guardar_contacto()"
-      />
-      <app-button
+        modal-footer-close
         action="close"
         size="sm"
         [disabled]="guardando_contacto()"
         (clicked)="contacto_modal.close()"
       />
-    </div>
-  </app-modal>
-
-  <app-modal
-    #datos_titular_modal
-    title="Información del Afiliado"
-    icon="fa-solid fa-address-book"
-    size="lg"
-    [keyboard]="true"
-    [showFooter]="true"
-    [showCloseButton]="true"
-  >
-    @if (paciente_seleccionado(); as pac) {
-      <div class="affiliate-modal-content">
-        <section class="affiliate-section">
-          <h6 class="affiliate-section-title">
-            <i class="fa-solid fa-user-shield" aria-hidden="true"></i> Datos del Titular
-          </h6>
-          <app-summary-card-group minWidth="9rem">
-            <app-summary-card
-              etiqueta="Titular"
-              [valor]="nombre_titular_completo()"
-              icon="fa-solid fa-user-shield"
-              [wide]="true"
-            />
-          </app-summary-card-group>
-        </section>
-
-        <section class="affiliate-section">
-          <h6 class="affiliate-section-title">
-            <i class="fa-solid fa-user" aria-hidden="true"></i> Datos del Paciente
-          </h6>
-          <app-summary-card-group minWidth="9rem">
-            <app-summary-card
-              etiqueta="Nombre"
-              [valor]="nombre_paciente_seleccionado()"
-              icon="fa-solid fa-user"
-              [wide]="true"
-            />
-            <app-summary-card
-              etiqueta="Parentesco"
-              [valor]="pac.parentesco || 'No registrado'"
-              icon="fa-solid fa-people-roof"
-            />
-            @if (pac.codigo_afiliado) {
-              <app-summary-card
-                etiqueta="Código Afiliado"
-                [valor]="pac.codigo_afiliado"
-                icon="fa-solid fa-id-badge"
-              />
-            }
-            <app-summary-card
-              etiqueta="DNI"
-              [valor]="pac.numero_documento || 'No registrado'"
-              icon="fa-regular fa-address-card"
-            />
-            <app-summary-card
-              etiqueta="Sexo"
-              [valor]="pac.sexo || 'No registrado'"
-              icon="fa-solid fa-venus-mars"
-            />
-            <app-summary-card
-              etiqueta="Edad"
-              [valor]="pac.edad === null ? 'No registrada' : pac.edad + ' años'"
-              icon="fa-regular fa-calendar"
-            />
-          </app-summary-card-group>
-        </section>
-      </div>
-    }
-    <div modal-footer>
       <app-button
-        action="close"
+        action="save"
         size="sm"
         color="primary"
-        (clicked)="datos_titular_modal.close()"
+        [loading]="guardando_contacto()"
+        (clicked)="guardar_contacto()"
       />
     </div>
   </app-modal>

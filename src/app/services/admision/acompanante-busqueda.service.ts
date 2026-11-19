@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
-import { AcompananteBusqueda } from '../../interfaces/emergencia/acompanante.interface';
+import { AcompananteBusqueda } from '../../interfaces/admision/acompanante.interface';
 import { AcompananteService } from './acompanante.service';
 
 export interface AcompananteOpcion {
@@ -9,11 +9,6 @@ export interface AcompananteOpcion {
   persona: AcompananteBusqueda;
 }
 
-/**
- * Encapsula la búsqueda combinada de acompañantes: realiza la consulta al endpoint de
- * acompañantes de sigho_back, el cual busca en personas locales y en afiliados SIFSA1
- * por NSA, DNI o Nombres y Apellidos.
- */
 @Injectable({ providedIn: 'root' })
 export class AcompananteBusquedaService {
   private readonly acompananteService = inject(AcompananteService);

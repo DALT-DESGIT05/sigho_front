@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { FormField, disabled, email, form, required } from '@angular/forms/signals';
 import { Router } from '@angular/router';
-import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
 import { Observable, concatMap, finalize, map, of, tap } from 'rxjs';
 import {
   AutoCompleteComponent,
@@ -29,14 +28,14 @@ import type { CatalogoEmergenciaCodigoOption } from '../../../../interfaces/emer
 import type {
   PacienteBusqueda,
   SexoCodigo,
-} from '../../../../interfaces/emergencia/paciente.interface';
+} from '../../../../interfaces/pacientes/paciente.interface';
 import type { PaletteColor } from '../../../../interfaces/util.interface';
 import type {
   CrearAtencionRequest,
   CrearAtencionResponse,
 } from '../../../../interfaces/emergencia/triaje.interface';
 import { CatalogoEmergenciaService } from '../../../../services/emergencia/catalogo-emergencia.service';
-import { PacienteService } from '../../../../services/emergencia/paciente.service';
+import { PacienteService } from '../../../../services/pacientes/paciente.service';
 import { TriajeService } from '../../../../services/emergencia/triaje.service';
 import { UtilService } from '../../../../services/util.service';
 import { AcompananteModalComponent } from '../../components/acompanante-modal/acompanante-modal.component';
@@ -61,7 +60,7 @@ interface AdmisionFormValue {
   correo_electronico: string;
   tipo_paciente_id: number | null;
   especialidad_id: number | null;
-  procedencia_id: number | null;
+  tipo_atencion_id: number | null;
   prioridad: string;
 }
 
@@ -85,11 +84,11 @@ const ADMISION_INICIAL: AdmisionFormValue = {
   correo_electronico: '',
   tipo_paciente_id: null,
   especialidad_id: null,
-  procedencia_id: null,
-  prioridad: 'I',
+  tipo_atencion_id: null,
+  prioridad: '',
 };
 
-/** RN007: a companion is required for minors and older adults (Ley 30490: 60+ years). */
+
 const EDAD_MAYORIA = 18;
 const EDAD_ADULTO_MAYOR = 60;
 
@@ -133,15 +132,9 @@ export class AdmisionComponents {
     return this.nombre_completo(paciente);
   });
 
-  /** Active situations in sifsa1.fstsituacion: ACTIVO, AFILIADO POR HOSPITAL, AFILIADO POR IPRESS. */
-  private static readonly SITUACIONES_AFILIADO_ACTIVO = [1, 11, 12];
-
   readonly badge_iafas_header = computed(() => {
     const paciente = this.paciente_seleccionado();
-    const es_afiliado_activo =
-      paciente?.cod_situ !== null &&
-      paciente?.cod_situ !== undefined &&
-      AdmisionComponents.SITUACIONES_AFILIADO_ACTIVO.includes(Number(paciente.cod_situ));
+    const es_afiliado_activo = paciente?.es_afiliado === true;
 
     return this.admision_model().paciente_fap && es_afiliado_activo
       ? 'AFILIADO IAFAS - FOSFAP'
@@ -182,11 +175,7 @@ export class AdmisionComponents {
     if (typeof paciente.es_afiliado === 'boolean') {
       return paciente.es_afiliado;
     }
-    const situ = paciente.cod_situ;
-    if (situ !== null && situ !== undefined) {
-      return AdmisionComponents.SITUACIONES_AFILIADO_ACTIVO.includes(Number(situ));
-    }
-    return Boolean(paciente.codigo_afiliado);
+    return paciente.es_afiliado === true;
   });
 
   readonly estado_afiliacion_paciente_seleccionado = computed(() => {
@@ -198,6 +187,22 @@ export class AdmisionComponents {
       return paciente.estado_afiliacion;
     }
     return this.es_afiliado_paciente_seleccionado() ? 'AFILIADO' : 'NO AFILIADO';
+  });
+
+  readonly condiciones_especiales_paciente_seleccionado = computed<string[]>(() => {
+    const paciente = this.paciente_seleccionado();
+    if (!paciente) return [];
+
+    const condiciones: string[] = [];
+    if (paciente.ind_discapacitado) condiciones.push('DISCAPACITADO');
+    if (
+      Number(paciente.ind_defensor_patria) === 1 ||
+      paciente.ind_defensor_patria === true
+    ) {
+      condiciones.push('DEFENSOR DE LA PATRIA');
+    }
+
+    return condiciones;
   });
 
   readonly nombre_titular_completo = computed(() => {
@@ -241,7 +246,7 @@ export class AdmisionComponents {
       when: () => this.admision_model().paciente_extrafap && !this.paciente_seleccionado_id(),
     });
     required(schema.tipo_paciente_id);
-    required(schema.procedencia_id);
+    required(schema.tipo_atencion_id);
     disabled(schema.numero_historia, { when: () => true });
     disabled(schema.apellidos_nombres, { when: () => true });
     disabled(schema.parentesco, { when: () => true });
@@ -251,10 +256,10 @@ export class AdmisionComponents {
   readonly validacion_solicitada = signal(false);
   readonly guardando = signal(false);
   readonly registrando_acompanante = signal(false);
-  /** True once a companion was registered for the selected patient in this admission. */
+
   readonly acompanante_registrado = signal(false);
 
-  /** RN007: why the selected patient needs a companion, or null when none is required or one exists. */
+
   readonly motivo_acompanante_requerido = computed<string | null>(() => {
     if (this.acompanante_registrado() || this.paciente_seleccionado()?.tiene_acompanante) {
       return null;
@@ -292,24 +297,18 @@ export class AdmisionComponents {
   readonly busqueda_extrafap_realizada = signal(false);
   readonly resultados_extrafap = signal(0);
   readonly especialidad_options = signal<SelectOption[]>([]);
-  readonly procedencia_options = signal<SelectOption[]>([]);
-  readonly prioridades = signal<readonly { value: string; color: string; label: string }[]>([
-    { value: 'I', label: 'Resucitación', color: 'red' },
-    { value: 'II', label: 'Emergencia', color: 'orange' },
-    { value: 'III', label: 'Urgencia', color: 'yellow' },
-    { value: 'IV', label: 'Urgencia Menor', color: 'green' },
-    { value: 'V', label: 'Sin Urgencia', color: 'blue' },
-  ]);
+  readonly tipo_atencion_options = signal<SelectOption[]>([]);
+  readonly prioridades = signal<readonly { value: string; color: string; label: string }[]>([]);
   readonly prioridades_nn = computed(() =>
-    this.prioridades().filter((prioridad) => prioridad.value === 'I'),
+    this.prioridades().slice(0, 1),
   );
   readonly prioridad_actual = computed(() => {
-    const prioridad_val = this.admision_model().prioridad || 'I';
+    const prioridad_val = this.admision_model().prioridad;
     return (
       this.prioridades().find((p) => p.value === prioridad_val) ?? {
-        value: 'I',
-        label: 'Resucitación',
-        color: 'red',
+        value: '',
+        label: 'Sin prioridad',
+        color: 'gray',
       }
     );
   });
@@ -325,7 +324,6 @@ export class AdmisionComponents {
   private readonly acompanante_modal =
     viewChild.required<AcompananteModalComponent>('acompanante_modal');
   private readonly contacto_modal = viewChild.required<ModalComponent>('contacto_modal');
-  private readonly datos_titular_modal = viewChild<ModalComponent>('datos_titular_modal');
   private readonly contacto_api_error = signal('');
   private paciente_nn_creado: { sexo: SexoCodigo; paciente_id: number } | null = null;
   private paciente_extrafap_creado: { documento: string; paciente_id: number } | null = null;
@@ -346,27 +344,6 @@ export class AdmisionComponents {
       }),
     );
 
-  /** Emergency admission origins, in display order (sighoweb.m_procedencia.nom_proc). */
-  private static readonly PROCEDENCIAS_ADMISION = ['ASO', 'AMB', 'EXA', 'REF'];
-
-  /** Keeps only the admission origins in their configured order; falls back to all when none match. */
-  filtrar_procedencias(procedencias: SelectOption[]): SelectOption[] {
-    const orden = AdmisionComponents.PROCEDENCIAS_ADMISION;
-    const filtradas = procedencias
-      .filter((item) => orden.includes(this.codigo_procedencia(item)))
-      .sort(
-        (a, b) =>
-          orden.indexOf(this.codigo_procedencia(a)) - orden.indexOf(this.codigo_procedencia(b)),
-      );
-
-    return filtradas.length > 0 ? filtradas : procedencias;
-  }
-
-  private codigo_procedencia(item: SelectOption): string {
-    return String((item as SelectOption & { codigo?: string }).codigo ?? '')
-      .trim()
-      .toUpperCase();
-  }
 
   readonly mostrar_paciente = (paciente: PacienteBusqueda): string => {
     const nsa = paciente.nsa?.trim();
@@ -386,7 +363,8 @@ export class AdmisionComponents {
         'tipos_documento',
         'sexos',
         'parentescos',
-        'procedencias',
+        'tipos_atencion',
+        'niveles_triaje',
       ])
       .subscribe({
         next: ({ data }) => {
@@ -397,29 +375,19 @@ export class AdmisionComponents {
           );
           this.parentesco_options.set(data.parentescos);
 
-          const opciones_procedencia = this.filtrar_procedencias(data.procedencias);
-          this.procedencia_options.set(opciones_procedencia);
+          const opciones_tipo_atencion = data.tipos_atencion ?? [];
+          this.tipo_atencion_options.set(opciones_tipo_atencion);
 
-          const procedencia_a_solicitud = opciones_procedencia.find(
-            (item) => this.codigo_procedencia(item) === 'ASO',
-          );
-          const procedencia_por_defecto_id =
-            (procedencia_a_solicitud?.value as number | undefined) ?? null;
+          const tipo_atencion_por_defecto =
+            opciones_tipo_atencion.find((item) => item.codigo === 'TIAT_01') ??
+            opciones_tipo_atencion[0];
+          const tipo_atencion_id_defecto = tipo_atencion_por_defecto?.value ?? null;
 
-          const niveles =
-            (data.niveles_triaje ?? []).length > 0
-              ? data.niveles_triaje.map((nivel) => ({
-                  value: nivel.value,
-                  label: nivel.label,
-                  color: this.util_service.color_prioridad(nivel.color),
-                }))
-              : [
-                  { value: 'I', label: 'Resucitación', color: 'red' },
-                  { value: 'II', label: 'Emergencia', color: 'orange' },
-                  { value: 'III', label: 'Urgencia', color: 'yellow' },
-                  { value: 'IV', label: 'Urgencia Menor', color: 'green' },
-                  { value: 'V', label: 'Sin Urgencia', color: 'blue' },
-                ];
+          const niveles = (data.niveles_triaje ?? []).map((nivel) => ({
+            value: nivel.value,
+            label: nivel.label,
+            color: this.util_service.color_prioridad(nivel.color),
+          }));
           this.prioridades.set(niveles);
 
           const opciones_prioridad = niveles.map((nivel) => ({
@@ -430,8 +398,8 @@ export class AdmisionComponents {
 
           this.actualizar_modelo({
             especialidad_id: null,
-            procedencia_id: procedencia_por_defecto_id,
-            prioridad: 'I',
+            tipo_atencion_id: tipo_atencion_id_defecto,
+            prioridad: niveles[0]?.value ?? '',
           });
           this.actualizar_tipo_paciente();
         },
@@ -473,16 +441,18 @@ export class AdmisionComponents {
   }
 
   actualizar_prioridad(value: string): void {
-    this.actualizar_modelo({ prioridad: this.admision_model().paciente_nn ? 'I' : value });
+    this.actualizar_modelo({
+      prioridad: this.admision_model().paciente_nn ? (this.prioridades()[0]?.value ?? '') : value,
+    });
   }
 
   actualizar_discapacidad(checked: boolean): void {
     this.actualizar_modelo({ ind_discapacitado: checked });
   }
 
-  actualizar_procedencia(value: string | number | null): void {
-    const procedencia_id = value === null || value === '' ? null : Number(value);
-    this.actualizar_modelo({ procedencia_id });
+  actualizar_tipo_atencion(value: string | number | null): void {
+    const tipo_atencion_id = value === null || value === '' ? null : Number(value);
+    this.actualizar_modelo({ tipo_atencion_id });
   }
 
   seleccionar_paciente(paciente: PacienteBusqueda): void {
@@ -670,10 +640,6 @@ export class AdmisionComponents {
     return valor !== 'TITULAR' && valor !== 'T' && valor !== 'A';
   }
 
-  abrir_modal_datos_titular(): void {
-    this.datos_titular_modal()?.open();
-  }
-
   error_paciente(): string {
     if (this.api_error('paciente_id')) {
       return this.api_error('paciente_id');
@@ -713,7 +679,7 @@ export class AdmisionComponents {
       | 'correo_electronico'
       | 'tipo_paciente_id'
       | 'especialidad_id'
-      | 'procedencia_id',
+      | 'tipo_atencion_id',
     api_campo: string,
   ): string {
     const api_error = this.api_error(api_campo);
@@ -754,29 +720,27 @@ export class AdmisionComponents {
 
     const motivo_acompanante = this.motivo_acompanante_requerido();
     if (motivo_acompanante) {
-      const decision = await Swal.fire({
+      const decision = await this.util_service.confirmar_accion({
         title: 'Acompañante requerido',
         text: `El paciente ${motivo_acompanante} y no tiene un acompañante registrado. Se debe registrar su acompañante con documento, parentesco y datos de contacto. ¿Desea continuar sin acompañante?`,
         icon: 'warning',
-        showCancelButton: true,
         confirmButtonText: 'Continuar sin acompañante',
         cancelButtonText: 'Registrar acompañante',
       });
-      if (!decision.isConfirmed) {
+      if (!decision) {
         this.abrir_modal_acompanante();
         return;
       }
     }
 
-    const confirmacion = await Swal.fire({
+    const confirmacion = await this.util_service.confirmar_accion({
       title: TITLE_MODAL,
       text: MESSAGE_CONFIRMATION_DEFAULT,
       icon: 'question',
-      showCancelButton: true,
       confirmButtonText: 'Sí, continuar',
       cancelButtonText: 'No',
     });
-    if (!confirmacion.isConfirmed) {
+    if (!confirmacion) {
       return;
     }
 
@@ -900,7 +864,7 @@ export class AdmisionComponents {
       atencion: {
         tipo_paciente_id: valor.tipo_paciente_id!,
         especialidad_id: valor.especialidad_id ?? undefined,
-        procedencia_id: valor.procedencia_id!,
+        tipo_atencion_id: valor.tipo_atencion_id!,
         numero_historia: valor.numero_historia.trim() || null,
       },
     };
@@ -956,7 +920,6 @@ export class AdmisionComponents {
     return '';
   }
 
-  /** Age from the search result or, for a new record, calculated from its birth date. */
   private edad_para_alerta(): number | null {
     const modelo = this.admision_model();
     if (modelo.edad !== '' && Number.isFinite(Number(modelo.edad))) {

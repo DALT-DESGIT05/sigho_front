@@ -8,7 +8,7 @@ import { vi } from 'vitest';
 import { environment } from '../../../../../environments/environments';
 import { ModalComponent } from '../../../../components/modal/modal.component';
 import { MESSAGE_CONFIRMATION_DEFAULT } from '../../../../config/constants';
-import { PacienteBusqueda } from '../../../../interfaces/emergencia/paciente.interface';
+import { PacienteBusqueda } from '../../../../interfaces/pacientes/paciente.interface';
 import { UtilService } from '../../../../services/util.service';
 import { AcompananteModalComponent } from '../../components/acompanante-modal/acompanante-modal.component';
 import { AdmisionComponents } from './admision.components';
@@ -50,7 +50,9 @@ describe('AdmisionComponents', () => {
           { value: 3, codigo: 'E', label: 'ExtraFap' },
         ],
         especialidades: [{ value: 13, label: 'Medicina Interna' }],
-        procedencias: [{ value: 1, codigo: 'EME', label: 'Emergencia' }],
+        procedencias: [],
+        modalidades_atencion: [],
+        tipos_atencion: [{ value: 126, codigo: 'TIAT_01', label: 'Consulta' }],
       },
     });
     fixture.detectChanges();
@@ -70,7 +72,7 @@ describe('AdmisionComponents', () => {
       paciente_fap: true,
       paciente_extrafap: false,
       paciente_nn: false,
-      procedencia_id: null,
+      tipo_atencion_id: null,
       tipo_paciente_id: 1,
     });
     expect(component.admision_form().valid()).toBe(false);
@@ -81,9 +83,13 @@ describe('AdmisionComponents', () => {
     expect(text).not.toContain('Listado de admisiones');
     expect(text).not.toContain('Asignar horario');
     expect(text).not.toContain('Seleccionar horario');
+    expect(text).toContain('Tipo de atención');
+    expect(component.tipo_atencion_options()).toEqual([
+      { value: 126, codigo: 'TIAT_01', label: 'Consulta' },
+    ]);
   });
 
-  it('does not create admission and requires procedencia to be selected', async () => {
+  it('does not create admission and requires an attention type to be selected', async () => {
     vi.spyOn(Swal, 'fire').mockResolvedValue({ isConfirmed: true } as never);
     component.seleccionar_paciente({
       paciente_id: 123,
@@ -104,13 +110,13 @@ describe('AdmisionComponents', () => {
       edad: 30,
       ind_discapacitado: false,
     });
-    component.admision_form.procedencia_id().value.set(null);
-    expect(component.admision_model().procedencia_id).toBeNull();
+    component.admision_form.tipo_atencion_id().value.set(null);
+    expect(component.admision_model().tipo_atencion_id).toBeNull();
 
     await component.guardar_admision();
 
     http_testing.expectNone(`${environment.baseUrl}v1/emergencia/atenciones`);
-    expect(component.error_campo('procedencia_id', 'atencion.procedencia_id')).toBe(
+    expect(component.error_campo('tipo_atencion_id', 'atencion.tipo_atencion_id')).toBe(
       'Este campo es obligatorio.',
     );
   });
@@ -136,7 +142,7 @@ describe('AdmisionComponents', () => {
       edad: 30,
       ind_discapacitado: false,
     });
-    component.admision_form.procedencia_id().value.set(1);
+    component.admision_form.tipo_atencion_id().value.set(126);
     await component.guardar_admision();
 
     expect(Swal.fire).toHaveBeenCalledWith(
@@ -149,7 +155,7 @@ describe('AdmisionComponents', () => {
       ind_discapacitado: false,
       atencion: {
         tipo_paciente_id: 1,
-        procedencia_id: 1,
+        tipo_atencion_id: 126,
         numero_historia: '654321',
       },
     });
@@ -218,7 +224,7 @@ describe('AdmisionComponents', () => {
       const fire = vi.spyOn(Swal, 'fire').mockResolvedValue({ isConfirmed: false } as never);
       vi.spyOn(component, 'abrir_modal_acompanante').mockImplementation(() => undefined);
       component.seleccionar_paciente(paciente_con({ edad: 5 }));
-      component.admision_form.procedencia_id().value.set(1);
+      component.admision_form.tipo_atencion_id().value.set(126);
 
       await component.guardar_admision();
 
@@ -455,7 +461,7 @@ describe('AdmisionComponents', () => {
       ind_discapacitado: false,
     });
 
-    component.admision_form.procedencia_id().value.set(1);
+    component.admision_form.tipo_atencion_id().value.set(126);
     await component.guardar_admision();
 
     const patient_request = http_testing.expectOne(`${environment.baseUrl}v1/pacientes/fap`);
@@ -491,7 +497,7 @@ describe('AdmisionComponents', () => {
     vi.spyOn(Swal, 'fire').mockResolvedValue({ isConfirmed: true } as never);
     component.seleccionar_tipo_paciente('nn', true);
     component.admision_form.sexo().value.set('F');
-    component.admision_form.procedencia_id().value.set(1);
+    component.admision_form.tipo_atencion_id().value.set(126);
 
     await component.guardar_admision();
 
@@ -526,7 +532,7 @@ describe('AdmisionComponents', () => {
     component.admision_form.apellido_materno().value.set('GARCIA');
     component.admision_form.sexo().value.set('M');
     component.admision_form.correo_electronico().value.set('juan@example.com');
-    component.admision_form.procedencia_id().value.set(1);
+    component.admision_form.tipo_atencion_id().value.set(126);
 
     await component.guardar_admision();
 
@@ -602,7 +608,7 @@ describe('AdmisionComponents', () => {
       ind_discapacitado: false,
     });
 
-    component.admision_form.procedencia_id().value.set(1);
+    component.admision_form.tipo_atencion_id().value.set(126);
     await component.guardar_admision();
 
     http_testing.expectNone(`${environment.baseUrl}v1/pacientes/extrafap`);
@@ -614,7 +620,7 @@ describe('AdmisionComponents', () => {
       ind_discapacitado: false,
       atencion: {
         tipo_paciente_id: 3,
-        procedencia_id: 1,
+        tipo_atencion_id: 126,
         numero_historia: '654321',
       },
     });
@@ -678,7 +684,7 @@ describe('AdmisionComponents', () => {
     vi.spyOn(Swal, 'fire').mockResolvedValue({ isConfirmed: true } as never);
     component.seleccionar_tipo_paciente('nn', true);
     component.admision_form.sexo().value.set('F');
-    component.admision_form.procedencia_id().value.set(1);
+    component.admision_form.tipo_atencion_id().value.set(126);
 
     await component.guardar_admision();
     http_testing.expectOne(`${environment.baseUrl}v1/pacientes/nn`).flush({
@@ -725,24 +731,6 @@ describe('AdmisionComponents', () => {
       paciente_nn: true,
       prioridad: 'I',
     });
-  });
-
-  it('shows only A SOLICITUD, AMBULATORIO, EXAMENES and REFERIDO as admission origins, in that order', () => {
-    const opciones = component.filtrar_procedencias([
-      { value: 1, codigo: 'EME', label: 'EMERGENCIA' },
-      { value: 11, codigo: 'REF', label: 'REFERIDO' },
-      { value: 9, codigo: 'EXA', label: 'EXAMENES' },
-      { value: 5, codigo: 'AMB', label: 'AMBULATORIO' },
-      { value: 3, codigo: 'ASO', label: 'A SOLICITUD' },
-    ] as never);
-
-    expect(opciones.map((opcion) => opcion.value)).toEqual([3, 5, 9, 11]);
-  });
-
-  it('keeps every origin when none of the admission origins exist', () => {
-    const procedencias = [{ value: 1, codigo: 'EME', label: 'EMERGENCIA' }] as never;
-
-    expect(component.filtrar_procedencias(procedencias)).toEqual(procedencias);
   });
 
   it('shows NSA and kinship code before the name in patient search options', () => {

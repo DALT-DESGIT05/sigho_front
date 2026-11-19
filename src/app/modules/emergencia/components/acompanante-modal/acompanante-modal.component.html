@@ -9,6 +9,7 @@
   [separateFromParent]="separateFromParent()"
   [showCloseButton]="!guardando()"
   [showFooter]="true"
+  [footerEstandar]="true"
 >
   <form class="companion-form">
     <app-card-general title="Registro del Acompañante" headerClass="companion-panel-header">
@@ -176,16 +177,18 @@
 
   <div modal-footer>
     <app-button
-      action="save"
-      size="sm"
-      [loading]="guardando()"
-      (clicked)="guardar()"
-    />
-    <app-button
+      modal-footer-close
       action="close"
       size="sm"
       [disabled]="guardando()"
       (clicked)="cerrar_modal()"
+    />
+    <app-button
+      action="save"
+      text="Registrar acompañante"
+      size="sm"
+      [loading]="guardando()"
+      (clicked)="guardar()"
     />
   </div>
 </app-modal>

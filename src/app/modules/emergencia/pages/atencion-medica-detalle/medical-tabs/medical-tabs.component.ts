@@ -47,7 +47,21 @@ import { TabEnfermedadComponent } from './tab-enfermedad/tab-enfermedad.componen
 import { TabEvaluacionComponent } from './tab-evaluacion/tab-evaluacion.component';
 import { TabRecetaComponent } from './tab-receta/tab-receta.component';
 
-import { Farmacia, RecetaMedica } from '../../../../../interfaces/emergencia/receta.interface';
+import { Farmacia, RecetaMedica } from '../../../../../interfaces/farmacia/medicamento.interface';
+import {
+  MotivoHospitalizacion,
+  OrdenHospitalizacion,
+} from '../../../../../interfaces/hospitalizacion/hospitalizacion.interface';
+import {
+  OrdenImagen,
+  ServicioImagen,
+} from '../../../../../interfaces/imagenologia/imagen.interface';
+import {
+  OrdenHistorialLaboratorio,
+  OrdenLaboratorio,
+  OrdenResultadoLaboratorio,
+  ServicioLaboratorio,
+} from '../../../../../interfaces/laboratorio/laboratorio.interface';
 import {
   AreaInterconsulta,
   DetalleAtencionResponse,
@@ -58,22 +72,13 @@ import {
   EvaluacionMedicaData,
   ExamenRegional,
   FuncionBiologica,
-  MotivoHospitalizacion,
-  OrdenHistorialLaboratorio,
-  OrdenHospitalizacion,
-  OrdenImagen,
   OrdenInterconsulta,
-  OrdenLaboratorio,
   OrdenProcedEnf,
-  OrdenResultadoLaboratorio,
   PersonalInterconsulta,
   PrioridadOrdenMedica,
-  ServicioImagen,
-  ServicioLaboratorio,
   ServicioProcedEnf,
   TipoDiagnostico,
 } from '../../../../../interfaces/emergencia/triaje.interface';
-import { RecetaEmergenciaService } from '../../../../../services/emergencia/receta.service';
 import { UtilService } from '../../../../../services/util.service';
 
 @Component({
@@ -292,28 +297,22 @@ export class MedicalTabsComponent {
     }
   }
 
-  campo_evaluacion_invalido(campo: keyof EvaluacionMedicaData): boolean {
-    if (!this.validacion_evaluacion_solicitada()) return false;
-
-    return !String(this.formulario()[campo] ?? '').trim();
+  campo_evaluacion_invalido(_campo: keyof EvaluacionMedicaData): boolean {
+    return false;
   }
 
-  clasificacion_regional_invalida(examen: ExamenRegional): boolean {
-    return this.validacion_evaluacion_solicitada() && examen.estado_id === null;
+  clasificacion_regional_invalida(_examen: ExamenRegional): boolean {
+    return false;
   }
 
-  observacion_regional_invalida(examen: ExamenRegional): boolean {
-    return (
-      this.validacion_evaluacion_solicitada() &&
-      examen.estado_tipo === 'PATOLOGICO' &&
-      !examen.observacion?.trim()
-    );
+  observacion_regional_invalida(_examen: ExamenRegional): boolean {
+    return false;
   }
 
   texto_observacion_regional(examen: ExamenRegional): string {
     return examen.estado_tipo === 'NO_EVALUADO'
       ? 'No aplica observación'
-      : 'Observación (requerido si es patológico)';
+      : 'Observación';
   }
 
   solicitar_guardado_enfermedad(event: Event): void {
@@ -324,24 +323,6 @@ export class MedicalTabsComponent {
   solicitar_guardado_evaluacion(event: Event): void {
     event.preventDefault();
     this.validacion_evaluacion_solicitada.set(true);
-
-    const formulario = this.formulario();
-    if (formulario.tipo_reg_evaluac === 1) {
-      const examenesIncompletos = this.examenes_regionales().some(
-        (examen) =>
-          this.clasificacion_regional_invalida(examen) ||
-          this.observacion_regional_invalida(examen),
-      );
-
-      if (examenesIncompletos) {
-        this.utilService.mostrar_alerta(
-          'Debe clasificar todos los sistemas del examen físico regional.',
-          'warning',
-        );
-        return;
-      }
-    }
-
     this.guardarEvaluacion.emit(event);
   }
 

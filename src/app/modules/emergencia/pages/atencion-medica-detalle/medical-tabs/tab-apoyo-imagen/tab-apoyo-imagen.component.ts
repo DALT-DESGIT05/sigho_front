@@ -19,21 +19,24 @@ import { CheckComponent } from '../../../../../../components/check/check.compone
 import { InputTextComponent } from '../../../../../../components/input-text/input-text.component';
 import { LabelComponent } from '../../../../../../components/label/label.component';
 import { ModalComponent } from '../../../../../../components/modal/modal.component';
-import { SelectComponent, SelectOption, SelectValue } from '../../../../../../components/select/select.component';
+import {
+  SelectComponent,
+  SelectOption,
+  SelectValue,
+} from '../../../../../../components/select/select.component';
 import { TableComponent } from '../../../../../../components/table/table.component';
+import { TableCellContext, TableColumn } from '../../../../../../interfaces/util.interface';
 import {
-  TableCellContext,
-  TableColumn,
-} from '../../../../../../interfaces/util.interface';
-import {
-  CategoriaApoyoImagen,
   DetalleAtencionResponse,
   Diagnostico,
-  OrdenImagen,
   PrioridadOrdenMedica,
-  ServicioImagen,
 } from '../../../../../../interfaces/emergencia/triaje.interface';
-import { ImagenService } from '../../../../../../services/emergencia/imagen.service';
+import {
+  CategoriaApoyoImagen,
+  OrdenImagen,
+  ServicioImagen,
+} from '../../../../../../interfaces/imagenologia/imagen.interface';
+import { ImagenService } from '../../../../../../services/imagenologia/imagen.service';
 import { UtilService } from '../../../../../../services/util.service';
 
 export interface GuardarApoyoImagenPayload {
@@ -84,18 +87,19 @@ export class TabApoyoImagenComponent {
   guardarSolicitud = output<GuardarApoyoImagenPayload>();
 
   private readonly estadoTpl = viewChild<TemplateRef<TableCellContext<OrdenImagen>>>('estadoTpl');
-  private readonly accionesTpl = viewChild<TemplateRef<TableCellContext<OrdenImagen>>>('accionesTpl');
+  private readonly accionesTpl =
+    viewChild<TemplateRef<TableCellContext<OrdenImagen>>>('accionesTpl');
 
-  readonly plantillasCelda = computed<
-    Record<string, TemplateRef<TableCellContext<OrdenImagen>>>
-  >(() => {
-    const plantillas: Record<string, TemplateRef<TableCellContext<OrdenImagen>>> = {};
-    const estado = this.estadoTpl();
-    const acciones = this.accionesTpl();
-    if (estado) plantillas['estado'] = estado;
-    if (acciones) plantillas['acciones'] = acciones;
-    return plantillas;
-  });
+  readonly plantillasCelda = computed<Record<string, TemplateRef<TableCellContext<OrdenImagen>>>>(
+    () => {
+      const plantillas: Record<string, TemplateRef<TableCellContext<OrdenImagen>>> = {};
+      const estado = this.estadoTpl();
+      const acciones = this.accionesTpl();
+      if (estado) plantillas['estado'] = estado;
+      if (acciones) plantillas['acciones'] = acciones;
+      return plantillas;
+    },
+  );
 
   readonly columnasOrdenes: TableColumn<OrdenImagen>[] = [
     {
@@ -154,7 +158,12 @@ export class TabApoyoImagenComponent {
     area_codigo: string;
   }[] = [
     { id: 'radiografias', nombre: 'Radiografías', icono: 'fa-solid fa-lungs', area_codigo: '012' },
-    { id: 'ecografias', nombre: 'Ecografías', icono: 'fa-solid fa-wave-square', area_codigo: '004' },
+    {
+      id: 'ecografias',
+      nombre: 'Ecografías',
+      icono: 'fa-solid fa-wave-square',
+      area_codigo: '004',
+    },
     { id: 'tomografias', nombre: 'Tomografías', icono: 'fa-solid fa-brain', area_codigo: '014' },
     { id: 'resonancias', nombre: 'Resonancias', icono: 'fa-solid fa-magnet', area_codigo: '013' },
     { id: 'mamografias', nombre: 'Mamografías', icono: 'fa-solid fa-ribbon', area_codigo: '008' },
@@ -171,10 +180,8 @@ export class TabApoyoImagenComponent {
     return cat === 'tomografias' || cat === 'resonancias';
   });
 
-  seleccionar_categoria_apoyo_imagen(categoria: CategoriaApoyoImagen): void {
-    this.categoria_apoyo_imagen.set(
-      this.categoria_apoyo_imagen() === categoria ? null : categoria,
-    );
+  seleccionar_categoria(categoria: CategoriaApoyoImagen): void {
+    this.categoria_apoyo_imagen.set(this.categoria_apoyo_imagen() === categoria ? null : categoria);
     this.limpiar_formulario();
   }
 
@@ -197,7 +204,7 @@ export class TabApoyoImagenComponent {
   mostrar_servicio_imagen = (servicio: ServicioImagen): string =>
     `${servicio.codigo} - ${servicio.nombre}`;
 
-  seleccionar_servicio_imagen(servicio: ServicioImagen): void {
+  seleccionar_servicio(servicio: ServicioImagen): void {
     this.servicio_imagen_seleccionado.set(servicio);
   }
 
@@ -205,6 +212,7 @@ export class TabApoyoImagenComponent {
     return this.prioridades_orden().map((p) => ({
       value: p.prioridad_id,
       label: p.nombre,
+      tone: this.utilService.color_alerta(p.color) ?? 'secondary',
     }));
   });
 
@@ -215,41 +223,24 @@ export class TabApoyoImagenComponent {
     }));
   });
 
-  actualizar_prioridad_valor(value: SelectValue): void {
+  actualizar_prioridad(value: SelectValue): void {
     this.prioridad_apoyo_id.set(value ? Number(value) : null);
   }
 
-  actualizar_diagnostico_valor(value: SelectValue): void {
+  actualizar_diagnostico(value: SelectValue): void {
     this.diagnostico_apoyo_id.set(value ? Number(value) : null);
   }
 
-  actualizar_datos_clinicos_texto(value: string | number | null | undefined): void {
+  actualizar_datos_clinicos(value: string | number | null | undefined): void {
     this.datos_clinicos_apoyo.set(value !== null && value !== undefined ? String(value) : '');
   }
 
-  actualizar_observacion_texto(value: string | number | null | undefined): void {
+  actualizar_observacion(value: string | number | null | undefined): void {
     this.observacion_apoyo.set(value !== null && value !== undefined ? String(value) : '');
   }
 
-  actualizar_diagnostico(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.diagnostico_apoyo_id.set(value ? Number(value) : null);
-  }
-
-  actualizar_contraste(event: Event): void {
-    this.requiere_contraste.set((event.target as HTMLInputElement).checked);
-  }
-
-  actualizar_contraste_check(checked: boolean): void {
+  actualizar_contraste(checked: boolean): void {
     this.requiere_contraste.set(checked);
-  }
-
-  actualizar_datos_clinicos(event: Event): void {
-    this.datos_clinicos_apoyo.set((event.target as HTMLInputElement).value);
-  }
-
-  actualizar_observacion(event: Event): void {
-    this.observacion_apoyo.set((event.target as HTMLInputElement).value);
   }
 
   abrir_modal(): void {
@@ -300,7 +291,10 @@ export class TabApoyoImagenComponent {
   imprimir_orden(imagen_id?: number | null): void {
     const atencionId = this.detalle()?.atencion_id;
     if (!atencionId) {
-      this.utilService.mostrar_alerta('No se identificó la atención médica para generar el PDF.', 'warning');
+      this.utilService.mostrar_alerta(
+        'No se identificó la atención médica para generar el PDF.',
+        'warning',
+      );
       return;
     }
 

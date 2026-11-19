@@ -85,7 +85,7 @@
         label="Tiempo Enfermedad"
         [value]="formulario().tiempo_enfermedad"
         [disabled]="!detalle().fecha_hora_llamada_med"
-        (valueChange)="actualizar_valor_campo('tiempo_enfermedad', $event)"
+        (valueChange)="actualizar_campo('tiempo_enfermedad', $event)"
       />
     </div>
   </div>
@@ -97,7 +97,7 @@
         [maxlength]="200"
         [value]="formulario().motivo_consulta"
         [disabled]="!detalle().fecha_hora_llamada_med"
-        (valueChange)="actualizar_valor_campo('motivo_consulta', $event)"
+        (valueChange)="actualizar_campo('motivo_consulta', $event)"
       />
     </div>
   </div>
@@ -109,7 +109,7 @@
         [maxlength]="500"
         [value]="formulario().anamnesis"
         [disabled]="!detalle().fecha_hora_llamada_med"
-        (valueChange)="actualizar_valor_campo('anamnesis', $event)"
+        (valueChange)="actualizar_campo('anamnesis', $event)"
       />
     </div>
   </div>

@@ -1,0 +1,130 @@
+:host {
+  display: block;
+}
+
+.hoja-lesiones-body {
+  color: var(--palette-gray-text, #1f2937);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.1rem 0;
+}
+
+// Control con radios en línea
+.control-radios-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+
+  .radios-group {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    height: 31px;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+
+    app-radio {
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+  }
+}
+
+// Elevar columnas que contienen un selector desplegado
+[class*='col'] {
+  position: relative;
+
+  &:has(app-select:focus-within),
+  &:has(.is-open) {
+    z-index: 40;
+  }
+}
+
+// Sección del agresor: misma disposición que el registro de acompañante
+.hoja-header-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.hoja-search {
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.hoja-search:has(.auto-complete__menu) {
+  z-index: 50;
+}
+
+:host ::ng-deep .hoja-search .auto-complete__menu {
+  max-width: 100%;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+.hoja-grid {
+  align-items: end;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.field-wide {
+  grid-column: span 2;
+}
+
+.field-full {
+  grid-column: 1 / -1;
+}
+
+:host ::ng-deep .hoja-panel-header .form-check-label {
+  color: var(--palette-white);
+}
+
+:host ::ng-deep .hoja-panel-header .form-check-input {
+  border-color: rgb(255 255 255 / 65%);
+}
+
+@media (max-width: 900px) {
+  .hoja-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .field-wide {
+    grid-column: span 1;
+  }
+
+  .field-full {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .hoja-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hoja-header-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+
+:host ::ng-deep .modal-dialog-scrollable .modal-content:has(.auto-complete__menu) {
+  overflow: hidden;
+}
+
+:host ::ng-deep .modal-dialog-scrollable .modal-body:has(.auto-complete__menu) {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.lesiones-registradas {
+  margin-top: 1rem;
+}

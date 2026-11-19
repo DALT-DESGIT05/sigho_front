@@ -21,7 +21,7 @@ export class ReservaCitasPageComponent {
 
 
   readonly afiliados = signal<AfiliadoReserva[]>([
-    // datos temporales de prueba
+
     {
       codigo: 'AF001',
       nombreCompleto: 'AFILIADO DE PRUEBA UNO',
@@ -54,7 +54,7 @@ export class ReservaCitasPageComponent {
     },
   ]);
 
- // DATOS DE PRUEBA MEDICOS
+
 
   readonly medicos = signal([
     {
@@ -88,13 +88,13 @@ export class ReservaCitasPageComponent {
   ]);
   readonly ipressSeleccionada = signal<{codigo: string; nombre: string;imagen: string;} | null>(null);
   readonly medicoSeleccionado = signal<{ codigo: string; nombreCompleto: string; cmp: string; fotoUrl: string | null } | null>(null);
-  // Etapa actual
+
   readonly pasoActual = signal(1);
   readonly afiliadoSeleccionado = signal<AfiliadoReserva | null>(null);
   readonly busquedaEspecialidad = signal('');
   readonly especialidadSeleccionada = signal<{codigo: string; nombre: string;imagen: string; } | null>(null);
 
-  // Última etapa habilitada
+
   readonly pasoHabilitado = signal(1);
 
   seleccionarMedico(medico: {codigo: string; nombreCompleto: string;cmp: string; fotoUrl: string | null;especialidad: string | null;}): void {
@@ -109,7 +109,7 @@ export class ReservaCitasPageComponent {
 
 
 
-  // Etapas del proceso
+
   readonly pasos = computed<TabItem[]>(() => {
     const habilitado = this.pasoHabilitado();
 
@@ -124,12 +124,12 @@ export class ReservaCitasPageComponent {
     ].map((paso, index) => ({...paso,disabled: index + 1 > habilitado,}));
   });
 
-  // Pasos completados
+
   readonly pasosCompletados = computed(() =>
     Array.from({ length: this.pasoActual() - 1 },(_, index) => String(index + 1))
   );
 
-  // Cambiar de etapa
+
   seleccionarPaso(id: string): void {
     const paso = Number(id);
 
@@ -142,7 +142,7 @@ export class ReservaCitasPageComponent {
     this.pasoActual.set(paso);
   }
 
-  // Se utilizará cuando se complete cada etapa
+
   avanzarPaso(): void {
     const siguiente = this.pasoActual() + 1;
 

@@ -1,0 +1,515 @@
+<app-modal
+  #modal
+  title="Registro de Lesiones"
+  icon="fa-solid fa-user-injured"
+  size="xl"
+  customClass="modal-hoja-lesiones"
+  [scrollable]="true"
+  [showFooter]="true"
+  [footerEstandar]="true"
+>
+  @if (cargando_catalogos() || cargando_datos()) {
+    <app-loading-api message="Cargando información de lesiones y causa externa..." />
+  }
+
+  <div class="hoja-lesiones-body">
+      <!-- 1. Evento -->
+      <app-card-general title="1. Evento" headerClass="hoja-panel-header">
+
+        <div class="row g-2 align-items-end">
+          <!-- Alcohol en las 6 horas previas -->
+          <div class="col-12 col-md-3 col-xl-3">
+            <div class="control-radios-inline">
+              <app-label [texto]="'En las 6 horas previas ingirió alcohol'" size="sm" />
+              <div class="radios-group">
+                <app-radio
+                  name="alcohol_6h"
+                  label="Sí"
+                  size="sm"
+                  [checked]="ind_alcohol_6h()"
+                  (checkedChange)="$event && ind_alcohol_6h.set(true)"
+                />
+                <app-radio
+                  name="alcohol_6h"
+                  label="No"
+                  size="sm"
+                  [checked]="!ind_alcohol_6h()"
+                  (checkedChange)="$event && ind_alcohol_6h.set(false)"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Tipo de sitio -->
+          <div class="col-12 col-sm-6 col-md-2 col-xl-2">
+            <app-select
+              label="Tipo de sitio"
+              size="sm"
+              [options]="tiposSitioOptions()"
+              [selectedValue]="tipo_sitio_id()"
+              placeholder="Seleccione..."
+              (selectedValueChange)="set_tipo_sitio_id($event)"
+            />
+          </div>
+
+          <div class="col-12 col-sm-6 col-md-3 col-xl-3">
+            <app-select
+              label="Sitio de ocurrencia"
+              [required]="true"
+              [searchable]="true"
+              searchPlaceholder="Buscar sitio..."
+              size="sm"
+              [options]="sitiosOcurrenciaOptions()"
+              [selectedValue]="sitio_ocurrencia_id()"
+              placeholder="Seleccione..."
+              (selectedValueChange)="set_sitio_ocurrencia_id($event)"
+            />
+          </div>
+
+          <div class="col-6 col-sm-6 col-md-2 col-xl-2">
+            <app-input-text
+              label="Fecha en que ocurrió"
+              [required]="true"
+              type="date"
+              size="sm"
+              [value]="fecha_ocurrencia()"
+              (valueChange)="set_fecha_ocurrencia($event)"
+            />
+          </div>
+
+          <!-- Hora en que se produjo -->
+          <div class="col-6 col-sm-6 col-md-2 col-xl-2">
+            <app-input-text
+              label="Hora en que se produjo"
+              type="time"
+              size="sm"
+              [value]="hora_ocurrencia()"
+              (valueChange)="set_hora_ocurrencia($event)"
+            />
+          </div>
+        </div>
+      </app-card-general>
+
+      <app-card-general
+        title="Datos del agresor"
+        headerClass="hoja-panel-header"
+      >
+        <div card-header-actions class="hoja-header-actions">
+          <app-check
+            label="FAP"
+            color="secondary"
+            size="sm"
+            [checked]="agresor_tipo() === 'FAP'"
+            (checkedChange)="cambiar_agresor_tipo('FAP', $event)"
+          />
+          <app-check
+            label="EXTRAFAP"
+            color="secondary"
+            size="sm"
+            [checked]="agresor_tipo() === 'EXTRAFAP'"
+            (checkedChange)="cambiar_agresor_tipo('EXTRAFAP', $event)"
+          />
+          <app-check
+            label="NN"
+            color="secondary"
+            size="sm"
+            [checked]="agresor_nn()"
+            (checkedChange)="cambiar_agresor_tipo('NN', $event)"
+          />
+        </div>
+
+        <div class="row g-2">
+          <!-- Formulario para agregar: ocupa toda la fila -->
+          <div class="col-12">
+            @if (!agresor_nn()) {
+              <div class="hoja-search">
+                <app-input-group
+                  label="NSA / DNI / Apellidos o Nombres"
+                  size="sm"
+                  color="primary"
+                  [projectedControl]="true"
+                >
+                  <app-auto-complete
+                    input-group-control
+                    [showLabel]="false"
+                    size="sm"
+                    color="primary"
+                    placeholder="Buscar persona ya registrada"
+                    [dataSource]="buscar_agresores"
+                    valueKey="id"
+                    labelKey="label"
+                    [minLength]="3"
+                    (optionSelected)="seleccionar_agresor($event)"
+                    (cleared)="cambiar_agresor()"
+                  />
+                </app-input-group>
+              </div>
+            }
+
+            <div class="hoja-grid">
+              <app-select
+                size="sm"
+                class="field-wide"
+                label="Móvil de la agresión"
+                [required]="true"
+                [searchable]="true"
+                searchPlaceholder="Buscar móvil..."
+                [options]="movilesAgresionOptions()"
+                [selectedValue]="agresor_movil_id()"
+                placeholder="-- Seleccione --"
+                (selectedValueChange)="set_agresor_movil_id($event)"
+              />
+              <app-select
+                size="sm"
+                class="field-wide"
+                label="Parentesco con la víctima"
+                [required]="true"
+                [searchable]="true"
+                searchPlaceholder="Buscar parentesco..."
+                [options]="parentescosOptions()"
+                [selectedValue]="agresor_parentesco_id()"
+                placeholder="-- Seleccione --"
+                (selectedValueChange)="set_agresor_parentesco_id($event)"
+              />
+
+              @if (!agresor_nn()) {
+                <app-select
+                  size="sm"
+                  class="field-wide"
+                  label="Documento"
+                  [required]="true"
+                  [disabled]="agresor_registrado()"
+                  [options]="tiposDocumentoOptions()"
+                  [selectedValue]="agresor_tipo_documento_id()"
+                  placeholder="-- Seleccione --"
+                  (selectedValueChange)="set_agresor_tipo_documento_id($event)"
+                />
+                <app-input-text
+                  size="sm"
+                  class="field-wide"
+                  label="Nº"
+                  placeholder="Si se conoce"
+                  [maxlength]="45"
+                  [disabled]="agresor_registrado()"
+                  [value]="agresor_numero_documento()"
+                  (valueChange)="agresor_numero_documento.set(texto($event))"
+                />
+
+                <app-input-text
+                  size="sm"
+                  class="field-wide"
+                  label="Apellido Paterno"
+                  [required]="true"
+                  [maxlength]="60"
+                  [disabled]="agresor_registrado()"
+                  [value]="agresor_apellido_paterno()"
+                  (valueChange)="agresor_apellido_paterno.set(texto($event))"
+                />
+                <app-input-text
+                  size="sm"
+                  class="field-wide"
+                  label="Apellido Materno"
+                  [maxlength]="60"
+                  [disabled]="agresor_registrado()"
+                  [value]="agresor_apellido_materno()"
+                  (valueChange)="agresor_apellido_materno.set(texto($event))"
+                />
+                <app-input-text
+                  size="sm"
+                  class="field-wide"
+                  label="Nombres"
+                  [required]="true"
+                  [maxlength]="60"
+                  [disabled]="agresor_registrado()"
+                  [value]="agresor_nombres()"
+                  (valueChange)="agresor_nombres.set(texto($event))"
+                />
+              }
+
+              <app-select
+                size="sm"
+                class="field-wide"
+                label="Sexo"
+                [required]="true"
+                [disabled]="agresor_registrado()"
+                [options]="sexosOptions()"
+                [selectedValue]="agresor_sexo_id()"
+                placeholder="-- Seleccione --"
+                (selectedValueChange)="set_agresor_sexo_id($event)"
+              />
+
+              @if (!agresor_nn()) {
+                <app-input-text
+                  size="sm"
+                  class="field-wide"
+                  label="Fecha de nacimiento"
+                  type="date"
+                  [disabled]="agresor_registrado()"
+                  [value]="agresor_fecha_nacimiento()"
+                  (valueChange)="agresor_fecha_nacimiento.set(texto($event))"
+                />
+                <app-input-text
+                  size="sm"
+                  class="field-wide"
+                  label="Celular"
+                  [maxlength]="20"
+                  [disabled]="agresor_registrado()"
+                  [value]="agresor_celular()"
+                  (valueChange)="agresor_celular.set(texto($event))"
+                />
+                <app-input-text
+                  size="sm"
+                  class="field-full"
+                  label="Correo Electrónico"
+                  type="email"
+                  [maxlength]="100"
+                  [disabled]="agresor_registrado()"
+                  [value]="agresor_correo()"
+                  (valueChange)="agresor_correo.set(texto($event))"
+                />
+              }
+            </div>
+
+            <div class="d-flex justify-content-end mt-2">
+              <app-button
+                icon="fa-solid fa-plus"
+                text="Agregar agresor"
+                color="primary"
+                size="sm"
+                (clicked)="agregar_agresor()"
+              />
+            </div>
+          </div>
+
+          <!-- Listado de agresores: debajo del formulario, solo cuando hay registros -->
+          @if (lista_agresores().length > 0) {
+            <div class="col-12">
+              <div class="lesiones-tabla-card">
+                <div class="lesiones-tabla-header">
+                  <span>Agresores registrados ({{ lista_agresores().length }})</span>
+                </div>
+                <div class="lesiones-tabla-body">
+                  <table class="table table-sm table-bordered table-hover align-middle mb-0">
+                    <thead>
+                      <tr class="table-light">
+                        <th class="ps-2" scope="col">Agresor</th>
+                        <th scope="col">Móvil de la agresión</th>
+                        <th scope="col">Parentesco con la víctima</th>
+                        <th scope="col" style="width: 36px"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (agresor of lista_agresores(); track $index) {
+                        <tr>
+                          <td class="ps-2 fw-semibold text-primary">{{ nombre_agresor(agresor) }}</td>
+                          <td>{{ agresor.movil_agresion_nombre || 'No especificado' }}</td>
+                          <td>{{ agresor.parentesco_nombre || 'No especificado' }}</td>
+                          <td class="text-end pe-2">
+                            <app-button
+                              action="delete"
+                              size="sm"
+                              [soloIcono]="true"
+                              title="Eliminar agresor"
+                              (clicked)="eliminar_agresor($index)"
+                            />
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </app-card-general>
+
+      <!-- 3. Tipo de lesión y área corporal dañada -->
+      <app-card-general title="3. Tipo de lesión y área corporal dañada" headerClass="hoja-panel-header">
+
+        <div class="row g-2">
+          <!-- Columna izquierda: formulario para agregar -->
+          <div class="col-12">
+            <div class="row g-2 align-items-end">
+              <div class="col-12 col-sm-6">
+                <app-select
+                  label="Área corporal dañada"
+                  [required]="true"
+                  [searchable]="true"
+                  searchPlaceholder="Buscar área..."
+                  size="sm"
+                  [options]="regionesCorporalesOptions()"
+                  [selectedValue]="nueva_region_id()"
+                  placeholder="Seleccione área..."
+                  (selectedValueChange)="set_nueva_region_id($event)"
+                />
+              </div>
+
+              <div class="col-12 col-sm-6">
+                <app-select
+                  label="Tipo de lesión"
+                  [required]="true"
+                  [searchable]="true"
+                  searchPlaceholder="Buscar tipo..."
+                  size="sm"
+                  [options]="tiposLesionOptions()"
+                  [selectedValue]="nuevo_tipo_lesion_id()"
+                  placeholder="Seleccione tipo..."
+                  (selectedValueChange)="set_nuevo_tipo_lesion_id($event)"
+                />
+              </div>
+
+              <div class="col-12 col-sm-6">
+                <app-select
+                  label="Agente de lesión"
+                  [searchable]="true"
+                  searchPlaceholder="Buscar agente..."
+                  size="sm"
+                  [options]="agentesLesionOptions()"
+                  [selectedValue]="nuevo_agente_id()"
+                  placeholder="Seleccione agente..."
+                  (selectedValueChange)="set_nuevo_agente_id($event)"
+                />
+              </div>
+
+              <div class="col-10 col-sm-5">
+                <app-input-text
+                  label="Descripción de la lesión"
+                  size="sm"
+                  placeholder="Detalle o descripción..."
+                  [maxlength]="100"
+                  [value]="nueva_descripcion()"
+                  (valueChange)="set_nueva_descripcion($event)"
+                />
+              </div>
+
+              <div class="col-2 col-sm-1 d-flex justify-content-end">
+                <app-button
+                  icon="fa-solid fa-plus"
+                  color="primary"
+                  size="sm"
+                  title="Agregar lesión"
+                  [iconOnly]="true"
+                  (clicked)="agregar_lesion()"
+                />
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        @if (lista_lesiones().length > 0) {
+          <div class="lesiones-registradas">
+            <div class="lesiones-tabla-card">
+              <div class="lesiones-tabla-header">
+                <span>Listado de lesiones ({{ lista_lesiones().length }})</span>
+              </div>
+              <div class="lesiones-tabla-body">
+                <table class="table table-sm table-bordered table-hover align-middle mb-0">
+                  <thead>
+                    <tr class="table-light">
+                      <th class="ps-2" scope="col">Área corporal</th>
+                      <th scope="col">Tipo de lesión</th>
+                      <th scope="col">Agente de lesión</th>
+                      <th scope="col">Descripción</th>
+                      <th scope="col" style="width: 36px"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (lesion of lista_lesiones(); track $index) {
+                      <tr>
+                        <td class="ps-2 fw-semibold text-primary">
+                          {{ lesion.region_corporal_nombre || 'No especificada' }}
+                        </td>
+                        <td>{{ lesion.tipo_lesion_nombre || 'No especificado' }}</td>
+                        <td>{{ lesion.agente_lesion_nombre || 'No especificado' }}</td>
+                        <td>{{ lesion.descripcion || 'No especificada' }}</td>
+                        <td class="text-end pe-2">
+                          <app-button
+                            action="delete"
+                            size="sm"
+                            [soloIcono]="true"
+                            title="Eliminar lesión"
+                            (clicked)="eliminar_lesion($index)"
+                          />
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        }
+      </app-card-general>
+
+      <!-- 4. Notificación legal y Observaciones -->
+      <app-card-general title="4. Notificación legal y Observaciones" headerClass="hoja-panel-header">
+
+        <div class="row g-2 align-items-end">
+          <!-- Se notificó al Ministerio Público -->
+          <div class="col-12 col-md-3">
+            <div class="control-radios-inline">
+              <app-label [texto]="'¿Se notificó al Ministerio Público?'" size="sm" />
+              <div class="radios-group">
+                <app-radio
+                  name="notif_minpub"
+                  label="Sí"
+                  size="sm"
+                  [checked]="ind_notif_minpub()"
+                  (checkedChange)="$event && ind_notif_minpub.set(true)"
+                />
+                <app-radio
+                  name="notif_minpub"
+                  label="No"
+                  size="sm"
+                  [checked]="!ind_notif_minpub()"
+                  (checkedChange)="$event && ind_notif_minpub.set(false)"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Campos de notificación fiscal / policial (visibles según ind_notif_minpub) -->
+          @if (ind_notif_minpub()) {
+            <div class="col-12 col-sm-4 col-md-2">
+              <app-input-text
+                label="Fecha de notificación"
+                type="date"
+                size="sm"
+                [value]="fecha_notificacion()"
+                (valueChange)="set_fecha_notificacion($event)"
+              />
+            </div>
+          }
+
+          <!-- Observaciones adicionales (fila completa) -->
+          <div class="col-12 mt-2">
+            <app-input-text
+              label="Observaciones adicionales y apreciación médico-legal"
+              size="sm"
+              placeholder="Observaciones clínicas, estado del paciente o datos complementarios de interés legal..."
+              [value]="observacion()"
+              (valueChange)="set_observacion($event)"
+            />
+          </div>
+        </div>
+      </app-card-general>
+  </div>
+
+  <div modal-footer class="d-flex align-items-center justify-content-end gap-2 w-100">
+    <app-button
+      modal-footer-close
+      action="close"
+      size="sm"
+      (clicked)="cerrar()"
+    />
+    <app-button
+      action="save"
+      size="sm"
+      [disabled]="!habilitado() || guardando()"
+      [loading]="guardando()"
+      (clicked)="guardar()"
+    />
+  </div>
+</app-modal>

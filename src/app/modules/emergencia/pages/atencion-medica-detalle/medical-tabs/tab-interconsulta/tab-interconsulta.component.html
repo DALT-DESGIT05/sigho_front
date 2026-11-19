@@ -7,15 +7,14 @@
       </p>
     </div>
     @if (ordenes_interconsulta().length > 0) {
-      <button
-        type="button"
-        class="btn btn-outline-secondary btn-sm interconsultation-action-button"
+      <app-button
+        action="print"
+        size="sm"
+        text="Generar orden"
         title="Generar orden de interconsulta"
-        aria-label="Generar orden de interconsulta"
-        (click)="imprimir_orden_interconsulta()"
-      >
-        Generar orden <i class="fa fa-print" aria-hidden="true"></i>
-      </button>
+        ariaLabel="Generar orden de interconsulta"
+        (clicked)="imprimir_orden_interconsulta()"
+      />
     }
   </div>
   <div class="interconsultation-form">
@@ -33,7 +32,7 @@
             size="sm"
             [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta()"
             [selectedValue]="area_interconsulta_id()"
-            (selectedValueChange)="actualizar_area_interconsulta_valor($event)"
+            (selectedValueChange)="actualizar_area($event)"
           />
         </div>
         <div class="interconsultation-field">
@@ -47,9 +46,13 @@
             [searchable]="true"
             searchPlaceholder="Buscar especialidad..."
             size="sm"
-            [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta() || area_interconsulta_id() === null"
+            [disabled]="
+              !detalle().fecha_hora_llamada_med ||
+              guardando_interconsulta() ||
+              area_interconsulta_id() === null
+            "
             [selectedValue]="especialidad_interconsulta_id()"
-            (selectedValueChange)="actualizar_especialidad_interconsulta_valor($event)"
+            (selectedValueChange)="actualizar_especialidad($event)"
           />
         </div>
         <div class="interconsultation-field">
@@ -69,7 +72,7 @@
               especialidad_interconsulta_id() === null
             "
             [selectedValue]="programacion_personal_interconsulta_id()"
-            (selectedValueChange)="actualizar_personal_interconsulta_valor($event)"
+            (selectedValueChange)="actualizar_personal($event)"
           />
         </div>
       </div>
@@ -88,7 +91,7 @@
         size="sm"
         [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta()"
         [selectedValue]="diagnostico_interconsulta_id()"
-        (selectedValueChange)="actualizar_diagnostico_interconsulta_valor($event)"
+        (selectedValueChange)="actualizar_diagnostico($event)"
       />
     </fieldset>
 
@@ -123,9 +126,7 @@
           @for (clase of clases; track clase.id) {
             <label
               class="interconsultation-choice"
-              [class.interconsultation-choice--selected]="
-                clase_seleccionada() === clase.nombre
-              "
+              [class.interconsultation-choice--selected]="clase_seleccionada() === clase.nombre"
             >
               <input
                 type="checkbox"
@@ -153,7 +154,7 @@
           placeholder="Describa el motivo de la interconsulta..."
           [value]="que_solicita_interconsulta()"
           [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta()"
-          (valueChange)="actualizar_que_solicita_texto($event)"
+          (valueChange)="actualizar_que_solicita($event)"
         />
       </div>
       <div class="interconsultation-field">
@@ -164,7 +165,7 @@
           placeholder="Observaciones adicionales..."
           [value]="observaciones_interconsulta()"
           [disabled]="!detalle().fecha_hora_llamada_med || guardando_interconsulta()"
-          (valueChange)="actualizar_observaciones_texto($event)"
+          (valueChange)="actualizar_observaciones($event)"
         />
       </div>
     </fieldset>

@@ -27,7 +27,7 @@
       [value]="formulario().signos_y_sintomas"
       [disabled]="!detalle().fecha_hora_llamada_med"
       [showLabel]="false"
-      (valueChange)="actualizar_valor_campo('signos_y_sintomas', $event)"
+      (valueChange)="actualizar_campo('signos_y_sintomas', $event)"
     />
   </fieldset>
   @if (formulario().tipo_reg_evaluac === 1) {
@@ -66,7 +66,7 @@
               </tr>
             } @else {
               @for (examen of examenes_regionales(); track examen.examen_id) {
-                <tr [class.regional-row--invalid]="clasificacion_regional_invalida(examen)">
+                <tr>
                   <td>{{ examen.nombre }}</td>
                   <td class="text-center">
                     <app-check-toggle
@@ -101,7 +101,6 @@
                   <td>
                     <input
                       class="form-control"
-                      [class.is-invalid]="observacion_regional_invalida(examen)"
                       maxlength="200"
                       [value]="examen.observacion ?? ''"
                       [disabled]="
@@ -111,11 +110,6 @@
                       "
                       (input)="actualizar_observacion_regional(examen, $event)"
                     />
-                    @if (clasificacion_regional_invalida(examen)) {
-                      <div class="regional-field-error">Seleccione una clasificación.</div>
-                    } @else if (observacion_regional_invalida(examen)) {
-                      <div class="invalid-feedback">Ingrese la observación clínica.</div>
-                    }
                   </td>
                 </tr>
               }
@@ -133,7 +127,7 @@
         [value]="formulario().examen_regional"
         [disabled]="!detalle().fecha_hora_llamada_med"
         [showLabel]="false"
-        (valueChange)="actualizar_valor_campo('examen_regional', $event)"
+        (valueChange)="actualizar_campo('examen_regional', $event)"
       />
     </fieldset>
   }

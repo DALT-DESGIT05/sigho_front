@@ -46,6 +46,7 @@
   size="lg"
   customClass="modal-diagnostico"
   [showFooter]="true"
+  [footerEstandar]="true"
 >
   <div class="row g-2">
     <div class="col-12 position-relative">
@@ -87,7 +88,7 @@
         size="sm"
         [disabled]="!habilitado() || guardando()"
         [selectedValue]="tipo_diagnostico_id()"
-        (selectedValueChange)="actualizar_tipo_diagnostico_valor($event)"
+        (selectedValueChange)="actualizar_tipo($event)"
       />
     </div>
     <div class="col-md-6">
@@ -101,7 +102,7 @@
         size="sm"
         [disabled]="!habilitado() || guardando()"
         [selectedValue]="clasificacion_diagnostico_id()"
-        (selectedValueChange)="actualizar_clasificacion_diagnostico_valor($event)"
+        (selectedValueChange)="actualizar_clasificacion($event)"
       />
     </div>
     <div class="col-12">
@@ -114,7 +115,7 @@
         placeholder="Ingrese una descripción opcional..."
         [value]="observacion_diagnostico()"
         [disabled]="!habilitado() || guardando()"
-        (valueChange)="actualizar_observacion_texto($event)"
+        (valueChange)="actualizar_observacion($event)"
         cssClass="w-100"
       />
     </div>
@@ -137,23 +138,25 @@
     </div>
 
     @if (diagnosticos_temporales().length > 0) {
-    <div class="col-12 mt-1">
-      <section class="clinical-section-card clinical-section-card--compact mb-0">
-        <div class="clinical-list-header mb-1">
-          <div class="clinical-title-actions">
-            <h4 class="clinical-list-title mb-0">Diagnósticos a registrar ({{ diagnosticos_temporales().length }})</h4>
+      <div class="col-12 mt-1">
+        <section class="clinical-section-card clinical-section-card--compact mb-0">
+          <div class="clinical-list-header mb-1">
+            <div class="clinical-title-actions">
+              <h4 class="clinical-list-title mb-0">
+                Diagnósticos a registrar ({{ diagnosticos_temporales().length }})
+              </h4>
+            </div>
           </div>
-        </div>
-        <app-table
-          size="xs"
-          [scrollHeight]="'140px'"
-          [columns]="columnasTemporales"
-          [cellTemplates]="plantillasTempCelda()"
-          [rows]="diagnosticos_temporales()"
-          emptyMessage="No se han registrado diagnósticos."
-        />
-      </section>
-    </div>
+          <app-table
+            size="xs"
+            [scrollHeight]="'140px'"
+            [columns]="columnasTemporales"
+            [cellTemplates]="plantillasTempCelda()"
+            [rows]="diagnosticos_temporales()"
+            emptyMessage="No se han registrado diagnósticos."
+          />
+        </section>
+      </div>
     }
   </div>
 
@@ -169,6 +172,7 @@
     </div>
   </ng-template>
   <div modal-footer>
+    <app-button modal-footer-close action="close" size="sm" (clicked)="cerrar_modal()" />
     <small class="diagnostico-form-status">
       @if (!habilitado()) {
         Inicie la atención médica para registrar.
@@ -184,6 +188,5 @@
       [disabled]="!habilitado() || diagnosticos_temporales().length === 0"
       (clicked)="guardar()"
     />
-    <app-button action="close" size="sm" (clicked)="cerrar_modal()" />
   </div>
 </app-modal>

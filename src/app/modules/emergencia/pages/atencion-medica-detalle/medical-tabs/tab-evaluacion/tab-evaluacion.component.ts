@@ -92,11 +92,7 @@ export class TabEvaluacionComponent {
     }
   }
 
-  actualizar(campo: keyof EvaluacionMedicaData, event: Event): void {
-    this.actualizarCampo.emit({ campo, event });
-  }
-
-  actualizar_valor_campo(
+  actualizar_campo(
     campo: keyof EvaluacionMedicaData,
     valor: string | number | null | undefined,
   ): void {
@@ -110,21 +106,17 @@ export class TabEvaluacionComponent {
     return false;
   }
 
-  clasificacion_regional_invalida(examen: ExamenRegional): boolean {
-    return this.validacion_solicitada() && examen.estado_id === null;
+  clasificacion_regional_invalida(_examen: ExamenRegional): boolean {
+    return false;
   }
 
-  observacion_regional_invalida(examen: ExamenRegional): boolean {
-    return (
-      this.validacion_solicitada() &&
-      examen.estado_tipo === 'PATOLOGICO' &&
-      !examen.observacion?.trim()
-    );
+  observacion_regional_invalida(_examen: ExamenRegional): boolean {
+    return false;
   }
 
   texto_observacion_regional(examen: ExamenRegional): string {
     return examen.estado_tipo === 'NO_EVALUADO'
       ? 'No aplica observación'
-      : 'Observación (requerido si es patológico)';
+      : 'Observación';
   }
 }

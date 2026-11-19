@@ -1,7 +1,7 @@
 
 <div class="reserva-citas">
 
-  <!-- Encabezado -->
+
   <div class="reserva-citas__alert-principal">
     <app-alert
       subtitulo="RESERVA DE CITAS"
@@ -14,7 +14,7 @@
       [destacarTitulo]="true">
     </app-alert>
   </div>
-  <!-- Stepper horizontal -->
+
   <app-tabs
      variant="stepper-line"
     [tabs]="pasos()"
@@ -23,7 +23,7 @@
     (tabSelected)="seleccionarPaso($event)">
   </app-tabs>
 
-  <!-- Contenido de la etapa -->
+
   <section class="reserva-citas__contenido">
 
     <span class="reserva-citas__paso">
@@ -139,7 +139,7 @@
 
           </div>
 
-          <!-- RESUMEN DE SELECCIONES ANTERIORES -->
+
 
             @if (resumenSelecciones().length > 0) {
               <app-breadcrumb
@@ -151,7 +151,7 @@
             }
 
 
-          <!-- LISTADO DE IPRESS -->
+
           <div class="reserva-citas__ipress-lista">
 
             @for (sede of ipress(); track sede.codigo) {
@@ -179,7 +179,7 @@
       }
       @case (4) {
 
-        <!-- ENCABEZADO -->
+
         <div class="reserva-citas__encabezado-paso">
 
           <app-label texto="Selecciona la especialidad"></app-label>
@@ -196,7 +196,7 @@
 
         </div>
 
-        <!-- RESUMEN DE SELECCIONES ANTERIORES -->
+
         @if (resumenSelecciones().length > 0) {
           <app-breadcrumb
             [items]="resumenSelecciones()"
@@ -206,7 +206,7 @@
           </app-breadcrumb>
         }
 
-        <!-- BUSCADOR DE ESPECIALIDADES -->
+
         <div class="reserva-citas__buscador-especialidad">
 
           <app-input-filter
@@ -218,7 +218,7 @@
           </app-input-filter>
 
         </div>
-              <!-- LISTADO DE ESPECIALIDADES -->
+
         <div class="reserva-citas__especialidades-lista">
 
           @for (especialidad of especialidadesFiltradas(); track especialidad.codigo) {
@@ -248,7 +248,7 @@
 
       @case (5) {
 
-        <!-- ENCABEZADO -->
+
         <div class="reserva-citas__encabezado-paso">
 
           <app-label texto="Selecciona al médico"></app-label>
@@ -265,7 +265,7 @@
 
         </div>
 
-        <!-- RESUMEN DE SELECCIONES ANTERIORES -->
+
          @if (resumenSelecciones().length > 0) {
           <app-breadcrumb
             [items]="resumenSelecciones()"
@@ -275,7 +275,7 @@
           </app-breadcrumb>
         }
 
-        <!-- LISTADO DE MÉDICOS -->
+
         <div class="reserva-citas__medicos-lista">
 
           @for (medico of medicos(); track medico.codigo) {

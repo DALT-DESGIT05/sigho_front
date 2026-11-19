@@ -6,7 +6,7 @@
           type="button"
           class="apoyo-imagen-cat-btn"
           [class.is-selected]="categoria_apoyo_imagen() === categoria.id"
-          (click)="seleccionar_categoria_apoyo_imagen(categoria.id)"
+          (click)="seleccionar_categoria(categoria.id)"
         >
           <span class="apoyo-imagen-cat-label">{{ categoria.nombre }}</span>
           <i [class]="categoria.icono" aria-hidden="true"></i>
@@ -32,15 +32,14 @@
       </div>
       <div class="clinical-list-header-actions">
         @if (ordenes_imagen().length > 0) {
-          <button
-            type="button"
-            class="btn btn-outline-secondary btn-sm"
+          <app-button
+            action="print"
+            size="sm"
+            text="Generar orden"
             title="Generar orden de apoyo diagnóstico"
-            aria-label="Generar orden de apoyo diagnóstico"
-            (click)="imprimir_orden()"
-          >
-            Generar orden <i class="fa fa-print" aria-hidden="true"></i>
-          </button>
+            ariaLabel="Generar orden de apoyo diagnóstico"
+            (clicked)="imprimir_orden()"
+          />
         }
       </div>
     </div>
@@ -117,6 +116,7 @@
   icon="fa-solid fa-x-ray"
   size="lg"
   [showFooter]="true"
+  [footerEstandar]="true"
 >
   <div class="row g-3">
     <div class="col-12 position-relative">
@@ -148,7 +148,7 @@
           [menuZIndex]="1080"
           [multilineOptions]="true"
           size="md"
-          (optionSelected)="seleccionar_servicio_imagen($event)"
+          (optionSelected)="seleccionar_servicio($event)"
         />
       }
     </div>
@@ -163,7 +163,7 @@
         size="md"
         [disabled]="!habilitado() || guardando()"
         [selectedValue]="diagnostico_apoyo_id()"
-        (selectedValueChange)="actualizar_diagnostico_valor($event)"
+        (selectedValueChange)="actualizar_diagnostico($event)"
       />
     </div>
     <div class="col-md-6">
@@ -177,7 +177,7 @@
         size="md"
         [disabled]="!habilitado() || guardando()"
         [selectedValue]="prioridad_apoyo_id()"
-        (selectedValueChange)="actualizar_prioridad_valor($event)"
+        (selectedValueChange)="actualizar_prioridad($event)"
       />
     </div>
     <div class="col-12">
@@ -188,7 +188,7 @@
         placeholder="Indicación clínica del estudio..."
         [value]="datos_clinicos_apoyo()"
         [disabled]="!habilitado() || guardando()"
-        (valueChange)="actualizar_datos_clinicos_texto($event)"
+        (valueChange)="actualizar_datos_clinicos($event)"
       />
     </div>
     <div [class]="permite_contraste() ? 'col-md-8' : 'col-12'">
@@ -199,7 +199,7 @@
         placeholder="Observación opcional..."
         [value]="observacion_apoyo()"
         [disabled]="!habilitado() || guardando()"
-        (valueChange)="actualizar_observacion_texto($event)"
+        (valueChange)="actualizar_observacion($event)"
       />
     </div>
     @if (permite_contraste()) {
@@ -208,12 +208,13 @@
           label="Requiere contraste"
           [checked]="requiere_contraste()"
           [disabled]="!habilitado() || guardando()"
-          (checkedChange)="actualizar_contraste_check($event)"
+          (checkedChange)="actualizar_contraste($event)"
         />
       </div>
     }
   </div>
   <div modal-footer>
+    <app-button modal-footer-close action="close" size="sm" (clicked)="cerrar_modal()" />
     <app-button
       texto="Agregar"
       action="save"
@@ -228,6 +229,5 @@
       "
       (clicked)="guardar()"
     />
-    <app-button action="close" size="sm" (clicked)="cerrar_modal()" />
   </div>
 </app-modal>

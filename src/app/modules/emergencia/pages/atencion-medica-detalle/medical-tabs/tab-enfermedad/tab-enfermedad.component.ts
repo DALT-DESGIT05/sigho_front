@@ -78,11 +78,7 @@ export class TabEnfermedadComponent {
     funcion.observacion = (event.target as HTMLInputElement).value;
   }
 
-  actualizar(campo: keyof EvaluacionMedicaData, event: Event): void {
-    this.actualizarCampo.emit({ campo, event });
-  }
-
-  actualizar_valor_campo(
+  actualizar_campo(
     campo: keyof EvaluacionMedicaData,
     valor: string | number | null | undefined,
   ): void {

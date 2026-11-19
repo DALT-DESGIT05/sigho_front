@@ -16,13 +16,14 @@ import { AutoCompleteComponent } from '../../../../../../components/auto-complet
 import { ButtonComponent } from '../../../../../../components/button/button.component';
 import { LabelComponent } from '../../../../../../components/label/label.component';
 import { ModalComponent } from '../../../../../../components/modal/modal.component';
-import { SelectComponent, SelectOption, SelectValue } from '../../../../../../components/select/select.component';
+import {
+  SelectComponent,
+  SelectOption,
+  SelectValue,
+} from '../../../../../../components/select/select.component';
 import { TableComponent } from '../../../../../../components/table/table.component';
 import { TextAreaComponent } from '../../../../../../components/text-area/text-area.component';
-import {
-  TableCellContext,
-  TableColumn,
-} from '../../../../../../interfaces/util.interface';
+import { TableCellContext, TableColumn } from '../../../../../../interfaces/util.interface';
 import {
   Diagnostico,
   DiagnosticoCatalogo,
@@ -101,14 +102,14 @@ export class TabDiagnosticosComponent {
   private readonly accionesTempTpl =
     viewChild<TemplateRef<TableCellContext<DiagnosticoTemporalItem>>>('accionesTempTpl');
 
-  readonly plantillasCelda = computed<
-    Record<string, TemplateRef<TableCellContext<Diagnostico>>>
-  >(() => {
-    const plantillas: Record<string, TemplateRef<TableCellContext<Diagnostico>>> = {};
-    const acc = this.accionesTpl();
-    if (acc) plantillas['acciones'] = acc;
-    return plantillas;
-  });
+  readonly plantillasCelda = computed<Record<string, TemplateRef<TableCellContext<Diagnostico>>>>(
+    () => {
+      const plantillas: Record<string, TemplateRef<TableCellContext<Diagnostico>>> = {};
+      const acc = this.accionesTpl();
+      if (acc) plantillas['acciones'] = acc;
+      return plantillas;
+    },
+  );
 
   readonly plantillasTempCelda = computed<
     Record<string, TemplateRef<TableCellContext<DiagnosticoTemporalItem>>>
@@ -212,9 +213,7 @@ export class TabDiagnosticosComponent {
   readonly buscar_diagnostico_datasource = (
     termino: string,
   ): Observable<readonly DiagnosticoCatalogo[]> => {
-    return this.diagnosticoService
-      .buscar_diagnosticos(termino)
-      .pipe(map((res) => res.data ?? []));
+    return this.diagnosticoService.buscar_diagnosticos(termino).pipe(map((res) => res.data ?? []));
   };
 
   mostrar_diagnostico = (diagnostico: DiagnosticoCatalogo): string =>
@@ -224,24 +223,15 @@ export class TabDiagnosticosComponent {
     this.diagnostico_seleccionado.set(diagnostico);
   }
 
-  actualizar_tipo_diagnostico(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
+  actualizar_tipo(value: SelectValue): void {
     this.tipo_diagnostico_id.set(value ? Number(value) : null);
   }
 
-  actualizar_tipo_diagnostico_valor(value: SelectValue): void {
-    this.tipo_diagnostico_id.set(value ? Number(value) : null);
-  }
-
-  actualizar_clasificacion_diagnostico_valor(value: SelectValue): void {
+  actualizar_clasificacion(value: SelectValue): void {
     this.clasificacion_diagnostico_id.set(value ? Number(value) : null);
   }
 
-  actualizar_observacion(event: Event): void {
-    this.observacion_diagnostico.set((event.target as HTMLInputElement).value);
-  }
-
-  actualizar_observacion_texto(value: string | number | null | undefined): void {
+  actualizar_observacion(value: string | number | null | undefined): void {
     this.observacion_diagnostico.set(value !== null && value !== undefined ? String(value) : '');
   }
 
@@ -282,7 +272,9 @@ export class TabDiagnosticosComponent {
     }
 
     const tipoObj = this.tipos_diagnostico().find((t) => t.tipo_id === tipoId);
-    const clasificacionObj = this.clasificaciones_diagnostico().find((c) => c.tipo_id === clasificacionId);
+    const clasificacionObj = this.clasificaciones_diagnostico().find(
+      (c) => c.tipo_id === clasificacionId,
+    );
 
     const nuevoItem: DiagnosticoTemporalItem = {
       cie10_id: seleccionado.cie10_id,

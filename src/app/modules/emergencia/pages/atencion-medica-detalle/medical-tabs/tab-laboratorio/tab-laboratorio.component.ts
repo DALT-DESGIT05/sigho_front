@@ -14,23 +14,26 @@ import {
 
 import { ButtonComponent } from '../../../../../../components/button/button.component';
 import { BadgeComponent } from '../../../../../../components/badge/badge.component';
-import { SelectComponent, SelectOption, SelectValue } from '../../../../../../components/select/select.component';
-import { TableComponent } from '../../../../../../components/table/table.component';
 import {
-  TableCellContext,
-  TableColumn,
-} from '../../../../../../interfaces/util.interface';
+  SelectComponent,
+  SelectOption,
+  SelectValue,
+} from '../../../../../../components/select/select.component';
+import { TableComponent } from '../../../../../../components/table/table.component';
+import { TableCellContext, TableColumn } from '../../../../../../interfaces/util.interface';
 
 import {
   DetalleAtencionResponse,
   Diagnostico,
+  PrioridadOrdenMedica,
+} from '../../../../../../interfaces/emergencia/triaje.interface';
+import {
   OrdenHistorialLaboratorio,
   OrdenLaboratorio,
   OrdenResultadoLaboratorio,
-  PrioridadOrdenMedica,
   ServicioLaboratorio,
-} from '../../../../../../interfaces/emergencia/triaje.interface';
-import { LaboratorioService } from '../../../../../../services/emergencia/laboratorio.service';
+} from '../../../../../../interfaces/laboratorio/laboratorio.interface';
+import { LaboratorioService } from '../../../../../../services/laboratorio/laboratorio.service';
 import { UtilService } from '../../../../../../services/util.service';
 
 export interface GuardarLaboratorioPayload {
@@ -42,13 +45,7 @@ export interface GuardarLaboratorioPayload {
 @Component({
   selector: 'app-tab-laboratorio',
   standalone: true,
-  imports: [
-    CommonModule,
-    ButtonComponent,
-    BadgeComponent,
-    TableComponent,
-    SelectComponent,
-  ],
+  imports: [CommonModule, ButtonComponent, BadgeComponent, TableComponent, SelectComponent],
   templateUrl: './tab-laboratorio.component.html',
   styleUrl: '../medical-tabs.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,8 +72,10 @@ export class TabLaboratorioComponent {
   readonly cargarHistorialLaboratorio = output<void>();
   readonly cargarResultadosLaboratorio = output<void>();
 
-  private readonly estadoTpl = viewChild<TemplateRef<TableCellContext<OrdenLaboratorio>>>('estadoTpl');
-  private readonly accionesTpl = viewChild<TemplateRef<TableCellContext<OrdenLaboratorio>>>('accionesTpl');
+  private readonly estadoTpl =
+    viewChild<TemplateRef<TableCellContext<OrdenLaboratorio>>>('estadoTpl');
+  private readonly accionesTpl =
+    viewChild<TemplateRef<TableCellContext<OrdenLaboratorio>>>('accionesTpl');
 
   readonly plantillasCelda = computed<
     Record<string, TemplateRef<TableCellContext<OrdenLaboratorio>>>
@@ -203,16 +202,16 @@ export class TabLaboratorioComponent {
     this.diagnostico_laboratorio_id.set(null);
   }
 
-  seleccionar_area_laboratorio(area_codigo: string | null): void {
+  seleccionar_area(area_codigo: string | null): void {
     this.laboratorio_area_activa.set(area_codigo);
     this.laboratorio_filtro.set('');
   }
 
-  actualizar_filtro_laboratorio(event: Event): void {
+  actualizar_filtro(event: Event): void {
     this.laboratorio_filtro.set((event.target as HTMLInputElement).value);
   }
 
-  alternar_servicio_laboratorio(event: Event, codigo: string): void {
+  alternar_servicio(event: Event, codigo: string): void {
     const seleccionado = (event.target as HTMLInputElement).checked;
     const servicios = new Set(this.servicios_laboratorio_seleccionados());
 
@@ -281,15 +280,10 @@ export class TabLaboratorioComponent {
   }
 
   readonly prioridadesOptions = computed<SelectOption[]>(() => {
-    return this.prioridades_orden()
-      .filter(
-        (p) =>
-          p.codigo?.toUpperCase() !== 'MUR' &&
-          !p.nombre?.toLowerCase().includes('muy urgente'),
-      )
-      .map((p) => ({
+    return this.prioridades_orden().map((p) => ({
         value: p.prioridad_id,
         label: p.nombre,
+        tone: this.utilService.color_alerta(p.color) ?? 'secondary',
       }));
   });
 
@@ -300,25 +294,15 @@ export class TabLaboratorioComponent {
     }));
   });
 
-  actualizar_prioridad_laboratorio(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
+  actualizar_prioridad(value: SelectValue): void {
     this.prioridad_laboratorio_id.set(value ? Number(value) : null);
   }
 
-  actualizar_prioridad_laboratorio_valor(value: SelectValue): void {
-    this.prioridad_laboratorio_id.set(value ? Number(value) : null);
-  }
-
-  actualizar_diagnostico_laboratorio_valor(value: SelectValue): void {
+  actualizar_diagnostico(value: SelectValue): void {
     this.diagnostico_laboratorio_id.set(value ? Number(value) : null);
   }
 
-  actualizar_diagnostico_laboratorio(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.diagnostico_laboratorio_id.set(value ? Number(value) : null);
-  }
-
-  guardar_laboratorio(): void {
+  guardar(): void {
     const servicios = this.servicios_laboratorio_seleccionados();
     const prioridad_id = this.prioridad_laboratorio_id();
     const diagnostico_id = this.diagnostico_laboratorio_id();
@@ -334,10 +318,13 @@ export class TabLaboratorioComponent {
     });
   }
 
-  imprimir_orden_laboratorio(): void {
+  imprimir_orden(): void {
     const atencionId = this.detalle()?.atencion_id;
     if (!atencionId) {
-      this.utilService.mostrar_alerta('No se identificó la atención médica para generar el PDF.', 'warning');
+      this.utilService.mostrar_alerta(
+        'No se identificó la atención médica para generar el PDF.',
+        'warning',
+      );
       return;
     }
 
@@ -346,8 +333,10 @@ export class TabLaboratorioComponent {
         const url = window.URL.createObjectURL(pdf);
         window.open(url, '_blank');
       },
-      error: () => {
-        this.utilService.mostrar_error('No se pudo generar la orden de laboratorio.');
+      error: (error: { message?: string }) => {
+        this.utilService.mostrar_error(
+          error.message ?? 'No se pudo generar el PDF de la orden de laboratorio.',
+        );
       },
     });
   }

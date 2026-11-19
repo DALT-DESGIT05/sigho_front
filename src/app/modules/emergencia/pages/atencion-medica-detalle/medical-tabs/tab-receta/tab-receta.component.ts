@@ -10,22 +10,21 @@ import {
   viewChild,
 } from '@angular/core';
 import { finalize } from 'rxjs';
-import Swal from 'sweetalert2';
 import { ButtonComponent } from '../../../../../../components/button/button.component';
-import { SelectComponent, SelectOption, SelectValue } from '../../../../../../components/select/select.component';
+import {
+  SelectComponent,
+  SelectOption,
+  SelectValue,
+} from '../../../../../../components/select/select.component';
 import { TableComponent } from '../../../../../../components/table/table.component';
 import { TextAreaComponent } from '../../../../../../components/text-area/text-area.component';
 import { TableCellContext, TableColumn } from '../../../../../../interfaces/util.interface';
-import {
-  Farmacia,
-  RecetaMedica,
-} from '../../../../../../interfaces/emergencia/receta.interface';
-import {
-  DetalleAtencionResponse,
-  Diagnostico,
-} from '../../../../../../interfaces/emergencia/triaje.interface';
-import { RecetaEmergenciaService } from '../../../../../../services/emergencia/receta.service';
+import { Farmacia, RecetaMedica } from '../../../../../../interfaces/farmacia/medicamento.interface';
+import { DetalleAtencionResponse } from '../../../../../../interfaces/emergencia/triaje.interface';
+import { Diagnostico } from '../../../../../../interfaces/emergencia/diagnostico.interface';
+import { MedicamentoService } from '../../../../../../services/farmacia/medicamento.service';
 import { UtilService } from '../../../../../../services/util.service';
+import { normalizar_texto_busqueda } from '../../../../../../utils/busqueda.util';
 import { FormularioRecetaMedicamentoComponent } from '../formulario-receta-medicamento/formulario-receta-medicamento.component';
 import { HistorialRecetasModalComponent } from '../historial-recetas-modal/historial-recetas-modal.component';
 
@@ -47,10 +46,9 @@ import { HistorialRecetasModalComponent } from '../historial-recetas-modal/histo
 })
 export class TabRecetaComponent {
   private readonly utilService = inject(UtilService);
-  private readonly recetaService = inject(RecetaEmergenciaService);
+  private readonly recetaService = inject(MedicamentoService);
 
-  readonly formularioReceta =
-    viewChild<FormularioRecetaMedicamentoComponent>('formularioReceta');
+  readonly formularioReceta = viewChild<FormularioRecetaMedicamentoComponent>('formularioReceta');
   readonly modalHistorialRecetas =
     viewChild<HistorialRecetasModalComponent>('modalHistorialRecetas');
 
@@ -83,14 +81,14 @@ export class TabRecetaComponent {
   private readonly accionesTpl =
     viewChild<TemplateRef<TableCellContext<RecetaMedica>>>('accionesTpl');
 
-  readonly plantillasCelda = computed<
-    Record<string, TemplateRef<TableCellContext<RecetaMedica>>>
-  >(() => {
-    const plantillas: Record<string, TemplateRef<TableCellContext<RecetaMedica>>> = {};
-    const acc = this.accionesTpl();
-    if (acc) plantillas['acciones'] = acc;
-    return plantillas;
-  });
+  readonly plantillasCelda = computed<Record<string, TemplateRef<TableCellContext<RecetaMedica>>>>(
+    () => {
+      const plantillas: Record<string, TemplateRef<TableCellContext<RecetaMedica>>> = {};
+      const acc = this.accionesTpl();
+      if (acc) plantillas['acciones'] = acc;
+      return plantillas;
+    },
+  );
 
   readonly columnasReceta: TableColumn<RecetaMedica>[] = [
     {
@@ -155,12 +153,26 @@ export class TabRecetaComponent {
       .list_farmacias()
       .pipe(finalize(() => this.cargando_farmacias.set(false)))
       .subscribe({
-        next: (res: { data?: Farmacia[] }) => this.farmacias.set(res.data ?? []),
+        next: (res: { data?: Farmacia[] }) => {
+          const farmacias = res.data ?? [];
+          this.farmacias.set(farmacias);
+
+          if (farmacias.length === 0) return;
+
+          const farmaciaEmergencia = farmacias.find((farmacia) => {
+            const nombreCompleto = normalizar_texto_busqueda(`${farmacia.nomfarm} ${farmacia.desfarm}`);
+            return nombreCompleto.includes('EMERGENCIA') || nombreCompleto.includes('FAREN');
+          });
+
+          const farmaciaSeleccionada = farmaciaEmergencia ?? farmacias[0];
+          this.codigo_farmacia.set(String(farmaciaSeleccionada.idfarm));
+          this.listar_receta();
+        },
         error: () => this.farmacias.set([]),
       });
   }
 
-  actualizar_farmacia_valor(value: SelectValue): void {
+  actualizar_farmacia(value: SelectValue): void {
     this.codigo_farmacia.set(value ? String(value) : '');
     this.listar_receta();
   }
@@ -202,16 +214,14 @@ export class TabRecetaComponent {
       ? this.detalle().fecha_hora_ingreso.split(' ')[0]
       : null;
 
-    this.recetaService
-      .verificar_receta(this.detalle().atencion_id, Number(cod), fecha)
-      .subscribe({
-        next: (res: { data?: any }) => {
-          this.existe_receta_imprimir.set(res.data?.status === 'ok');
-        },
-        error: () => {
-          this.existe_receta_imprimir.set(false);
-        },
-      });
+    this.recetaService.verificar_receta(this.detalle().atencion_id, Number(cod), fecha).subscribe({
+      next: (res: { data?: any }) => {
+        this.existe_receta_imprimir.set(res.data?.status === 'ok');
+      },
+      error: () => {
+        this.existe_receta_imprimir.set(false);
+      },
+    });
   }
 
   abrir_nueva_receta(): void {
@@ -227,32 +237,22 @@ export class TabRecetaComponent {
     this.modalHistorialRecetas()?.abrir();
   }
 
-  eliminar_medicamento_receta(idtemrec: number, event: Event): void {
+  async eliminar_medicamento_receta(idtemrec: number, event: Event): Promise<void> {
     event.preventDefault();
-    Swal.fire({
-      title: 'Eliminar medicamento',
+    const confirmado = await this.utilService.confirmar_eliminacion({
+      title: '¿Eliminar medicamento?',
       text: '¿Está seguro de eliminar este medicamento de la receta?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.recetaService.eliminar_medicamento(idtemrec).subscribe({
-          next: () => {
-            this.utilService.mostrar_alerta(
-              'Medicamento eliminado correctamente.',
-              'success',
-            );
-            this.listar_receta();
-          },
-          error: (err: any) => {
-            this.utilService.mostrar_error(
-              err?.message ?? 'No se pudo eliminar el medicamento.',
-            );
-          },
-        });
-      }
+    });
+    if (!confirmado) return;
+
+    this.recetaService.eliminar_medicamento(idtemrec).subscribe({
+      next: () => {
+        this.utilService.mostrar_alerta('Medicamento eliminado correctamente.', 'success');
+        this.listar_receta();
+      },
+      error: (err: any) => {
+        this.utilService.mostrar_error(err?.message ?? 'No se pudo eliminar el medicamento.');
+      },
     });
   }
 
@@ -275,10 +275,7 @@ export class TabRecetaComponent {
       .pipe(finalize(() => this.guardando_indicacion.set(false)))
       .subscribe({
         next: () => {
-          this.utilService.mostrar_alerta(
-            'Indicaciones generales actualizadas.',
-            'success',
-          );
+          this.utilService.mostrar_alerta('Indicaciones generales actualizadas.', 'success');
         },
         error: (err: any) => {
           this.utilService.mostrar_error(
@@ -288,38 +285,35 @@ export class TabRecetaComponent {
       });
   }
 
-  generar_receta(): void {
+  async generar_receta(): Promise<void> {
     if (this.data_receta().length === 0 || this.generando_receta()) return;
 
-    Swal.fire({
-      title: 'Generar Receta',
-      text: '¿Está seguro de generar la receta médica? Una vez generada no podrá editarse salvo habilitar edición.',
+    const confirmado = await this.utilService.confirmar_accion({
+      title: '¿Generar Receta Médica?',
+      text: 'Una vez generada no podrá editarse salvo habilitar edición.',
       icon: 'question',
-      showCancelButton: true,
       confirmButtonText: 'Sí, generar',
       cancelButtonText: 'Cancelar',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.generando_receta.set(true);
-        this.recetaService
-          .insertar_receta(this.detalle().atencion_id)
-          .pipe(finalize(() => this.generando_receta.set(false)))
-          .subscribe({
-            next: () => {
-              this.utilService.mostrar_alerta(
-                'Receta médica generada exitosamente.',
-                'success',
-              );
-              this.listar_receta();
-            },
-            error: (err: any) => {
-              this.utilService.mostrar_error(
-                err?.message ?? 'No se pudo generar la receta médica.',
-              );
-            },
-          });
-      }
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#6c757d',
     });
+    if (!confirmado) return;
+
+    this.generando_receta.set(true);
+    this.recetaService
+      .insertar_receta(this.detalle().atencion_id)
+      .pipe(finalize(() => this.generando_receta.set(false)))
+      .subscribe({
+        next: () => {
+          this.utilService.mostrar_alerta('Receta médica generada exitosamente.', 'success');
+          this.listar_receta();
+        },
+        error: (err: any) => {
+          this.utilService.mostrar_error(
+            err?.message ?? 'No se pudo generar la receta médica.',
+          );
+        },
+      });
   }
 
   habilitar_edicion_receta(): void {
@@ -331,18 +325,11 @@ export class TabRecetaComponent {
       : null;
 
     this.recetaService
-      .enable_editing_receta(
-        this.detalle().atencion_id,
-        Number(cod),
-        fecha,
-      )
+      .enable_editing_receta(this.detalle().atencion_id, Number(cod), fecha)
       .subscribe({
         next: () => {
           this.existe_receta_imprimir.set(false);
-          this.utilService.mostrar_alerta(
-            'Edición de receta habilitada.',
-            'success',
-          );
+          this.utilService.mostrar_alerta('Edición de receta habilitada.', 'success');
           this.listar_receta();
         },
         error: (err: any) => {

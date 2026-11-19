@@ -1,7 +1,6 @@
 import { Component, computed, inject, input, output, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize, map, Observable } from 'rxjs';
-import Swal from 'sweetalert2';
 import { ModalComponent } from '../../../../../../components/modal/modal.component';
 import { ButtonComponent } from '../../../../../../components/button/button.component';
 import { AutoCompleteComponent } from '../../../../../../components/auto-complete/auto-complete.component';
@@ -14,8 +13,9 @@ import {
   Frecuencia,
   Medicamento,
   ViaAdministracion,
-} from '../../../../../../interfaces/emergencia/receta.interface';
-import { RecetaEmergenciaService } from '../../../../../../services/emergencia/receta.service';
+} from '../../../../../../interfaces/farmacia/medicamento.interface';
+import { MedicamentoService } from '../../../../../../services/farmacia/medicamento.service';
+import { UtilService } from '../../../../../../services/util.service';
 
 @Component({
   selector: 'app-formulario-receta-medicamento',
@@ -41,7 +41,8 @@ export class FormularioRecetaMedicamentoComponent {
 
   readonly recetaGuardada = output<void>();
 
-  private readonly recetaService = inject(RecetaEmergenciaService);
+  private readonly recetaService = inject(MedicamentoService);
+  private readonly utilService = inject(UtilService);
 
   readonly data_frecuencia = signal<Frecuencia[]>([]);
   readonly data_dosis = signal<Dosis[]>([]);
@@ -155,11 +156,7 @@ export class FormularioRecetaMedicamentoComponent {
           }
         },
         error: (err) => {
-          Swal.fire({
-            title: 'Receta médica',
-            text: err?.message ?? 'No se pudo cargar la prescripción para edición.',
-            icon: 'error',
-          });
+          this.utilService.mostrar_error(err?.message ?? 'No se pudo cargar la prescripción para edición.');
           this.cerrar();
         },
       });
@@ -204,24 +201,20 @@ export class FormularioRecetaMedicamentoComponent {
 
     peticion.pipe(finalize(() => this.guardando.set(false))).subscribe({
       next: () => {
-        Swal.fire({
-          title: 'Prescripción médica',
-          text: this.modo_edicion()
+        this.utilService.mostrar_alerta(
+          this.modo_edicion()
             ? 'Medicamento actualizado con éxito.'
             : 'Medicamento agregado a la receta.',
-          icon: 'success',
-          timer: 1500,
-          showConfirmButton: false,
-        });
+          'success',
+          1500,
+        );
         this.cerrar();
         this.recetaGuardada.emit();
       },
       error: (err) => {
-        Swal.fire({
-          title: 'Error al guardar prescripción',
-          text: err?.message ?? 'Ocurrió un error al guardar el medicamento.',
-          icon: 'error',
-        });
+        this.utilService.mostrar_error(
+          err?.message ?? 'Ocurrió un error al guardar el medicamento.',
+        );
       },
     });
   }

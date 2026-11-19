@@ -8,8 +8,8 @@
   [keyboard]="false"
   [ignoreBackdropClick]="true"
   [showFooter]="false"
-  (closed)="limpiar_formulario()">
-
+  (closed)="limpiar_formulario()"
+>
   <div class="receta-formulario">
     <fieldset class="receta-fieldset">
       <legend>SELECCIÓN DEL MEDICAMENTO</legend>
@@ -24,7 +24,8 @@
           [debounceTime]="500"
           [required]="true"
           [(ngModel)]="codigo_medicamento"
-          (optionSelected)="seleccionar_medicamento($event)">
+          (optionSelected)="seleccionar_medicamento($event)"
+        >
         </app-auto-complete>
       </div>
     </fieldset>
@@ -41,7 +42,8 @@
             labelField="nombre"
             size="sm"
             [required]="true"
-            [(ngModel)]="codigo_frecuencia">
+            [(ngModel)]="codigo_frecuencia"
+          >
           </app-select>
         </div>
 
@@ -53,7 +55,8 @@
             size="sm"
             [allowNegative]="false"
             [required]="true"
-            [(ngModel)]="duracion">
+            [(ngModel)]="duracion"
+          >
           </app-input-text>
         </div>
 
@@ -66,7 +69,8 @@
             labelField="nombre"
             size="sm"
             [required]="true"
-            [(ngModel)]="codigo_dosis">
+            [(ngModel)]="codigo_dosis"
+          >
           </app-select>
         </div>
 
@@ -78,7 +82,8 @@
             size="sm"
             [allowNegative]="false"
             [required]="true"
-            [(ngModel)]="cantidad">
+            [(ngModel)]="cantidad"
+          >
           </app-input-text>
         </div>
 
@@ -91,7 +96,8 @@
             labelField="nombre"
             size="sm"
             [required]="true"
-            [(ngModel)]="codigo_via_administracion">
+            [(ngModel)]="codigo_via_administracion"
+          >
           </app-select>
         </div>
       </div>
@@ -109,7 +115,8 @@
             labelField="nombre"
             size="sm"
             [required]="true"
-            [(ngModel)]="codigo_diagnostico">
+            [(ngModel)]="codigo_diagnostico"
+          >
           </app-select>
         </div>
 
@@ -122,7 +129,8 @@
             [maxlength]="1000"
             resize="vertical"
             [required]="true"
-            [(ngModel)]="indicacion">
+            [(ngModel)]="indicacion"
+          >
           </app-text-area>
         </div>
       </div>
@@ -135,7 +143,8 @@
         icon="fa-solid fa-xmark"
         texto="Cancelar"
         [disabled]="guardando()"
-        (clicked)="cerrar()">
+        (clicked)="cerrar()"
+      >
       </app-button>
 
       <app-button
@@ -143,10 +152,17 @@
         color="primary"
         size="sm"
         icon="fa-solid fa-floppy-disk"
-        [texto]="guardando() ? 'Guardando...' : (modo_edicion() ? 'Actualizar medicamento' : 'Guardar medicamento')"
+        [texto]="
+          guardando()
+            ? 'Guardando...'
+            : modo_edicion()
+              ? 'Actualizar medicamento'
+              : 'Guardar medicamento'
+        "
         [loading]="guardando()"
         [disabled]="!formulario_valido() || cargando_edicion()"
-        (clicked)="guardar_medicamento()">
+        (clicked)="guardar_medicamento()"
+      >
       </app-button>
     </div>
   </div>

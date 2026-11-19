@@ -10,15 +10,15 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import Swal from 'sweetalert2';
 import { ButtonComponent } from '../../../../../../components/button/button.component';
 import { BadgeComponent } from '../../../../../../components/badge/badge.component';
-import { SelectComponent, SelectOption, SelectValue } from '../../../../../../components/select/select.component';
-import { TableComponent } from '../../../../../../components/table/table.component';
 import {
-  TableCellContext,
-  TableColumn,
-} from '../../../../../../interfaces/util.interface';
+  SelectComponent,
+  SelectOption,
+  SelectValue,
+} from '../../../../../../components/select/select.component';
+import { TableComponent } from '../../../../../../components/table/table.component';
+import { TableCellContext, TableColumn } from '../../../../../../interfaces/util.interface';
 import { UtilService } from '../../../../../../services/util.service';
 import {
   DetalleAtencionResponse,
@@ -176,7 +176,10 @@ export class TabProcedEnfComponent {
         nombre: servicio?.nombre || codigo,
         area_codigo: servicio?.area_codigo ?? '005',
         area_nombre: servicio
-          ? this.etiqueta_area_proced_enf(servicio.area_codigo ?? '005', servicio.area_nombre ?? 'Enfermería')
+          ? this.etiqueta_area_proced_enf(
+              servicio.area_codigo ?? '005',
+              servicio.area_nombre ?? 'Enfermería',
+            )
           : 'Enfermería',
         indicacion: indicaciones.get(codigo) ?? null,
       });
@@ -260,41 +263,29 @@ export class TabProcedEnfComponent {
     }
   }
 
-  abrir_modal_indicacion_servicio(codigo: string, nombre: string): void {
+  async abrir_modal_indicacion_servicio(codigo: string, nombre: string): Promise<void> {
     const indicacionActual = this.indicaciones_por_servicio().get(codigo) ?? '';
 
-    Swal.fire({
+    const texto = await this.utilService.solicitar_texto({
       title: 'Indicación médica',
-      html: `
-        <div style="text-align: left; margin-bottom: 8px;">
-          <p style="font-size: 13px; color: #4b5563; margin-bottom: 4px;"><strong>Servicio:</strong> ${codigo} - ${nombre}</p>
-        </div>
-      `,
-      input: 'textarea',
-      inputValue: indicacionActual,
-      inputPlaceholder: 'Ingrese las indicaciones o especificaciones (opcional)...',
-      inputAttributes: {
-        maxlength: '500',
-        rows: '4',
-        style: 'font-size: 13px; resize: vertical;',
-      },
-      showCancelButton: true,
+      subtitulo: `<strong>Servicio:</strong> ${codigo} - ${nombre}`,
+      valorInicial: indicacionActual,
+      placeholder: 'Ingrese las indicaciones o especificaciones (opcional)...',
+      multilinea: true,
+      maxlength: 500,
       confirmButtonText: 'Aceptar',
       cancelButtonText: 'Omitir',
-      confirmButtonColor: '#002060',
-      cancelButtonColor: '#6c757d',
-    }).then((result) => {
-      if (result.isConfirmed && typeof result.value === 'string') {
-        const texto = result.value.trim();
-        const mapa = new Map(this.indicaciones_por_servicio());
-        if (texto) {
-          mapa.set(codigo, texto);
-        } else {
-          mapa.delete(codigo);
-        }
-        this.indicaciones_por_servicio.set(mapa);
-      }
     });
+
+    if (texto !== null) {
+      const mapa = new Map(this.indicaciones_por_servicio());
+      if (texto) {
+        mapa.set(codigo, texto);
+      } else {
+        mapa.delete(codigo);
+      }
+      this.indicaciones_por_servicio.set(mapa);
+    }
   }
 
   obtener_indicacion_servicio(codigo: string): string {
@@ -327,19 +318,15 @@ export class TabProcedEnfComponent {
     return this.prioridades_orden().map((p) => ({
       value: p.prioridad_id,
       label: p.nombre,
+      tone: this.utilService.color_alerta(p.color) ?? 'secondary',
     }));
   });
 
-  actualizar_prioridad_proced_enf(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
+  actualizar_prioridad(value: SelectValue): void {
     this.prioridad_proced_enf_id.set(value ? Number(value) : null);
   }
 
-  actualizar_prioridad_proced_enf_valor(value: SelectValue): void {
-    this.prioridad_proced_enf_id.set(value ? Number(value) : null);
-  }
-
-  guardar_proced_enf(): void {
+  guardar(): void {
     const seleccionados = this.servicios_proced_enf_seleccionados();
     const prioridad = this.prioridad_proced_enf_id();
 

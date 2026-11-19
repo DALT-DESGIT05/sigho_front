@@ -12,13 +12,14 @@ import {
 } from '@angular/core';
 import { ButtonComponent } from '../../../../../../components/button/button.component';
 import { BadgeComponent } from '../../../../../../components/badge/badge.component';
-import { SelectComponent, SelectOption, SelectValue } from '../../../../../../components/select/select.component';
+import {
+  SelectComponent,
+  SelectOption,
+  SelectValue,
+} from '../../../../../../components/select/select.component';
 import { InputTextComponent } from '../../../../../../components/input-text/input-text.component';
 import { TableComponent } from '../../../../../../components/table/table.component';
-import {
-  TableCellContext,
-  TableColumn,
-} from '../../../../../../interfaces/util.interface';
+import { TableCellContext, TableColumn } from '../../../../../../interfaces/util.interface';
 import {
   AreaInterconsulta,
   DetalleAtencionResponse,
@@ -30,6 +31,7 @@ import {
 } from '../../../../../../interfaces/emergencia/triaje.interface';
 import { InterconsultaService } from '../../../../../../services/emergencia/interconsulta.service';
 import { UtilService } from '../../../../../../services/util.service';
+import { formatear_nombre_medico } from '../../../../utils/nombre-medico.util';
 
 export interface GuardarInterconsultaPayload {
   prioridad_id: number;
@@ -94,6 +96,11 @@ export class TabInterconsultaComponent {
   });
 
   readonly columnasOrdenes: TableColumn<OrdenInterconsulta>[] = [
+    {
+      key: 'prioridad_nombre',
+      label: 'CLASE',
+      formatter: (_val, fila) => fila.prioridad_nombre || fila.prioridad_codigo || '-',
+    },
     {
       key: 'area_nombre',
       label: 'ÁREA',
@@ -164,10 +171,17 @@ export class TabInterconsultaComponent {
     this.clase_seleccionada.set(nombre);
     const prioridades = this.prioridades_orden();
     if (nombre === 'Urgente') {
-      const urg = prioridades.find((p) => p.codigo === 'URG' || p.nombre?.toLowerCase().includes('urgente'));
+      const urg = prioridades.find(
+        (p) => p.codigo === 'URG' || p.nombre?.toLowerCase().includes('urgente'),
+      );
       if (urg) this.prioridad_interconsulta_id.set(urg.prioridad_id);
     } else {
-      const normal = prioridades.find((p) => p.codigo === 'NOR' || p.nombre?.toLowerCase().includes('normal') || p.nombre?.toLowerCase().includes('programad'));
+      const normal = prioridades.find(
+        (p) =>
+          p.codigo === 'NOR' ||
+          p.nombre?.toLowerCase().includes('normal') ||
+          p.nombre?.toLowerCase().includes('programad'),
+      );
       if (normal) this.prioridad_interconsulta_id.set(normal.prioridad_id);
     }
   }
@@ -248,7 +262,7 @@ export class TabInterconsultaComponent {
   readonly personalOptions = computed<SelectOption[]>(() => {
     return this.personal_interconsulta_filtrado().map((p) => ({
       value: p.programacion_personal_id,
-      label: `${p.nombre_completo} · ${p.turno}`,
+      label: `${formatear_nombre_medico(p.nombre_completo)} · ${p.turno}`,
     }));
   });
 
@@ -259,59 +273,31 @@ export class TabInterconsultaComponent {
     }));
   });
 
-  actualizar_area_interconsulta_valor(value: SelectValue): void {
+  actualizar_area(value: SelectValue): void {
     this.area_interconsulta_id.set(value ? Number(value) : null);
     this.especialidad_interconsulta_id.set(null);
     this.programacion_personal_interconsulta_id.set(null);
   }
 
-  actualizar_especialidad_interconsulta_valor(value: SelectValue): void {
+  actualizar_especialidad(value: SelectValue): void {
     this.especialidad_interconsulta_id.set(value ? Number(value) : null);
     this.programacion_personal_interconsulta_id.set(null);
   }
 
-  actualizar_personal_interconsulta_valor(value: SelectValue): void {
+  actualizar_personal(value: SelectValue): void {
     this.programacion_personal_interconsulta_id.set(value ? Number(value) : null);
   }
 
-  actualizar_diagnostico_interconsulta_valor(value: SelectValue): void {
+  actualizar_diagnostico(value: SelectValue): void {
     this.diagnostico_interconsulta_id.set(value ? Number(value) : null);
   }
 
-  actualizar_que_solicita_texto(value: string | number | null | undefined): void {
+  actualizar_que_solicita(value: string | number | null | undefined): void {
     this.que_solicita_interconsulta.set(value != null ? String(value) : '');
   }
 
-  actualizar_observaciones_texto(value: string | number | null | undefined): void {
+  actualizar_observaciones(value: string | number | null | undefined): void {
     this.observaciones_interconsulta.set(value != null ? String(value) : '');
-  }
-
-  actualizar_especialidad_interconsulta(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.especialidad_interconsulta_id.set(value ? Number(value) : null);
-    this.programacion_personal_interconsulta_id.set(null);
-  }
-
-  actualizar_personal_interconsulta(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.programacion_personal_interconsulta_id.set(value ? Number(value) : null);
-  }
-
-  actualizar_diagnostico_interconsulta(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.diagnostico_interconsulta_id.set(value ? Number(value) : null);
-  }
-
-  seleccionar_prioridad_interconsulta(prioridad_id: number): void {
-    this.prioridad_interconsulta_id.update((prev) => (prev === prioridad_id ? null : prioridad_id));
-  }
-
-  actualizar_que_solicita_interconsulta(event: Event): void {
-    this.que_solicita_interconsulta.set((event.target as HTMLInputElement).value);
-  }
-
-  actualizar_observaciones_interconsulta(event: Event): void {
-    this.observaciones_interconsulta.set((event.target as HTMLInputElement).value);
   }
 
   guardar(): void {
@@ -319,10 +305,17 @@ export class TabInterconsultaComponent {
     if (prioridad_id === null) {
       const prioridades = this.prioridades_orden();
       if (this.clase_seleccionada() === 'Urgente') {
-        const urg = prioridades.find((p) => p.codigo === 'URG' || p.nombre?.toLowerCase().includes('urgente'));
+        const urg = prioridades.find(
+          (p) => p.codigo === 'URG' || p.nombre?.toLowerCase().includes('urgente'),
+        );
         prioridad_id = urg?.prioridad_id ?? prioridades[0]?.prioridad_id ?? 1;
       } else {
-        const nor = prioridades.find((p) => p.codigo === 'NOR' || p.nombre?.toLowerCase().includes('normal') || p.nombre?.toLowerCase().includes('programad'));
+        const nor = prioridades.find(
+          (p) =>
+            p.codigo === 'NOR' ||
+            p.nombre?.toLowerCase().includes('normal') ||
+            p.nombre?.toLowerCase().includes('programad'),
+        );
         prioridad_id = nor?.prioridad_id ?? prioridades[0]?.prioridad_id ?? 1;
       }
     }
@@ -345,19 +338,14 @@ export class TabInterconsultaComponent {
       return;
     }
 
-    const tipoExamen = this.solicita_seleccionado();
-    const claseConsulta = this.clase_seleccionada();
-    const payloadQueSolicita = `[${tipoExamen}] ${que_solicita}`;
-    const payloadObservaciones = `[${claseConsulta}] ${observaciones}`.trim();
-
     this.guardarInterconsulta.emit({
       prioridad_id,
       diagnostico_id,
       especialidad_id,
       area_id,
       programacion_personal_id,
-      que_solicita: payloadQueSolicita,
-      observaciones: payloadObservaciones,
+      que_solicita,
+      observaciones,
     });
 
     this.limpiar();
@@ -378,7 +366,10 @@ export class TabInterconsultaComponent {
   imprimir_orden_interconsulta(interconsulta_id?: number | null): void {
     const atencionId = this.detalle()?.atencion_id;
     if (!atencionId) {
-      this.utilService.mostrar_alerta('No se identificó la atención médica para generar el PDF.', 'warning');
+      this.utilService.mostrar_alerta(
+        'No se identificó la atención médica para generar el PDF.',
+        'warning',
+      );
       return;
     }
 
@@ -418,7 +409,9 @@ export class TabInterconsultaComponent {
       .join('\n');
 
     doc.open();
-    doc.write(`<!doctype html><html><head><base href="${document.baseURI}"><title>${titulo}</title>${estilos}<style>@page{size:A5 portrait;margin:10mm}body{margin:0;padding:1rem}.laboratory-print-area,.hospitalization-print-area{display:block!important;position:static!important}.laboratory-print-document{display:block!important}</style></head><body>${elemento.outerHTML}</body></html>`);
+    doc.write(
+      `<!doctype html><html><head><base href="${document.baseURI}"><title>${titulo}</title>${estilos}<style>@page{size:A5 portrait;margin:10mm}body{margin:0;padding:1rem}.laboratory-print-area,.hospitalization-print-area{display:block!important;position:static!important}.laboratory-print-document{display:block!important}</style></head><body>${elemento.outerHTML}</body></html>`,
+    );
     doc.close();
 
     iframe.contentWindow?.focus();

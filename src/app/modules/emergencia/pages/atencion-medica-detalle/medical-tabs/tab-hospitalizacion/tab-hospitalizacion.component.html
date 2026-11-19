@@ -7,15 +7,14 @@
       </p>
     </div>
     @if (orden_hospitalizacion_actual()) {
-      <button
-        type="button"
-        class="btn btn-outline-secondary btn-sm"
+      <app-button
+        action="print"
+        size="sm"
+        text="Generar orden"
         title="Generar orden de hospitalización"
-        aria-label="Generar orden de hospitalización"
-        (click)="imprimir_orden_hospitalizacion()"
-      >
-        Generar orden <i class="fa fa-print" aria-hidden="true"></i>
-      </button>
+        ariaLabel="Generar orden de hospitalización"
+        (clicked)="imprimir_orden_hospitalizacion()"
+      />
     }
   </div>
   <div class="hospitalization-form">
@@ -31,7 +30,7 @@
         size="md"
         [disabled]="!detalle().fecha_hora_llamada_med"
         [selectedValue]="diagnostico_hospitalizacion_id()"
-        (selectedValueChange)="actualizar_diagnostico_hospitalizacion_valor($event)"
+        (selectedValueChange)="actualizar_diagnostico($event)"
       />
     </fieldset>
 
@@ -50,7 +49,7 @@
               class="form-check-input"
               [checked]="motivo_hospitalizacion_id() === motivo.motivo_id"
               [disabled]="!detalle().fecha_hora_llamada_med"
-              (change)="seleccionar_motivo_hospitalizacion(motivo.motivo_id)"
+              (change)="seleccionar_motivo(motivo.motivo_id)"
             />
             <span>{{ motivo.nombre }}</span>
             <i class="fa fa-check" aria-hidden="true"></i>
@@ -69,7 +68,7 @@
         placeholder="Observación opcional..."
         [value]="observacion_hospitalizacion()"
         [disabled]="!detalle().fecha_hora_llamada_med"
-        (valueChange)="actualizar_observacion_texto($event)"
+        (valueChange)="actualizar_observacion($event)"
       />
     </fieldset>
 

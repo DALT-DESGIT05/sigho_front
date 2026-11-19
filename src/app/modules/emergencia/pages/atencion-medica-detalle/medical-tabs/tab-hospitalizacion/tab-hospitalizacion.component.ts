@@ -14,14 +14,20 @@ import {
 } from '@angular/core';
 import { ButtonComponent } from '../../../../../../components/button/button.component';
 import { InputTextComponent } from '../../../../../../components/input-text/input-text.component';
-import { SelectComponent, SelectOption, SelectValue } from '../../../../../../components/select/select.component';
+import {
+  SelectComponent,
+  SelectOption,
+  SelectValue,
+} from '../../../../../../components/select/select.component';
 import {
   DetalleAtencionResponse,
   Diagnostico,
+} from '../../../../../../interfaces/emergencia/triaje.interface';
+import {
   MotivoHospitalizacion,
   OrdenHospitalizacion,
-} from '../../../../../../interfaces/emergencia/triaje.interface';
-import { HospitalizacionService } from '../../../../../../services/emergencia/hospitalizacion.service';
+} from '../../../../../../interfaces/hospitalizacion/hospitalizacion.interface';
+import { HospitalizacionService } from '../../../../../../services/hospitalizacion/hospitalizacion.service';
 import { UtilService } from '../../../../../../services/util.service';
 
 export interface GuardarHospitalizacionPayload {
@@ -63,11 +69,45 @@ export class TabHospitalizacionComponent {
   readonly motivo_hospitalizacion_id = signal<number | null>(null);
   readonly observacion_hospitalizacion = signal('');
 
+  readonly diagnostico_principal = computed<Diagnostico | null>(() => {
+    const list = this.diagnosticos();
+    if (list.length === 0) return null;
+    return (
+      list.find(
+        (d) =>
+          d.clasificacion_codigo?.toUpperCase() === 'PRI' ||
+          d.clasificacion_nombre?.trim().toUpperCase() === 'PRINCIPAL',
+      ) ??
+      list[0] ??
+      null
+    );
+  });
+
   readonly diagnosticosOptions = computed<SelectOption[]>(() => {
-    return this.diagnosticos().map((d) => ({
-      value: d.diagnostico_id,
-      label: `${d.codigo} - ${d.descripcion}`,
-    }));
+    const list = [...this.diagnosticos()];
+    list.sort((a, b) => {
+      const aEsPrincipal =
+        a.clasificacion_codigo?.toUpperCase() === 'PRI' ||
+        a.clasificacion_nombre?.trim().toUpperCase() === 'PRINCIPAL';
+      const bEsPrincipal =
+        b.clasificacion_codigo?.toUpperCase() === 'PRI' ||
+        b.clasificacion_nombre?.trim().toUpperCase() === 'PRINCIPAL';
+      if (aEsPrincipal && !bEsPrincipal) return -1;
+      if (!aEsPrincipal && bEsPrincipal) return 1;
+      return 0;
+    });
+
+    return list.map((d) => {
+      const tag = d.clasificacion_nombre?.trim()
+        ? ` (${d.clasificacion_nombre.trim()})`
+        : d.clasificacion_codigo === 'PRI'
+          ? ' (Principal)'
+          : '';
+      return {
+        value: d.diagnostico_id,
+        label: `${d.codigo} - ${d.descripcion}${tag}`,
+      };
+    });
   });
 
   constructor() {
@@ -79,33 +119,41 @@ export class TabHospitalizacionComponent {
           this.motivo_hospitalizacion_id.set(orden.motivo_id);
           this.observacion_hospitalizacion.set(orden.observacion ?? '');
         } else {
-          this.diagnostico_hospitalizacion_id.set(null);
           this.motivo_hospitalizacion_id.set(null);
           this.observacion_hospitalizacion.set('');
+          this.diagnostico_hospitalizacion_id.set(
+            this.diagnostico_principal()?.diagnostico_id ?? null,
+          );
+        }
+      });
+    });
+
+    effect(() => {
+      const principal = this.diagnostico_principal();
+      untracked(() => {
+        if (
+          !this.orden_hospitalizacion_actual() &&
+          this.diagnostico_hospitalizacion_id() === null &&
+          principal
+        ) {
+          this.diagnostico_hospitalizacion_id.set(principal.diagnostico_id);
         }
       });
     });
   }
 
-  actualizar_diagnostico_hospitalizacion_valor(value: SelectValue): void {
+  actualizar_diagnostico(value: SelectValue): void {
     this.diagnostico_hospitalizacion_id.set(value ? Number(value) : null);
   }
 
-  actualizar_observacion_texto(value: string | number | null | undefined): void {
-    this.observacion_hospitalizacion.set(value !== null && value !== undefined ? String(value) : '');
+  actualizar_observacion(value: string | number | null | undefined): void {
+    this.observacion_hospitalizacion.set(
+      value !== null && value !== undefined ? String(value) : '',
+    );
   }
 
-  actualizar_diagnostico_hospitalizacion(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.diagnostico_hospitalizacion_id.set(value ? Number(value) : null);
-  }
-
-  seleccionar_motivo_hospitalizacion(motivo_id: number): void {
+  seleccionar_motivo(motivo_id: number): void {
     this.motivo_hospitalizacion_id.update((prev) => (prev === motivo_id ? null : motivo_id));
-  }
-
-  actualizar_observacion_hospitalizacion(event: Event): void {
-    this.observacion_hospitalizacion.set((event.target as HTMLInputElement).value);
   }
 
   guardar(): void {
@@ -131,7 +179,9 @@ export class TabHospitalizacionComponent {
   }
 
   limpiar(): void {
-    this.diagnostico_hospitalizacion_id.set(null);
+    this.diagnostico_hospitalizacion_id.set(
+      this.diagnostico_principal()?.diagnostico_id ?? null,
+    );
     this.motivo_hospitalizacion_id.set(null);
     this.observacion_hospitalizacion.set('');
   }
@@ -139,7 +189,10 @@ export class TabHospitalizacionComponent {
   imprimir_orden_hospitalizacion(): void {
     const atencionId = this.detalle()?.atencion_id;
     if (!atencionId) {
-      this.utilService.mostrar_alerta('No se identificó la atención médica para generar el PDF.', 'warning');
+      this.utilService.mostrar_alerta(
+        'No se identificó la atención médica para generar el PDF.',
+        'warning',
+      );
       return;
     }
 
@@ -175,7 +228,9 @@ export class TabHospitalizacionComponent {
       .join('\n');
 
     doc.open();
-    doc.write(`<!doctype html><html><head><base href="${document.baseURI}"><title>${titulo}</title>${estilos}<style>@page{size:A5 portrait;margin:10mm}body{margin:0;padding:1rem}.laboratory-print-area,.hospitalization-print-area{display:block!important;position:static!important}.laboratory-print-document{display:block!important}</style></head><body>${elemento.outerHTML}</body></html>`);
+    doc.write(
+      `<!doctype html><html><head><base href="${document.baseURI}"><title>${titulo}</title>${estilos}<style>@page{size:A5 portrait;margin:10mm}body{margin:0;padding:1rem}.laboratory-print-area,.hospitalization-print-area{display:block!important;position:static!important}.laboratory-print-document{display:block!important}</style></head><body>${elemento.outerHTML}</body></html>`,
+    );
     doc.close();
 
     iframe.contentWindow?.focus();

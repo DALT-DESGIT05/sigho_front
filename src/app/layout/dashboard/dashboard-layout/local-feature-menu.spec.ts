@@ -1,10 +1,10 @@
 import { mergeLocalFeatureMenu } from './local-feature-menu';
 
 describe('mergeLocalFeatureMenu', () => {
-  it('adds the temporary Emergency and Personal menus when the remote menu is empty', () => {
+  it('adds the temporary Emergency menus when the remote menu is empty', () => {
     const menu = mergeLocalFeatureMenu([]);
 
-    expect(menu.map((item) => item.label)).toEqual(['Admisión', 'Triaje', 'Atención médica', 'Personal']);
+    expect(menu.map((item) => item.label)).toEqual(['Admisión', 'Triaje', 'Atención médica', 'Rol de horarios']);
     const admision = menu.find((item) => item.label === 'Admisión');
     expect(admision?.children?.map((child) => child.label)).toEqual([
       'Nueva admisión',
@@ -12,11 +12,7 @@ describe('mergeLocalFeatureMenu', () => {
     ]);
     expect(menu.find((item) => item.label === 'Triaje')?.children?.[0].link).toBe('/emergencia/pacientes-triaje');
     expect(menu.find((item) => item.label === 'Atención médica')?.children?.[0].link).toBe('/emergencia/atencion-medica');
-    expect(menu.find((item) => item.label === 'Personal')?.children?.map((child) => child.link)).toEqual([
-      '/personal/horarios',
-      '/personal/turnos',
-      '/personal/mi-horario',
-    ]);
+    expect(menu.find((item) => item.label === 'Rol de horarios')?.children?.[0].link).toBe('/emergencia/rol-horarios');
   });
 
   it('does not duplicate routes already supplied by the remote menu', () => {

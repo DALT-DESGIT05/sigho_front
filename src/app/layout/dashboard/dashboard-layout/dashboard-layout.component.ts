@@ -10,7 +10,7 @@ import {
 } from '@angular/router';
 import { AuthService } from '../../../services/auth/auth.service';
 import { LoginService } from '../../../services/auth/login.service';
-import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
+import { UtilService } from '../../../services/util.service';
 import { filter, map } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { ImageLazyComponent } from '../../../components/image-lazy/image-lazy.component';
@@ -37,6 +37,7 @@ export class DashboardLayoutComponent implements OnInit {
   private router = inject(Router);
   private menuService = inject(MenuService);
   private sidebarService = inject(SidebarService);
+  private utilService = inject(UtilService);
 
   isSidebarOpen = false;
   isSidebarCollapsed = false;
@@ -61,7 +62,7 @@ export class DashboardLayoutComponent implements OnInit {
 
   ngOnInit() {
     this.updateHeaderScrollState();
-    // 🔹 Manejo de breadcrumbs y título dinámico
+
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -79,7 +80,7 @@ export class DashboardLayoutComponent implements OnInit {
 
     this.cargarMenu();
 
-    // 🔹 Redirigir a perfil si debe cambiar contraseña
+
     if (this.contrasena_cambiada() === 1) {
       this.router.navigateByUrl('perfil/perfil-usuario');
     }
@@ -99,15 +100,10 @@ export class DashboardLayoutComponent implements OnInit {
     this.closeProfileMenu();
     this.login_service.logout().subscribe({
       next: () => {
-        Swal.fire({
-          title: "Logout",
-          text: "Se cerró la sesión correctamente",
-          icon: "success",
-          timer: 1500
-        });
+        this.utilService.mostrar_alerta('Se cerró la sesión correctamente', 'success', 1500);
       },
       error: (error) => {
-        Swal.fire('Logout', error.data.message, 'error');
+        this.utilService.mostrar_error(error?.data?.message || 'Error al cerrar sesión');
       }
     });
   }
@@ -264,7 +260,7 @@ export class DashboardLayoutComponent implements OnInit {
 
     this.menuService.loadMenu().subscribe({
       next: (menu) => {
-        // 🔹 Sanitizamos recursivamente los enlaces antes de asignarlos al estado
+
         this.menuItems = this.sanitizarEnlacesMenu(mergeLocalFeatureMenu(menu));
         this.isMenuLoading = false;
         this.syncActiveMenuGroup();
@@ -276,10 +272,10 @@ export class DashboardLayoutComponent implements OnInit {
     });
   }
 
-  /**
-   * Recorre de forma recursiva los ítems del menú y remueve espacios en blanco
-   * innecesarios en la propiedad 'link' usando .trim().
-   */
+
+
+
+
   private sanitizarEnlacesMenu(items: MenuItem[]): MenuItem[] {
     if (!items) return [];
 

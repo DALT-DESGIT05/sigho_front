@@ -46,27 +46,15 @@ const LOCAL_FEATURE_MENU: MenuItem[] = [
     ],
   },
   {
-    id_modulo: 'local-personal',
-    label: 'Personal',
+    id_modulo: 'local-horarios',
+    label: 'Rol de horarios',
     icon: 'fa fa-calendar-days',
     children: [
       {
-        id_formulario: 'local-programacion-personal',
-        label: 'Programación',
-        link: '/personal/horarios',
+        id_formulario: 'local-rol-horarios',
+        label: 'Rol de horarios de emergencia',
+        link: '/emergencia/rol-horarios',
         icon: 'fa fa-calendar-check',
-      },
-      {
-        id_formulario: 'local-catalogo-turnos',
-        label: 'Turnos',
-        link: '/personal/turnos',
-        icon: 'fa fa-clock',
-      },
-      {
-        id_formulario: 'local-mi-horario',
-        label: 'Mi horario',
-        link: '/personal/mi-horario',
-        icon: 'fa fa-calendar-day',
       },
     ],
   },

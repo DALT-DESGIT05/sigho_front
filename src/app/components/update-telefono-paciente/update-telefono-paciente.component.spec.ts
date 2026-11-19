@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NEVER } from 'rxjs';
-import { PacienteService } from '../../services/emergencia/paciente.service';
+import { PacienteService } from '../../services/pacientes/paciente.service';
 
 import { UpdateTelefonoPacienteComponent } from './update-telefono-paciente.component';
 

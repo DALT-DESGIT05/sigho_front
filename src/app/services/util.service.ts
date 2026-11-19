@@ -78,19 +78,122 @@ export class UtilService {
   }
 
   mostrar_alerta(mensaje: string, icono: 'success' | 'info' | 'warning' | 'error' = 'success', tiempo?: number): void {
-    const autoTimer = tiempo ?? (icono === 'success' ? 1200 : undefined);
+    const autoTimer = tiempo ?? (icono === 'success' ? 1200 : 3500);
     Swal.fire({
-      title: TITLE_MODAL,
-      text: mensaje,
+      toast: true,
+      position: 'top-end',
+      title: mensaje,
       icon: icono,
+      customClass: {
+        popup: 'sigho-toast',
+      },
       timer: autoTimer,
       timerProgressBar: autoTimer !== undefined,
-      showConfirmButton: icono !== 'success',
+      showConfirmButton: false,
     });
   }
 
   mostrar_error(mensaje?: string, tiempo?: number): void {
     this.mostrar_alerta(mensaje ?? MESSAGE_ERROR_DEFAULT, 'error', tiempo);
+  }
+
+  async confirmar_eliminacion(opciones?: {
+    title?: string;
+    text?: string;
+    confirmButtonText?: string;
+    cancelButtonText?: string;
+  }): Promise<boolean> {
+    const result = await Swal.fire({
+      title: opciones?.title ?? '¿Está seguro de eliminar este registro?',
+      text: opciones?.text ?? 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: opciones?.confirmButtonText ?? 'Sí, eliminar',
+      cancelButtonText: opciones?.cancelButtonText ?? 'Cancelar',
+    });
+
+    return Boolean(result.isConfirmed);
+  }
+
+  async confirmar_accion(opciones: {
+    title: string;
+    text: string;
+    icon?: 'warning' | 'question' | 'info';
+    confirmButtonText?: string;
+    cancelButtonText?: string;
+    confirmButtonColor?: string;
+    cancelButtonColor?: string;
+    reverseButtons?: boolean;
+    allowOutsideClick?: boolean;
+    allowEscapeKey?: boolean;
+  }): Promise<boolean> {
+    const result = await Swal.fire({
+      title: opciones.title,
+      text: opciones.text,
+      icon: opciones.icon ?? 'question',
+      showCancelButton: true,
+      confirmButtonColor: opciones.confirmButtonColor ?? '#3085d6',
+      cancelButtonColor: opciones.cancelButtonColor ?? '#6c757d',
+      confirmButtonText: opciones.confirmButtonText ?? 'Sí, continuar',
+      cancelButtonText: opciones.cancelButtonText ?? 'Cancelar',
+      reverseButtons: opciones.reverseButtons,
+      allowOutsideClick: opciones.allowOutsideClick ?? true,
+      allowEscapeKey: opciones.allowEscapeKey ?? true,
+    });
+
+    return Boolean(result.isConfirmed);
+  }
+
+  mostrar_aviso(opciones: {
+    title: string;
+    text?: string;
+    html?: string;
+    icon?: 'warning' | 'info' | 'error' | 'success';
+    confirmButtonText?: string;
+    confirmButtonColor?: string;
+  }): Promise<void> {
+    return Swal.fire({
+      title: opciones.title,
+      text: opciones.text,
+      html: opciones.html,
+      icon: opciones.icon ?? 'warning',
+      confirmButtonText: opciones.confirmButtonText ?? 'Entendido',
+      confirmButtonColor: opciones.confirmButtonColor ?? '#3085d6',
+    }).then(() => undefined);
+  }
+
+  async solicitar_texto(opciones: {
+    title: string;
+    subtitulo?: string;
+    placeholder?: string;
+    valorInicial?: string;
+    multilinea?: boolean;
+    maxlength?: number;
+    confirmButtonText?: string;
+    cancelButtonText?: string;
+  }): Promise<string | null> {
+    const result = await Swal.fire({
+      title: opciones.title,
+      html: opciones.subtitulo
+        ? `<div style="text-align:left;font-size:13px;color:#4b5563;margin-bottom:8px;">${opciones.subtitulo}</div>`
+        : undefined,
+      input: opciones.multilinea ? 'textarea' : 'text',
+      inputValue: opciones.valorInicial ?? '',
+      inputPlaceholder: opciones.placeholder ?? 'Ingrese las especificaciones...',
+      inputAttributes: {
+        maxlength: String(opciones.maxlength ?? 500),
+        ...(opciones.multilinea ? { rows: '4', style: 'font-size: 13px; resize: vertical;' } : {}),
+      },
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: opciones.confirmButtonText ?? 'Aceptar',
+      cancelButtonText: opciones.cancelButtonText ?? 'Cancelar',
+    });
+
+    return result.isConfirmed && typeof result.value === 'string' ? result.value.trim() : null;
   }
 
   empty_page<T>(perPage: number): Paginado<T> {
@@ -145,17 +248,17 @@ export class UtilService {
     return Number.isFinite(numericValue) ? numericValue : 0;
   }
 
-  /** Conserva solo dígitos; útil para limpiar valores escritos o pegados. */
+
   only_number_value(value: unknown): string {
     return this.clear_null(value).replace(/\D/g, '');
   }
 
-  /** Bloquea el pegado de contenido en un campo. */
+
   prevent_paste(event: ClipboardEvent): void {
     event.preventDefault();
   }
 
-  /** Asigna errores de validación 422 del API a los controles indicados. */
+
   applyApiValidationErrors(form: FormGroup, error: unknown, fields: string[]): boolean {
     const response = error as {
       code?: number;
@@ -186,7 +289,7 @@ export class UtilService {
     return response?.code === 422 || response?.statusCode === 422;
   }
 
-  /** Limpia solo los errores devueltos por API, conservando validadores locales. */
+
   clearApiValidationErrors(form: FormGroup, fields: string[]): void {
     fields.forEach(field => {
       const control = form.get(field);
@@ -204,7 +307,7 @@ export class UtilService {
       : fallback;
   }
 
-  /** Obtiene exclusivamente un mensaje emitido por un validador o por el API. */
+
   validationMessage(control: AbstractControl | null): string | null {
     if (!control?.errors) return null;
 
@@ -237,7 +340,7 @@ export class UtilService {
     return typeof value === 'string' ? value : null;
   }
 
-  /** Formatea un número con la cantidad indicada de decimales usando la convención peruana. */
+
   format_number(value: unknown, decimals = 2): string {
     const fractionDigits = Math.max(0, decimals);
     return new Intl.NumberFormat('es-PE', {
@@ -246,7 +349,7 @@ export class UtilService {
     }).format(this.clear_number(value));
   }
 
-  /** Formatea importe en soles peruanos (PEN). */
+
   format_currency_pen(value: unknown, decimals = 2): string {
     const fractionDigits = Math.max(0, decimals);
     return new Intl.NumberFormat('es-PE', {
@@ -257,7 +360,7 @@ export class UtilService {
     }).format(this.clear_number(value));
   }
 
-  /** Formatea un importe en la moneda indicada; PEN usa el formato local de soles. */
+
   format_currency(value: unknown, currency = 'PEN', decimals = 2): string {
     if (currency === 'PEN') return this.format_currency_pen(value, decimals);
     const fractionDigits = Math.max(0, decimals);
@@ -656,7 +759,7 @@ export class UtilService {
     return 'Obesidad grado III';
   }
 
-  /** `talla` llega en centímetros desde los formularios de signos vitales. */
+
   calculate_imc(peso: any, talla: any): number {
     const pesoNumero = Number(this.clear_number(peso).toFixed(2));
     const tallaNumero = Number(this.clear_number(talla).toFixed(2));
@@ -668,23 +771,23 @@ export class UtilService {
     return Number((pesoNumero / (tallaEnMetros * tallaEnMetros)).toFixed(2));
   }
 
-  /** Color de badge/estado (PaletteColor) para un nombre de color de catálogo
-   *  (ROJO/NARANJA/AMARILLO/VERDE/AZUL). AZUL usa 'primary' porque, en la paleta
-   *  del proyecto, --palette-primary (#0d6efd) es el azul real; --palette-info
-   *  (#0dcaf0) es celeste/cian, no azul. Devuelve null si el nombre no coincide
-   *  con ningún color conocido. */
+
+
+
+
+
   color_alerta(nombreColor: string): PaletteColor | null {
-    const color = this.to_upper(nombreColor);
-    if (color === 'ROJO') return 'danger';
-    if (color === 'VERDE') return 'success';
-    if (color === 'AMARILLO' || color === 'NARANJA') return 'warning';
-    if (color === 'AZUL') return 'primary';
+    const color = this.color_prioridad(nombreColor);
+    if (color === 'red') return 'danger';
+    if (color === 'green') return 'success';
+    if (color === 'yellow' || color === 'orange') return 'warning';
+    if (color === 'blue') return 'primary';
     return null;
   }
 
-  /** Color literal (para los indicadores de prioridad de triaje) a partir del
-   *  nombre de color de catálogo. No es un PaletteColor: estos indicadores usan
-   *  su propia paleta de clases CSS (priority-option--red, etc.). */
+
+
+
   color_prioridad(nombreColor: string): string {
     const color = this.to_upper(nombreColor);
     if (color === 'ROJO') return 'red';
@@ -695,13 +798,13 @@ export class UtilService {
     return 'gray';
   }
 
-  /**
-   * Resuelve el color de un signo vital usando el catálogo maestro: rangos normales por edad
-   * (m_rango_param_clin) y niveles de alerta (m_param_niv_alerta). Ambos ya vienen graduados
-   * por edad/severidad desde la base de datos. Devuelve null cuando el catálogo maestro no
-   * tiene información aplicable, para que el llamador recurra a un cálculo de respaldo
-   * (ver *_status de esta clase).
-   */
+
+
+
+
+
+
+
   estado_desde_maestro(
     codigo: string,
     rawValue: string,
@@ -744,7 +847,7 @@ export class UtilService {
     return alerta.genera_alerta ? 'warning' : 'success';
   }
 
-  /** Clases para una app-progress-bars usada como indicador de alerta de un signo vital. */
+
   progress_bar_classes(color: PaletteColor): string {
     return `progress app-progress-bars app-progress-bars--${color} app-progress-bars--sm mt-1`;
   }

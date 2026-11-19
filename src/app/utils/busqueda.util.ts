@@ -1,6 +1,6 @@
-/**
- * Normaliza una cadena quitando tildes y pasando a mayúsculas para búsquedas insensibles.
- */
+
+
+
 export function normalizar_texto_busqueda(texto: string | null | undefined): string {
   if (!texto) {
     return '';
@@ -12,10 +12,10 @@ export function normalizar_texto_busqueda(texto: string | null | undefined): str
     .trim();
 }
 
-/**
- * Filtra una lista de elementos verificando que todos los tokens/palabras del término
- * de búsqueda estén presentes en los campos evaluados del elemento.
- */
+
+
+
+
 export function filtrar_elementos_por_tokens<T>(
   elementos: T[],
   termino: string,

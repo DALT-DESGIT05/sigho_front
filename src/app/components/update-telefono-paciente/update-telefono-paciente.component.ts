@@ -1,7 +1,7 @@
 import { Component, inject, output, signal, viewChild } from '@angular/core';
 import { disabled, form, FormField, pattern, required } from '@angular/forms/signals';
-import { PacienteService } from '../../services/emergencia/paciente.service';
-import Swal from 'sweetalert2/dist/sweetalert2.esm.all.js';
+import { PacienteService } from '../../services/pacientes/paciente.service';
+import { UtilService } from '../../services/util.service';
 import { MESSAGE_ERROR_DEFAULT, TITLE_MODAL } from '../../config/constants';
 import { ButtonComponent } from '../button/button.component';
 import { ModalComponent } from '../modal/modal.component';
@@ -16,6 +16,7 @@ export class UpdateTelefonoPacienteComponent {
   readonly ouput_save = output<string>();
   readonly modal = viewChild<ModalComponent>('modal');
   private readonly paciente_service = inject(PacienteService);
+  private readonly util_service = inject(UtilService);
 
   readonly telefono_model = signal({ telefono: '' });
   readonly telefono_form = form(this.telefono_model, (schema) => {
@@ -27,7 +28,6 @@ export class UpdateTelefonoPacienteComponent {
   readonly isCompleted = signal(false);
   formulario = { persona_id: 0, correo_actual: null as string | null };
 
-  /** Abre el modal con los datos de contacto actuales del paciente. */
   abrir(telefono_actual: string, persona_id: number, correo_actual: string | null): void {
     this.isSaving.set(false);
     this.isCompleted.set(false);
@@ -38,14 +38,27 @@ export class UpdateTelefonoPacienteComponent {
 
   close_modal = (): void => { this.modal()?.close(); this.ouput_close.emit(); };
 
-  btn_save(): void {
+  async btn_save(): Promise<void> {
     if (!this.telefono_form().valid()) {
       this.telefono_form.telefono().markAsTouched();
       return;
     }
 
-    Swal.fire({ title: TITLE_MODAL, text: '¿Esta seguro de grabar?', icon: 'question', showCancelButton: true, allowOutsideClick: false, allowEscapeKey: false, confirmButtonColor: '#3085d6', cancelButtonColor: '#d33', confirmButtonText: 'Si, estoy seguro', cancelButtonText: 'No' })
-      .then((result) => { if (result.isConfirmed) this.action_save(); });
+    const confirmado = await this.util_service.confirmar_accion({
+      title: TITLE_MODAL,
+      text: '¿Está seguro de grabar?',
+      icon: 'question',
+      confirmButtonText: 'Sí, estoy seguro',
+      cancelButtonText: 'No',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+    });
+
+    if (confirmado) {
+      this.action_save();
+    }
   }
 
   action_save(): void {
@@ -60,18 +73,22 @@ export class UpdateTelefonoPacienteComponent {
       next: () => {
         this.isSaving.set(false);
         this.isCompleted.set(true);
-        Swal.fire({ title: TITLE_MODAL, text: 'El teléfono se ha cambiado correctamente.', icon: 'success', timer: 1200, timerProgressBar: true, showConfirmButton: false })
-          .then(() => {
-            this.modal()?.close();
-            this.ouput_save.emit(telefono);
-          });
+        this.util_service.mostrar_alerta('El teléfono se ha cambiado correctamente.', 'success', 1200);
+        this.modal()?.close();
+        this.ouput_save.emit(telefono);
       },
       error: (error) => {
         this.isSaving.set(false);
         this.isCompleted.set(false);
-        if (error.status === 422) Swal.fire({ title: TITLE_MODAL, text: 'Ingrese telefono', icon: 'error' });
-        else if (error.status === 500) Swal.fire({ title: TITLE_MODAL, text: error?.data?.message || MESSAGE_ERROR_DEFAULT, icon: 'error' });
-        else if (error.status === 429) Swal.fire({ title: TITLE_MODAL, text: 'Cantidad de Intentos Superado. Espere 1 minuto', icon: 'error' });
+        if (error.status === 422) {
+          this.util_service.mostrar_error('Ingrese teléfono');
+        } else if (error.status === 500) {
+          this.util_service.mostrar_error(error?.data?.message || MESSAGE_ERROR_DEFAULT);
+        } else if (error.status === 429) {
+          this.util_service.mostrar_error('Cantidad de Intentos Superado. Espere 1 minuto');
+        } else {
+          this.util_service.mostrar_error();
+        }
       },
     });
   }

@@ -19,14 +19,14 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const token = auth_service.get_token();
   const es_api_propia = req.url.startsWith(baseUrl);
 
-  if (es_api_propia && req.url !== url_login && !!token) {
-
-    req=req.clone({
-      setHeaders:{
-        Authorization:`Bearer ${token}`,
-        'Accept': 'application/json',
-      }
-    });
+  if (es_api_propia) {
+    const headers: Record<string, string> = {
+      Accept: 'application/json',
+    };
+    if (req.url !== url_login && !!token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    req = req.clone({ setHeaders: headers });
   }
 
   const debe_actualizar_actividad =
@@ -44,12 +44,8 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
       }
     }),
     catchError((error) => {
-      // Un token vencido o inválido es rechazado por la API con 401. Se limpia
-      // la sesión local para que AppComponent redirija al usuario al login.
       if (error.status === 401 && es_api_propia && req.url !== url_login) {
         injector.get(AuthService).expireSession();
-        // El 401 ya fue gestionado: no debe llegar al componente que originó
-        // la petición para que no muestre el mensaje técnico "Unauthenticated".
         return EMPTY;
       }
 
@@ -74,6 +70,7 @@ function mostrar_alerta_sin_permiso(): void {
     text: MESSAGE_ERROR_DEFAULT_403,
     icon: 'warning',
     confirmButtonText: 'Entendido',
+    confirmButtonColor: '#3085d6',
   }).finally(() => {
     alerta_403_abierta = false;
   });

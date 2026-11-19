@@ -6,7 +6,8 @@
   | 'secondary'
   | 'info'
   | 'purple'
-  | 'fuchsia';
+  | 'fuchsia'
+  | 'fap';
 
 export type ComponentSize = 'xs' | 'sm' | 'md' | 'lg';
 export type DateControlType = 'date' | 'datetime-local' | 'time' | 'month';

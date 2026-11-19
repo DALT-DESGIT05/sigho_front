@@ -12,7 +12,7 @@ const BUTTON_ACTIONS: Record<ButtonAction, ButtonActionDefinition> = {
   exit: { text: 'Salir', icon: 'fa-solid fa-right-from-bracket', color: 'danger' },
   search: { text: 'Consultar', icon: 'fa-solid fa-magnifying-glass', color: 'info' },
   view: { text: 'Ver detalle', icon: 'fa-solid fa-eye', color: 'primary' },
-  print: { text: 'Imprimir', icon: 'fa-solid fa-print', color: 'fuchsia' },
+  print: { text: 'Imprimir', icon: 'fa-solid fa-print', color: 'fap' },
   download: { text: 'Descargar', icon: 'fa-solid fa-download', color: 'fuchsia' },
   send: { text: 'Enviar', icon: 'fa-solid fa-paper-plane', color: 'primary' },
   clear: { text: 'Limpiar', icon: 'fa-solid fa-broom', color: 'warning' },

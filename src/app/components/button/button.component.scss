@@ -39,7 +39,8 @@
   color: inherit !important;
 }
 
-.app-button--solid.app-button--primary { background: var(--palette-primary-fap) ; border-color: var(--palette-primary-fap); color: var(--palette-white); }
+.app-button--solid.app-button--primary,
+.app-button--solid.app-button--fap { background: var(--palette-primary-fap) ; border-color: var(--palette-primary-fap); color: var(--palette-white); }
 .app-button--solid.app-button--danger { background: var(--palette-danger); border-color: var(--palette-danger); color: var(--palette-white); }
 .app-button--solid.app-button--success { background: var(--palette-success); border-color: var(--palette-success); color: var(--palette-white); }
 .app-button--solid.app-button--warning { background: var(--palette-warning-600); border-color: var(--palette-warning-600); color: var(--palette-white); }
@@ -48,7 +49,8 @@
 .app-button--solid.app-button--purple { background: var(--palette-purple); border-color: var(--palette-purple); color: var(---palette-white); }
 .app-button--solid.app-button--fuchsia { background: var(--palette-fuchsia); border-color: var(--palette-fuchsia); color: var(---palette-white); }
 
-.app-button--solid.app-button--primary:hover:not(:disabled) { background: var(--palette-primary-fap-hover); border-color: var(--palette-primary-fap-hover); }
+.app-button--solid.app-button--primary:hover:not(:disabled),
+.app-button--solid.app-button--fap:hover:not(:disabled) { background: var(--palette-primary-fap-hover); border-color: var(--palette-primary-fap-hover); }
 .app-button--solid.app-button--danger:hover:not(:disabled) { background: var(--palette-danger-700); border-color: var(--palette-danger-700); }
 .app-button--solid.app-button--success:hover:not(:disabled) { background: var(--palette-success-700); border-color: var(--palette-success-700); }
 .app-button--solid.app-button--warning:hover:not(:disabled) { background: var(--palette-warning-700) ; border-color: var(--palette-warning-700); }
@@ -58,7 +60,8 @@
 .app-button--solid.app-button--fuchsia:hover:not(:disabled) { background: var(--palette-fuchsia-700); border-color: var(--palette-fuchsia-700); }
 
 .app-button--outline { background: transparent; }
-.app-button--outline.app-button--primary { border-color: var(--palette-primary); color: var(--palette-primary) !important; }
+.app-button--outline.app-button--primary,
+.app-button--outline.app-button--fap { border-color: var(--palette-primary-fap); color: var(--palette-primary-fap) !important; }
 .app-button--outline.app-button--danger { border-color: var(--palette-danger); color: var(--palette-danger) !important; }
 .app-button--outline.app-button--success { border-color: var(--palette-success); color: var(--palette-success) !important; }
 .app-button--outline.app-button--warning { border-color: var(--palette-warning); color: var(--palette-warning) !important; }
@@ -68,7 +71,8 @@
 .app-button--outline.app-button--fuchsia { border-color: var(--palette-fuchsia); color: var(--palette-fuchsia) !important; }
 
 .app-button--outline:hover:not(:disabled) { color: var(--palette-white) !important; }
-.app-button--outline.app-button--primary:hover:not(:disabled) { background: var(--palette-primary-600); border-color: var(--palette-primary-600); }
+.app-button--outline.app-button--primary:hover:not(:disabled),
+.app-button--outline.app-button--fap:hover:not(:disabled) { background: var(--palette-primary-fap); border-color: var(--palette-primary-fap); }
 .app-button--outline.app-button--danger:hover:not(:disabled) { background: var(--palette-danger-600); border-color: var(--palette-danger-600); }
 .app-button--outline.app-button--success:hover:not(:disabled) { background: var(--palette-success-600); border-color: var(--palette-success-600); }
 .app-button--outline.app-button--warning:hover:not(:disabled) { background: var(--palette-warning-600); border-color: var(--palette-warning-600); }
@@ -77,7 +81,8 @@
 .app-button--outline.app-button--purple:hover:not(:disabled) { background: var(--palette-purple-600); border-color: var(--palette-purple-600); }
 .app-button--outline.app-button--fuchsia:hover:not(:disabled) { background: var(--palette-fuchsia-600); border-color: var(--palette-fuchsia-600); }
 
-.app-button--hover-primary:hover:not(:disabled) { background: var(--palette-primary) !important; border-color: var(--palette-primary) !important; color: var(--palette-white) !important; }
+.app-button--hover-primary:hover:not(:disabled),
+.app-button--hover-fap:hover:not(:disabled) { background: var(--palette-primary-fap) !important; border-color: var(--palette-primary-fap) !important; color: var(--palette-white) !important; }
 .app-button--hover-danger:hover:not(:disabled) { background: var(--palette-danger) !important; border-color: var(--palette-danger) !important; color: var(--palette-white) !important; }
 .app-button--hover-success:hover:not(:disabled) { background: var(--palette-success) !important; border-color: var(--palette-success) !important; color: var(--palette-white) !important; }
 .app-button--hover-warning:hover:not(:disabled) { background: var(--palette-warning) !important; border-color: var(--palette-warning) !important; color: var(--palette-white) !important; }
@@ -91,7 +96,8 @@
   border-width: 2px;
   box-shadow: 0 0 0 .14rem color-mix(in srgb, currentColor 20%, transparent);
 }
-.app-button--outline-border-hover.app-button--primary:hover:not(:disabled), .app-button--outline-border-hover.app-button--hover-primary:hover:not(:disabled) { border-color: var(--palette-action-primary-200) !important; color: var(--palette-action-primary-200) !important; }
+.app-button--outline-border-hover.app-button--primary:hover:not(:disabled), .app-button--outline-border-hover.app-button--hover-primary:hover:not(:disabled),
+.app-button--outline-border-hover.app-button--fap:hover:not(:disabled), .app-button--outline-border-hover.app-button--hover-fap:hover:not(:disabled) { border-color: var(--palette-action-primary-200) !important; color: var(--palette-action-primary-200) !important; }
 .app-button--outline-border-hover.app-button--danger:hover:not(:disabled), .app-button--outline-border-hover.app-button--hover-danger:hover:not(:disabled) { border-color: var(--palette-danger-300) !important; color: var(--palette-danger-300) !important; }
 .app-button--outline-border-hover.app-button--success:hover:not(:disabled), .app-button--outline-border-hover.app-button--hover-success:hover:not(:disabled) { border-color: var(--palette-success-300) !important; color: var(--palette-success-300) !important; }
 .app-button--outline-border-hover.app-button--warning:hover:not(:disabled), .app-button--outline-border-hover.app-button--hover-warning:hover:not(:disabled) { border-color: var(--palette-warning-200) !important; color: var(--palette-warning-200) !important; }

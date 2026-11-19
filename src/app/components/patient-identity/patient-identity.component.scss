@@ -78,7 +78,7 @@
   white-space: nowrap;
 }
 .app-patient-identity__hc-badge {
-  background: var(--palette-primary-10, #ebf5ff);
+  background: var(--palette-primary-100, #ebf5ff);
   border: 1px solid var(--palette-primary-200, #b6d4fe);
   border-radius: 999px;
   color: var(--palette-primary-fap-text);
@@ -124,6 +124,16 @@
   padding: 0.3rem 0.5rem;
   text-transform: uppercase;
   white-space: nowrap;
+}
+.app-patient-identity__special-badge--discapacitado {
+  background: var(--palette-gray-200, #e5e7eb);
+  border-color: var(--palette-gray-400, #9ca3af);
+  color: var(--palette-gray-800, #1f2937);
+}
+.app-patient-identity__special-badge--defensor {
+  background: var(--palette-info-100, #cff4fc);
+  border-color: var(--palette-info-300, #9eeaf9);
+  color: var(--palette-info-900, #055160);
 }
 .app-patient-identity__identifiers {
   align-items: center;

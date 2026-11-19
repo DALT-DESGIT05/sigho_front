@@ -11,7 +11,7 @@ import { ImageLazyComponent, TipoImagenLazy } from '../image-lazy/image-lazy.com
   host: { '[class.app-patient-identity--vertical]': 'vertical()' },
 })
 export class PatientIdentityComponent {
-  /** Identificador usado por ImageService para obtener y cachear la fotografía. */
+
   readonly identificador = input.required<string>();
   readonly nombre = input.required<string>();
   readonly historia = input<string | number | null>(null);
@@ -20,6 +20,7 @@ export class PatientIdentityComponent {
   readonly hcNsa = input<string | null>(null);
   readonly nsaLetra = input<string | null>(null);
   readonly estadoAfiliacion = input<string | null>(null);
+  readonly esAfiliadoInput = input<boolean | null>(null);
   readonly mostrarAfiliacion = input(false);
   readonly situacion = input<string | null>(null);
   readonly codSitu = input<number | null>(null);
@@ -42,10 +43,9 @@ export class PatientIdentityComponent {
     if (estado === 'AFILIADO') return true;
     if (estado === 'NO AFILIADO' || estado === 'DESAFILIADO' || estado === 'INACTIVO') return false;
 
-    const situ = this.codSitu();
-    if (situ !== null && situ !== undefined) {
-      return [1, 11, 12].includes(Number(situ));
-    }
+    const esAfiliado = this.esAfiliadoInput();
+    if (esAfiliado !== null) return esAfiliado;
+
     return Boolean(this.codigoAfiliado());
   });
 

@@ -1,4 +1,28 @@
 /* Paleta original de los componentes compartidos. */
+.sigho-toast.swal2-popup {
+  min-height: 0;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.sigho-toast .swal2-title {
+  margin: 0;
+  padding: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.sigho-toast .swal2-icon {
+  width: 1.35rem;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  margin: 0 0.45rem 0 0;
+}
+
+.sigho-toast .swal2-icon .swal2-icon-content {
+  font-size: 0.85rem;
+}
+
 :root {
   --palette-danger: #dc3545;
   --palette-danger-text: #dc222c;

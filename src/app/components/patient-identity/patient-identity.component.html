@@ -38,7 +38,14 @@
         </span>
       }
       @for (condicion of listaCondicionesEspeciales(); track condicion) {
-        <span class="app-patient-identity__special-badge" [title]="condicion">{{ condicion }}</span>
+        <span
+          class="app-patient-identity__special-badge"
+          [class.app-patient-identity__special-badge--discapacitado]="condicion === 'DISCAPACITADO'"
+          [class.app-patient-identity__special-badge--defensor]="condicion === 'DEFENSOR DE LA PATRIA'"
+          [title]="condicion"
+        >
+          {{ condicion }}
+        </span>
       }
       <span class="app-patient-identity__identifiers">
         @if (historia() !== null && historia() !== '') {

@@ -13,16 +13,16 @@ export interface SelectChangeEvent { value: SelectValue; option: SelectOption | 
 export class SelectComponent implements ControlValueAccessor {
   readonly label = input(''); readonly title = input(''); readonly nombre = input(''); readonly helpText = input(''); readonly error = input(''); readonly id = input('');
   readonly required = input(false); readonly requerido = input(false); readonly invalid = input(false); readonly ariaLabel = input(''); readonly color = input<PaletteColor>('primary');
-  /** Muestra el label externo. */ readonly showLabel = input(true);
-  /** Muestra el label dentro del selector. */ readonly showFloatingLabel = input(false);
-  /** Atajo: en xs oculta el label externo y muestra el flotante. */ readonly responsiveFloatingLabel = input(false);
+   readonly showLabel = input(true);
+   readonly showFloatingLabel = input(false);
+   readonly responsiveFloatingLabel = input(false);
   readonly options = input<SelectOption[]>([]); readonly apiItems = input<object[]>([]); readonly valueField = input('id'); readonly labelField = input('nombre');
   readonly detailField = input(''); readonly countField = input(''); readonly iconField = input(''); readonly imageField = input(''); readonly toneField = input('');
-  /** Color del texto secundario mostrado como detalle de cada opción. */
+
   readonly detailColor = input<PaletteColor>('secondary');
   readonly placeholder = input('Seleccionar'); readonly showEmptyOption = input(false); readonly emptyOptionLabel = input('-- SELECCIONAR --');
   readonly disabled = input(false); readonly dropup = input(false); readonly selectedValue = input<SelectValue>(null); readonly size = input<ComponentSize>('md');
-  /** Permite filtrar/buscar opciones escribiendo en el desplegable. */
+
   readonly searchable = input(false);
   readonly searchPlaceholder = input('Buscar...');
   readonly selectedValueChange = output<SelectValue>(); readonly change = output<SelectChangeEvent>();

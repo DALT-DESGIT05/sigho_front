@@ -9,6 +9,7 @@ import { ComponentSize, PaletteColor } from '../../interfaces/util.interface';
 })
 export class LabelComponent {
   readonly texto = input.required<string>();
+  readonly subtexto = input('');
   readonly title = input('');
   readonly forId = input('');
   readonly color = input<PaletteColor>('primary');
@@ -28,6 +29,7 @@ export class LabelComponent {
       info: 'var(--palette-info-text)',
       purple: 'var(--palette-purple-text)',
       fuchsia: 'var(--palette-fuchsia-text)',
+      fap: 'var(--palette-primary-fap-900)',
     };
 
     return colores[this.color()];

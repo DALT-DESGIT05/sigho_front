@@ -1,7 +1,7 @@
 :host { display: block; max-width: 100%; min-width: 0; }
 :host ::ng-deep app-label.text-truncate .app-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* Evita que Bootstrap agregue padding al host del componente. */
+
 :host(.form-select-sm), :host(.form-control-sm), :host(.select-sm),
 :host(.form-select-lg), :host(.form-control-lg), :host(.select-lg) {
   background: transparent !important;
@@ -33,7 +33,7 @@
 .auto-complete__message--error { color: var(--palette-danger-text); }
 .is-disabled .auto-complete__control { background-color: var(--palette-secondary-100); cursor: not-allowed; opacity: .75; }
 
-/* Se puede configurar como [size]="'sm'" o class="form-select-sm". */
+
 .auto-complete.size-xs { font-size: .6rem; }
 .auto-complete.size-xs .auto-complete__control { min-height: 1.7rem; }
 .auto-complete.size-xs .auto-complete__input, .auto-complete.size-xs .auto-complete__option { padding: .15rem .35rem; }

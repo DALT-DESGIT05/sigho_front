@@ -15,6 +15,7 @@ let nextInputTextId = 0;
 })
 export class InputTextComponent implements ControlValueAccessor {
   readonly label = input('');
+  readonly sublabel = input('');
   readonly title = input('');
   readonly nombre = input('');
   readonly helpText = input('');
@@ -35,17 +36,17 @@ export class InputTextComponent implements ControlValueAccessor {
   readonly align = input<TableColumnAlignment>('start');
   readonly size = input<ComponentSize>('md');
   readonly color = input<PaletteColor>('primary');
-  /** Color opcional del valor mostrado, usando la paleta del proyecto. */
+
   readonly textColor = input<PaletteColor | ''>('');
   readonly value = model<string | number | null | undefined>(undefined);
   readonly maxlength = input<number | null>(null);
   readonly minlength = input<number | null>(null);
   readonly ariaLabel = input('');
-  /** Muestra el label externo. */
+
   readonly showLabel = input(true);
-  /** Muestra el label dentro del input. */
+
   readonly showFloatingLabel = input(false);
-  /** Atajo: en xs oculta el label externo y muestra el flotante. */
+
   readonly responsiveFloatingLabel = input(false);
   readonly disabled = input(false, { transform: (value: boolean | string) => value === '' || value === true || value === 'true' });
 

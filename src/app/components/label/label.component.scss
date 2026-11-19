@@ -44,3 +44,17 @@
 }
 .app-label--md { font-size: var(--app-size-md-font-size, .875rem); margin-bottom: .35rem; }
 
+.app-label__subtexto,
+.app-label__badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--palette-gray-500);
+  margin-left: 0.35rem;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  vertical-align: baseline;
+}
+

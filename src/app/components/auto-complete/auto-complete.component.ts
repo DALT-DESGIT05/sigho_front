@@ -22,11 +22,11 @@ export class AutoCompleteComponent<T extends object = any> implements ControlVal
   readonly id = input('');
   readonly required = input(false);
   readonly color = input<PaletteColor>('primary');
-  /** Muestra el label externo. */
+
   readonly showLabel = input(true);
-  /** Muestra el label dentro del control. */
+
   readonly showFloatingLabel = input(false);
-  /** Atajo: en xs oculta el label externo y muestra el flotante. */
+
   readonly responsiveFloatingLabel = input(false);
   readonly dataSource = input.required<AutoCompleteDataSource<T>>();
   readonly resolveValue = input<AutoCompleteValueResolver<T>>();
@@ -36,11 +36,11 @@ export class AutoCompleteComponent<T extends object = any> implements ControlVal
   readonly placeholder = input('Buscar...');
   readonly minLength = input(0);
   readonly debounceTime = input(450);
-  /** Altura máxima opcional del panel de resultados, en píxeles. */
+
   readonly menuMaxHeight = input<number | null>(null);
-  /** Permite mostrar descripciones extensas en varias líneas. */
+
   readonly multilineOptions = input(false);
-  /** z-index opcional para desplegables que se muestran dentro de un modal. */
+
   readonly menuZIndex = input<number | null>(null);
   readonly emptyMessage = input('No se encontraron resultados.');
   readonly loadingMessage = input('Buscando...');

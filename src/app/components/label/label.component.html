@@ -17,7 +17,10 @@
   [attr.for]="forId() || null"
   [style.color]="color_css()"
 >
-  {{ texto() }}
+  <span class="app-label__texto">{{ texto() }}</span>
+  @if (subtexto()) {
+    <span class="app-label__subtexto">{{ subtexto() }}</span>
+  }
   @if (esRequerido()) {
     <span class="label-required" aria-hidden="true">*</span>
   }

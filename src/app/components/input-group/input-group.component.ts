@@ -15,6 +15,7 @@ let nextInputGroupId = 0;
 })
 export class InputGroupComponent implements ControlValueAccessor {
   readonly label = input('');
+  readonly sublabel = input('');
   readonly title = input('');
   readonly nombre = input('');
   readonly helpText = input('');
@@ -39,14 +40,14 @@ export class InputGroupComponent implements ControlValueAccessor {
   readonly minlength = input<number | null>(null);
   readonly min = input<number | null>(null);
   readonly max = input<number | null>(null);
-  readonly step = input<number | string | null>(null);
+  readonly step = input<number | string | null | undefined>(null);
   readonly allowNegative = input(true);
   readonly ariaLabel = input('');
-  /** Permite usar un control compuesto (por ejemplo, app-auto-complete) dentro del grupo. */
+
   readonly projectedControl = input(false);
-  /** Texto que se muestra antes del input. Para contenido arbitrario use [prefix]. */
+
   readonly prefix = input('');
-  /** Texto que se muestra después del input. Para contenido arbitrario use [suffix]. */
+
   readonly suffix = input('');
   readonly disabled = input(false, { transform: (value: boolean | string) => value === '' || value === true || value === 'true' });
 
